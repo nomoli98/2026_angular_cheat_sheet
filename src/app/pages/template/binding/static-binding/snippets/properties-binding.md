@@ -22,7 +22,7 @@ import { Component } from '@angular/core';
 import { ChildComponentComponent } from '../child-component/child-component.component';
 
 @Component({
-  selector: 'app-binding',
+  selector: 'app-static-binding',
   imports: [ChildComponentComponent],
   templateUrl: './static-binding.component.html',
   styles: `
