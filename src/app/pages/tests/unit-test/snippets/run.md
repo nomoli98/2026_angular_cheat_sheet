@@ -6,5 +6,5 @@ ng test --watch=false
 ng test
 
 # Only one file
-ng test --include src/app/components/tests/unit-test/counter/counter.component.spec.ts
+ng test --include src/app/pages/tests/unit-test/counter/counter.component.spec.ts
 ```

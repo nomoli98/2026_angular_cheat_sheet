@@ -33,7 +33,8 @@ formRegister = this._formBuilder.group({
   name:         new FormControl('', Validators.required),
   email:        new FormControl('', [Validators.required, Validators.email]),
   password:     new FormControl('', [Validators.required, strongPasswordValidator()]),
-  birthdate:    new FormControl(new Date(), [Validators.required, birthdateValidator(0, 135)]),
+  // 'YYYY-MM-DD' string: <input type="date"> reads and writes that format directly
+  birthdate:    new FormControl('', [Validators.required, birthdateValidator(0, 135)]),
   height:       new FormControl(50, [Validators.min(50), Validators.max(275)]),
   gender:       new FormControl(GenderEnum.OTHER, [Validators.required, enumValidator(GenderEnum)]),
   subscription: new FormControl<'free' | 'premium'>('free', [Validators.required, inValidator(['free', 'premium'])]),
@@ -117,7 +118,7 @@ onSubmit() {
   if (this.formRegister.invalid) return;
 
   this.loading.set(true);
-  const user: RegisterData = {
+  const user: RegisterRequest = {
     name: this.formRegister.value.name!,
     email: this.formRegister.value.email!,
     // ...
@@ -194,7 +195,15 @@ export function strongPasswordValidator(): ValidatorFn {
 @if (formRegister.get('password')?.hasError('uppercase')) { <p>Needs an uppercase letter</p> }
 ```
 
-The validators in this repo are in `core/validators/reactive-form/`:
+The validators in this repo are in `core/validators/reactive-form/`. Import them with the `@core` alias:
+
+```ts
+import { strongPasswordValidator } from '@core/validators/reactive-form/strong-password.validator';
+import { birthdateValidator } from '@core/validators/reactive-form/birthdate.validator';
+import { enumValidator } from '@core/validators/reactive-form/in-enum.validator';
+import { inValidator } from '@core/validators/reactive-form/in-string-list.validator';
+```
+
 - `strong-password.validator.ts`: `strongPasswordValidator()`
 - `birthdate.validator.ts`: `birthdateValidator(minAge, maxAge)`
 - `in-enum.validator.ts`: `enumValidator(SomeEnum)`

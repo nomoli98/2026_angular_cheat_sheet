@@ -4,7 +4,7 @@
 
 How to tell the router **which component to show for which URL**, and **when its code is downloaded**.
 
-Files: `app.routes.ts`, `app.config.ts`, `components/routers/app.routes.example.ts`
+Files: `app.routes.ts`, `app.config.ts`, `pages/routers/app.routes.example.ts`
 
 Sub-routing (a component with its own `<router-outlet>`, named outlets) has its own file: [SUB-ROUTING.md](./SUB-ROUTING.md).
 
@@ -16,13 +16,15 @@ Demo page: `/router/basics` (the 3 ways, links, params, redirect and 404, each w
 
 ```ts
 // app.config.ts
-import { provideRouter } from '@angular/router';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    // withComponentInputBinding: route params (:id) and query params go into the component's input()
+    provideRouter(routes, withComponentInputBinding()),
   ],
 };
 ```
@@ -57,7 +59,7 @@ The router renders the matched component **right after** `<router-outlet />`. An
 ## 3. The three ways to point a route at code
 
 ```ts
-// components/routers/app.routes.example.ts
+// pages/routers/app.routes.example.ts
 export const routes: Routes = [
   // 1. component: eager
   { path: '', component: IndexComponent },
@@ -91,7 +93,7 @@ export const routes: Routes = [
 ### `component`
 
 ```ts
-import { IndexComponent } from './components/@index/index.component'; // static import at the top
+import { IndexComponent } from '@pages/@index/index.component'; // static import at the top
 
 { path: '', component: IndexComponent }
 ```
@@ -121,10 +123,10 @@ loadComponent: () => import('./signal-form/signal-form.component'),
 // app.routes.ts
 {
   path: 'form',
-  loadChildren: () => import('./components/forms/form.routes').then((r) => r.routes),
+  loadChildren: () => import('./pages/forms/form.routes').then((r) => r.routes),
 }
 
-// components/forms/form.routes.ts
+// pages/forms/form.routes.ts
 export const routes: Routes = [
   { path: 'reactive-form', loadComponent: () => import('./reactive-form/reactive-form.component').then((m) => m.ReactiveFormComponent) },
   { path: 'signal-form',   loadComponent: () => import('./signal-form/signal-form.component').then((m) => m.SignalFormComponent) },

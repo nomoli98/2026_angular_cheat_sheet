@@ -7,18 +7,29 @@
 ```
 
 ```ts sub-outlet.component.ts
-import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-sub-outlet',
   imports: [RouterOutlet, RouterLink],
   templateUrl: './sub-outlet.component.html',
 })
-export class SubOutletComponent {}
+export class SubOutletComponent {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute); // = the /router/sub-outlet route
+
+  openPanel() {
+    this.router.navigate([{ outlets: { panel: ['3'] } }], { relativeTo: this.route });
+  }
+
+  closePanel() {
+    this.router.navigate([{ outlets: { panel: null } }], { relativeTo: this.route });
+  }
+}
 ```
 
-```ts sub-outlet.routes.ts
+```ts sub-outlet.routes.example.ts
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
@@ -27,6 +38,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./sub-outlet/sub-outlet.component').then((m) => m.SubOutletComponent),
     children: [
+      // A. to an unnamed router-outlet
       { path: '', redirectTo: '1', pathMatch: 'full' },
       {
         path: '1',
@@ -41,4 +53,12 @@ export const routes: Routes = [
     ],
   },
 ];
+```
+
+```ts app.routes.example.ts
+{
+  // Nested router-outlet: /router/sub-outlet loads its own routes file
+  path: 'sub-outlet',
+  loadChildren: () => import('./sub-outlet.routes.example').then((r) => r.routes),
+},
 ```

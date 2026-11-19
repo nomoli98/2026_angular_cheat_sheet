@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { CodeSnippetComponent } from '@app/shared/code-snippet/code-snippet.component';
+import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import templateForm from './snippets/template-form.md';
-import { StrongPasswordDirective } from '@app/core/validators/template-form/strong-password.directive';
-import { BirthdateDirective } from '@app/core/validators/template-form/birthday.directive';
-import { InEnumDirective } from '@app/core/validators/template-form/in-enum.directive';
-import { InListDirective } from '@app/core/validators/template-form/in-list.directive';
-import { GenderEnum } from '@app/core/enums/gender.enum';
+import { StrongPasswordDirective } from '@core/validators/template-form/strong-password.directive';
+import { BirthdateDirective } from '@core/validators/template-form/birthday.directive';
+import { InEnumDirective } from '@core/validators/template-form/in-enum.directive';
+import { InListDirective } from '@core/validators/template-form/in-list.directive';
+import { GenderEnum } from '@core/enums/gender.enum';
 
 @Component({
   imports: [

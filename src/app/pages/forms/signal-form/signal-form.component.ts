@@ -3,9 +3,9 @@ import { email, form, FormField, max, min, required, validate } from '@angular/f
 import { GenderEnum } from '@core/enums/gender.enum';
 import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import signalForm from './snippets/signal-form.md';
-import { RegisterRequest } from '@app/core/requests/register.request';
-import { strongPassword } from '@app/core/validators/signal-form/strong-password.validator';
-import { birthdate } from '@app/core/validators/signal-form/birthdate.validator';
+import { RegisterRequest } from '@core/requests/register.request';
+import { strongPassword } from '@core/validators/signal-form/strong-password.validator';
+import { birthdate } from '@core/validators/signal-form/birthdate.validator';
 
 @Component({
   imports: [CodeSnippetComponent, FormField],

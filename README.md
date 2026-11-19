@@ -4,30 +4,30 @@
 
 Code snippets and step-by-step notes on how to do things in Angular 22, for when I forget.
 
-Each topic is a folder in `src/app/components/` with **working demo pages** and a **`.md` file** that explains them.
+Each topic is a folder in `src/app/pages/` with **working demo pages** and a **`.md` file** that explains them.
 
 ## Contents
 
 | Topic | Doc | Demo pages |
 |---|---|---|
-| **Templates** | [TEMPLATE.md](src/app/components/template/TEMPLATE.md) | |
-| ↳ Binding: `{{ }}`, `[prop]`, `(event)`, `[(two-way)]`, `model()` | [BINDING.md](src/app/components/template/binding/BINDING.md) | `/template/static-binding`, `/template/responsive-binding`, `/template/event-binding`, `/template/two-way-binding` |
-| ↳ Syntax: `@if`, `@switch`, `@for`, `@let`, `@defer` | [SYNTAX.md](src/app/components/template/syntax/SYNTAX.md) | `/template/condition`, `/template/loop` |
-| **Forms** | [FORM.md](src/app/components/forms/FORM.md) | |
-| ↳ Template-driven | [TEMPLATE_FORM.md](src/app/components/forms/template-form/TEMPLATE_FORM.md) | `/form/template-form` |
-| ↳ Reactive | [REACTIVE_FORM.md](src/app/components/forms/reactive-form/REACTIVE_FORM.md) | `/form/reactive-form` |
-| ↳ Signal forms | [SIGNAL_FORM.md](src/app/components/forms/signal-form/SIGNAL_FORM.md) | `/form/signal-form` |
-| **Routing** | [ROUTING.md](src/app/components/routers/ROUTING.md) | |
-| ↳ Basics: the 3 ways, links, params, redirects, 404 | [ROUTING.md](src/app/components/routers/ROUTING.md) | `/router/basics` |
-| ↳ Sub-routing and named outlets | [SUB-ROUTING.md](src/app/components/routers/SUB-ROUTING.md) | `/router/sub-outlet` |
+| **Templates** | [TEMPLATE.md](src/app/pages/template/TEMPLATE.md) | |
+| ↳ Binding: `{{ }}`, `[prop]`, `(event)`, `[(two-way)]`, `model()` | [BINDING.md](src/app/pages/template/binding/BINDING.md) | `/template/static-binding`, `/template/responsive-binding`, `/template/event-binding`, `/template/two-way-binding` |
+| ↳ Syntax: `@if`, `@switch`, `@for`, `@let`, `@defer` | [SYNTAX.md](src/app/pages/template/syntax/SYNTAX.md) | `/template/condition`, `/template/loop` |
+| **Forms** | [FORM.md](src/app/pages/forms/FORM.md) | |
+| ↳ Template-driven | [TEMPLATE_FORM.md](src/app/pages/forms/template-form/TEMPLATE_FORM.md) | `/form/template-form` |
+| ↳ Reactive | [REACTIVE_FORM.md](src/app/pages/forms/reactive-form/REACTIVE_FORM.md) | `/form/reactive-form` |
+| ↳ Signal forms | [SIGNAL_FORM.md](src/app/pages/forms/signal-form/SIGNAL_FORM.md) | `/form/signal-form` |
+| **Routing** | [ROUTING.md](src/app/pages/routers/ROUTING.md) | |
+| ↳ Basics: the 3 ways, links, params, redirects, 404 | [ROUTING.md](src/app/pages/routers/ROUTING.md) | `/router/basics` |
+| ↳ Sub-routing and named outlets | [SUB-ROUTING.md](src/app/pages/routers/SUB-ROUTING.md) | `/router/sub-outlet` |
 | **Bootstrap** (install + use, how the pages are styled) | [BOOTSTRAP.md](BOOTSTRAP.md) | every page |
 | **Fake API** (json-server): people CRUD to practise services and `HttpClient` | [FAKE-API.md](fake-api/FAKE-API.md) | `http://localhost:3000/people` (start with `npm run dev`) |
 | **Input / Output** | | |
-| ↳ Signal inputs: `input()`, `input.required()`, alias, transform | [INPUT.md](src/app/components/input-output/input/INPUT.md) | `/input-output/input` |
-| ↳ Signal outputs: `output()`, `emit()`, alias, RxJS interop, `model()` | [OUTPUT.md](src/app/components/input-output/output/OUTPUT.md) | `/input-output/output` |
-| **Tests** | [TESTS.md](src/app/components/tests/TESTS.md) | |
-| ↳ Unit tests (Vitest): components, inputs/outputs, services, forms, mocks | [UNIT_TEST.md](src/app/components/tests/unit-test/UNIT_TEST.md) | `/tests/unit-test` |
-| ↳ E2E tests (Playwright): install, config, locators, run | [E2E_TEST.md](src/app/components/tests/e2e-test/E2E_TEST.md) | `/tests/e2e-test` |
+| ↳ Signal inputs: `input()`, `input.required()`, alias, transform | [INPUT.md](src/app/pages/input-output/input/INPUT.md) | `/input-output/input` |
+| ↳ Signal outputs: `output()`, `emit()`, alias, RxJS interop, `model()` | [OUTPUT.md](src/app/pages/input-output/output/OUTPUT.md) | `/input-output/output` |
+| **Tests** | [TESTS.md](src/app/pages/tests/TESTS.md) | |
+| ↳ Unit tests (Vitest): components, inputs/outputs, services, forms, mocks | [UNIT_TEST.md](src/app/pages/tests/unit-test/UNIT_TEST.md) | `/tests/unit-test` |
+| ↳ E2E tests (Playwright): install, config, locators, run | [E2E_TEST.md](src/app/pages/tests/e2e-test/E2E_TEST.md) | `/tests/e2e-test` |
 
 The home page (`/`) links to every demo page.
 
@@ -55,17 +55,42 @@ It starts the fake API (`http://localhost:3000`) **and** `ng serve` in one termi
 ```
 src/app/
 ├── app.routes.ts            one lazy-loaded entry per topic
-├── components/
+├── pages/
 │   ├── @index/              the home page with all the links
 │   ├── template/            template.routes.ts + binding/ + syntax/
 │   ├── forms/               form.routes.ts + one folder per kind of form
-│   ├── routers/             routing examples
+│   ├── routers/             app.routes.example.ts, sub-outlet.routes.example.ts + the routing demos
 │   ├── input-output/        input-output.routes.ts + input/ + output/
 │   └── tests/               tests.routes.ts + unit-test/ + e2e-test/
 ├── shared/
 │   └── code-snippet/        the code box (tabs + Copy button) shown on the demo pages
-└── core/                    shared models, enums, factories, validators and services
+└── core/
+    ├── interfaces/          the app's models (user.interface.ts → UserInterface)
+    ├── requests/            what we SEND to the API (register.request.ts → RegisterRequest)
+    ├── responses/           what the API sends BACK (user.response.ts → UserResponse)
+    ├── enums/               gender.enum.ts, subscription.enum.ts
+    ├── validators/          custom form validators: reactive-form/, template-form/, signal-form/
+    ├── services/            auth.service.ts, user.service.ts (empty for now, being rewritten)
+    └── controllers/         auth.controller.ts, user.controller.ts (empty for now)
 ```
+
+### Path aliases
+
+`tsconfig.json` defines short import paths, so you don't count `../../../`:
+
+| Alias | Points to |
+|---|---|
+| `@core/*` | `src/app/core/*` |
+| `@shared/*` | `src/app/shared/*` |
+| `@pages/*` | `src/app/pages/*` |
+| `@app/*` | `src/app/*` |
+
+```ts
+import { GenderEnum } from '@core/enums/gender.enum';
+import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
+```
+
+Use `@core`, `@shared` and `@pages` in new code. Keep `./` for files in the same folder (child components, `snippets/*.md`).
 
 The Playwright tests live outside `src/`, in `e2e/` at the root, with `playwright.config.ts`.
 
@@ -87,24 +112,24 @@ Every topic's routes file exports its array as `routes`, and `app.routes.ts` laz
 ```ts
 {
   path: 'template',
-  loadChildren: () => import('./components/template/template.routes').then((r) => r.routes),
+  loadChildren: () => import('./pages/template/template.routes').then((r) => r.routes),
 },
 ```
 
 ## Adding a new topic
 
-1. Create a folder in `src/app/components/<topic>/`.
-2. Generate the demo components inside it: `ng generate component components/<topic>/<demo>`.
+1. Create a folder in `src/app/pages/<topic>/`.
+2. Generate the demo components inside it: `ng generate component pages/<topic>/<demo>`.
 3. Create `<topic>.routes.ts` with `export const routes: Routes = [...]`, one `loadComponent` per demo.
 4. Add the topic to `app.routes.ts` with `loadChildren` (like above).
-5. Add the links to `components/@index/index.component.html`. Start them with `/`, e.g. `routerLink="/<topic>/<demo>"`.
+5. Add the links to `pages/@index/index.component.html`. Start them with `/`, e.g. `routerLink="/<topic>/<demo>"`.
 6. Write `<TOPIC>.md` next to the code and add it to the table above.
 7. Add a code snippet to each section (see below).
 
 ## Adding a code snippet to a page
 
 Each section of a demo page shows its code in a box with tabs and a **Copy** button, like the official docs.
-The snippets have **no Bootstrap classes**, so you can copy them as-is into another project.
+The demo snippets have **no Bootstrap classes**, so you can copy them as-is into another project. The form snippets are the exception: they show the full form as it runs, Bootstrap classes included (see [BOOTSTRAP.md](BOOTSTRAP.md)).
 
 **1. Write the snippet** in `<demo>/snippets/<name>.md`. Each code block becomes a tab. The text after the language is the tab name:
 
@@ -122,10 +147,12 @@ isOpen = signal(false);
 
 Languages you can use: `html`, `ts`, `css`, `json`, `bash`.
 
+In the snippets, write imports with the aliases (`@core/...`, `@shared/...`), and leave out the snippet plumbing (`CodeSnippetComponent`, `import x from './snippets/x.md'`).
+
 **2. Import it in the component** (the `.md` file is imported as a string, see `"loader"` in `angular.json`):
 
 ```ts
-import { CodeSnippetComponent } from '../../../../shared/code-snippet/code-snippet.component';
+import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import ifElse from './snippets/if-else.md';
 
 @Component({

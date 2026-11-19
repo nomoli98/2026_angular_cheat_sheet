@@ -1,4 +1,4 @@
-import { GenderEnum } from '../enums/gender.enum';
+import { GenderEnum } from '@core/enums/gender.enum';
 import { SubscriptionEnum } from '@core/enums/subscription.enum';
 
 export interface UserInterface {

@@ -1,92 +1,97 @@
 ```html reactive-form.component.html
-<form [formGroup]="formRegister" (ngSubmit)="onSubmit()">
+<!-- Bootstrap: .form-label + .form-control, .is-invalid turns the field red,
+     .invalid-feedback shows the message (only when the input before it is .is-invalid) -->
+<form [formGroup]="formRegister" (ngSubmit)="onSubmit()" class="card card-body">
 
-  <div>
-    <label for="name">Name</label>
-    <input type="text" name="name" id="name" placeholder="name123"
+  <div class="mb-3">
+    <label for="name" class="form-label">Name</label>
+    <input type="text" name="name" id="name" placeholder="name123" class="form-control"
            formControlName="name"
-           [class.invalid]="formRegister.get('name')?.invalid && formRegister.get('name')?.touched" />
+           [class.is-invalid]="formRegister.get('name')?.invalid && formRegister.get('name')?.touched" />
     @if (formRegister.get('name')?.invalid && formRegister.get('name')?.touched) {
-      <p>Enter valid name</p>
+      <div class="invalid-feedback">Enter valid name</div>
     }
   </div>
 
-  <div>
-    <label for="email">Email</label>
-    <input type="text" name="email" id="email" placeholder="example@email.com"
+  <div class="mb-3">
+    <label for="email" class="form-label">Email</label>
+    <input type="text" name="email" id="email" placeholder="example@email.com" class="form-control"
            formControlName="email"
-           [class.invalid]="formRegister.get('email')?.invalid && formRegister.get('email')?.touched" />
+           [class.is-invalid]="formRegister.get('email')?.invalid && formRegister.get('email')?.touched" />
     @if (formRegister.get('email')?.invalid && formRegister.get('email')?.touched) {
-      <p>Enter valid email address</p>
+      <div class="invalid-feedback">Enter valid email address</div>
     }
   </div>
 
-  <div>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" placeholder="Password123"
+  <div class="mb-3">
+    <label for="password" class="form-label">Password</label>
+    <input type="password" name="password" id="password" placeholder="Password123" class="form-control"
            formControlName="password"
-           [class.invalid]="formRegister.get('password')?.invalid && formRegister.get('password')?.touched" />
+           [class.is-invalid]="formRegister.get('password')?.invalid && formRegister.get('password')?.touched" />
     @if (formRegister.get('password')?.invalid && formRegister.get('password')?.touched) {
-      <p>Enter valid password</p>
+      <div class="invalid-feedback">Enter valid password</div>
     }
   </div>
 
-  <div>
-    <label for="birthdate">Birthdate</label>
-    <input type="date" name="birthdate" id="birthdate"
+  <div class="mb-3">
+    <label for="birthdate" class="form-label">Birthdate</label>
+    <input type="date" name="birthdate" id="birthdate" class="form-control"
            formControlName="birthdate"
-           [class.invalid]="formRegister.get('birthdate')?.invalid && formRegister.get('birthdate')?.touched" />
+           [class.is-invalid]="formRegister.get('birthdate')?.invalid && formRegister.get('birthdate')?.touched" />
     @if (formRegister.get('birthdate')?.invalid && formRegister.get('birthdate')?.touched) {
-      <p>Enter valid birthdate</p>
+      <div class="invalid-feedback">Enter valid birthdate</div>
     }
   </div>
 
-  <div>
-    <label for="height">Height</label>
-    <input type="number" name="height" id="height" formControlName="height"
-           [class.invalid]="formRegister.get('height')?.invalid && formRegister.get('height')?.touched" />
+  <div class="mb-3">
+    <label for="height" class="form-label">Height</label>
+    <input type="number" name="height" id="height" class="form-control" formControlName="height"
+           [class.is-invalid]="formRegister.get('height')?.invalid && formRegister.get('height')?.touched" />
     @if (formRegister.get('height')?.invalid && formRegister.get('height')?.touched) {
-      <p>Enter valid height</p>
+      <div class="invalid-feedback">Enter valid height</div>
     }
   </div>
 
-  <div>
-    <label for="gender">Gender</label>
-    <select name="gender" id="gender" formControlName="gender"
-            [class.invalid]="formRegister.get('gender')?.invalid && formRegister.get('gender')?.touched">
+  <div class="mb-3">
+    <label for="gender" class="form-label">Gender</label>
+    <!-- <select> uses .form-select instead of .form-control -->
+    <select name="gender" id="gender" class="form-select" formControlName="gender"
+            [class.is-invalid]="formRegister.get('gender')?.invalid && formRegister.get('gender')?.touched">
       <option value="">Choose a gender...</option>
       <option value="{{GenderEnum.FEMALE}}">{{ GenderEnum.FEMALE }}</option>
       <option value="{{GenderEnum.MALE}}">{{ GenderEnum.MALE }}</option>
       <option value="{{GenderEnum.OTHER}}">{{ GenderEnum.OTHER }}</option>
     </select>
     @if (formRegister.get('gender')?.invalid && formRegister.get('gender')?.touched) {
-      <p>Enter valid gender</p>
+      <div class="invalid-feedback">Enter valid gender</div>
     }
   </div>
 
-  <div>
-    <div>
-      <input type="radio" value="free" id="free" formControlName="subscription" />
-      <label for="free">Free</label>
+  <!-- Radios and checkboxes: .form-check wrapper + .form-check-input + .form-check-label -->
+  <div class="mb-3">
+    <div class="form-check">
+      <input type="radio" value="free" id="free" class="form-check-input" formControlName="subscription" />
+      <label for="free" class="form-check-label">Free</label>
     </div>
-    <div>
-      <input type="radio" value="premium" id="premium" formControlName="subscription" />
-      <label for="premium">Premium</label>
+    <div class="form-check">
+      <input type="radio" value="premium" id="premium" class="form-check-input" formControlName="subscription" />
+      <label for="premium" class="form-check-label">Premium</label>
     </div>
     @if (formRegister.get('subscription')?.invalid && formRegister.get('subscription')?.touched) {
-      <p>Choose a Subscription</p>
+      <!-- d-block: the message isn't right after an .is-invalid input, so force it visible -->
+      <div class="invalid-feedback d-block">Choose a Subscription</div>
     }
   </div>
 
-  <div>
-    <input type="checkbox" id="agreeToTerms" formControlName="agreeToTerms" />
-    <label for="agreeToTerms">I agree to the terms</label>
+  <div class="mb-3 form-check">
+    <input type="checkbox" id="agreeToTerms" class="form-check-input" formControlName="agreeToTerms" />
+    <label for="agreeToTerms" class="form-check-label">I agree to the terms</label>
     @if (formRegister.get('agreeToTerms')?.invalid && formRegister.get('agreeToTerms')?.touched) {
-      <p>You need to agree to the terms</p>
+      <div class="invalid-feedback d-block">You need to agree to the terms</div>
     }
   </div>
 
-  <button [disabled]="formRegister.invalid || loading()" type="submit">
+  <button class="btn btn-primary" [disabled]="formRegister.invalid || loading()" type="submit">
     @if (!loading()) {
       Register
     } @else {
@@ -99,22 +104,20 @@
 ```ts reactive-form.component.ts
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { strongPasswordValidator } from '../../../core/validators/reactive-form/strong-password.validator';
-import { birthdateValidator } from '../../../core/validators/reactive-form/birthdate.validator';
-import { GenderEnum } from '../../../core/enums/gender.enum';
-import { enumValidator } from '../../../core/validators/reactive-form/in-enum.validator';
-import { inValidator } from '../../../core/validators/reactive-form/in-string-list.validator';
-import { RegisterData } from '../../../core/models/user.interface';
+import { strongPasswordValidator } from '@core/validators/reactive-form/strong-password.validator';
+import { birthdateValidator } from '@core/validators/reactive-form/birthdate.validator';
+import { enumValidator } from '@core/validators/reactive-form/in-enum.validator';
+import { GenderEnum } from '@core/enums/gender.enum';
+import { inValidator } from '@core/validators/reactive-form/in-string-list.validator';
+import { RegisterRequest } from '@core/requests/register.request';
 
 @Component({
   imports: [ReactiveFormsModule],
-  selector: 'app-template-form',
+  selector: 'app-reactive-form',
   templateUrl: './reactive-form.component.html',
-  styleUrl: './reactive-form.component.css',
 })
 export class ReactiveFormComponent {
   private readonly _formBuilder = inject(FormBuilder);
-  protected readonly GenderEnum = GenderEnum;
 
   loading = signal<boolean>(false);
 
@@ -137,7 +140,7 @@ export class ReactiveFormComponent {
     this.formRegister.markAllAsTouched();
     this.loading.set(true);
     if (this.formRegister.valid) {
-      const user: RegisterData = {
+      const user: RegisterRequest = {
         name: this.formRegister.value.name!,
         email: this.formRegister.value.email!,
         password: this.formRegister.value.password!,
@@ -151,12 +154,7 @@ export class ReactiveFormComponent {
       console.log(user);
     }
   }
-}
-```
 
-```css reactive-form.component.css
-/* A red border on invalid fields */
-.invalid {
-  border: 1px solid red;
+  protected readonly GenderEnum = GenderEnum;
 }
 ```

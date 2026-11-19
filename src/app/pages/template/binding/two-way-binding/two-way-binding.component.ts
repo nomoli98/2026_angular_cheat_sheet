@@ -1,7 +1,7 @@
 import { Component, model, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CodeSnippetComponent } from '../../../../../../../angular-22-cheat-sheet/src/app/shared/code-snippet/code-snippet.component';
+import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import twoWayBinding from './snippets/two-way-binding.md';
 
 @Component({

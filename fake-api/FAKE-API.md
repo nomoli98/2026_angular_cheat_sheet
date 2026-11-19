@@ -3,7 +3,7 @@
 > 📖 **Official docs:** [json-server v0.17 README](https://github.com/typicode/json-server/tree/v0.17.4)
 
 A fake backend that runs on `http://localhost:3000` so you can practise **services**, `HttpClient` and **CRUD** without writing a real server.
-The data is a list of people based on `RegisterData` (no password).
+The data is a list of people shaped like `UserResponse` (`src/app/core/responses/user.response.ts`). No password.
 
 ```
 Angular app (localhost:4200) ──HTTP──▶ json-server (localhost:3000) ──reads/writes──▶ fake-api/db.json
@@ -156,33 +156,56 @@ One person in `db.json`:
   "email": "bob@email.bob",
   "birthdate": "2000-09-22",
   "height": 195,
-  "gender": "MALE",
+  "gender": "male",
   "subscription": "premium",
   "agreeToTerms": true
 }
 ```
 
-Matching interface, e.g. `src/app/core/models/person.interface.ts`:
+The matching types are in `src/app/core/`:
+
+| File | Type | Used for |
+| ---- | ---- | -------- |
+| `responses/user.response.ts` | `UserResponse` | what the API sends **back** (`GET`, and the answer to `POST`/`PUT`/`PATCH`) |
+| `requests/register.request.ts` | `RegisterRequest` | what you **send** to create a person (`POST`) or replace one (`PUT`) |
+| `interfaces/user.interface.ts` | `UserInterface` | the user inside the app (`birthdate` is a real `Date`) |
 
 ```ts
-import { GenderEnum } from '../enums/gender.enum';
+// src/app/core/responses/user.response.ts
+import { GenderEnum } from '@core/enums/gender.enum';
+import { SubscriptionEnum } from '@core/enums/subscription.enum';
 
-export interface Person {
-  id: number;
+export interface UserResponse {
+  id: number; // json-server gives every person an id
   name: string;
   email: string;
   birthdate: string;          // ⚠️ JSON has no Date type → ISO string "YYYY-MM-DD"
   height: number;
   gender: GenderEnum;
+  subscription: SubscriptionEnum;
+  agreeToTerms: boolean;
+}
+```
+
+```ts
+// src/app/core/requests/register.request.ts
+import { GenderEnum } from '@core/enums/gender.enum';
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  birthdate: string;
+  height: number;
+  gender: GenderEnum;
   subscription: 'free' | 'premium';
   agreeToTerms: boolean;
 }
-
-// What you SEND when creating: the server gives the id.
-export type NewPerson = Omit<Person, 'id'>;
 ```
 
-> ⚠️ `"gender"` in `db.json` must be the **values** of your `GenderEnum`. The file uses `"MALE"`, `"FEMALE"`, `"OTHER"`. If your enum is `MALE = 'male'`, change the JSON to lowercase.
+> 💡 json-server saves whatever you send. A `POST` with a `RegisterRequest` stores the `password` in `db.json` too. That's fine for a fake API. A real API would never send it back.
+
+> ⚠️ `"gender"` in `db.json` must be the **values** of `GenderEnum` (`'male'`, `'female'`, `'other'`), not the keys (`MALE`...). If you edit the JSON by hand, keep them lowercase.
 
 ---
 
@@ -192,11 +215,11 @@ Base URL: `http://localhost:3000/people`
 
 | Action | Method | URL | Body | Returns |
 | ------ | ------ | --- | ---- | ------- |
-| **Read** all | `GET` | `/people` | – | `Person[]` |
-| **Read** one | `GET` | `/people/1` | – | `Person` (or `404`) |
-| **Create** | `POST` | `/people` | `NewPerson` (no id) | the new `Person` with its `id` |
-| **Update** (replace everything) | `PUT` | `/people/1` | full `NewPerson` | updated `Person` |
-| **Update** (only some fields) | `PATCH` | `/people/1` | `Partial<Person>` e.g. `{ "subscription": "premium" }` | updated `Person` |
+| **Read** all | `GET` | `/people` | – | `UserResponse[]` |
+| **Read** one | `GET` | `/people/1` | – | `UserResponse` (or `404`) |
+| **Create** | `POST` | `/people` | `RegisterRequest` (no id) | the new person with its `id` |
+| **Update** (replace everything) | `PUT` | `/people/1` | full `RegisterRequest` | updated person |
+| **Update** (only some fields) | `PATCH` | `/people/1` | `Partial<RegisterRequest>` e.g. `{ "subscription": "premium" }` | updated person |
 | **Delete** | `DELETE` | `/people/1` | – | `{}` |
 
 - `POST` → the `id` is **auto-generated** (next number). Don't send one.
@@ -212,11 +235,11 @@ All with `GET /people?...`. Combine them with `&`.
 | Need | URL |
 | ---- | --- |
 | Filter by field | `/people?subscription=premium` |
-| Several values | `/people?gender=MALE&gender=OTHER` |
+| Several values | `/people?gender=male&gender=other` |
 | Full-text search (all fields) | `/people?q=alice` |
 | Contains (one field) | `/people?name_like=ali` |
 | Greater / lower than | `/people?height_gte=180` / `/people?height_lte=160` |
-| Not equal | `/people?gender_ne=MALE` |
+| Not equal | `/people?gender_ne=male` |
 | Sort | `/people?_sort=height&_order=desc` |
 | First N results | `/people?_limit=3` |
 | Pagination | `/people?_page=2&_limit=3` |
@@ -229,18 +252,32 @@ With `_page`, the total number of people is in the **response header** `X-Total-
 
 ### 8.1 Enable `HttpClient`, in `app.config.ts`
 
+Not done in this repo yet. Add `provideHttpClient` next to the providers already there:
+
 ```ts
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
+import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withFetch()),   // 👈 DON'T FORGET THIS
   ],
 };
 ```
 
 ### 8.2 Keep the URL in one place
+
+The repo has no `src/environments/` folder yet. Create it with the CLI:
+
+```bash
+ng generate environments
+```
+
+Then put the URL in it:
 
 ```ts
 // src/environments/environment.ts
@@ -251,21 +288,27 @@ export const environment = {
 
 ### 8.3 Smallest possible call
 
+In `src/app/core/services/user.service.ts`:
+
 ```ts
-import { inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
-import { Person } from '../models/person.interface';
+import { environment } from '../../../environments/environment';
+import { UserResponse } from '@core/responses/user.response';
+import { RegisterRequest } from '@core/requests/register.request';
 
-http = inject(HttpClient);
-url = `${environment.apiUrl}/people`;
+@Injectable({ providedIn: 'root' })
+export class UserService {
+  private http = inject(HttpClient);
+  private url = `${environment.apiUrl}/people`;
 
-this.http.get<Person[]>(this.url);                        // all
-this.http.get<Person>(`${this.url}/${id}`);               // one
-this.http.post<Person>(this.url, newPerson);              // create
-this.http.put<Person>(`${this.url}/${id}`, newPerson);    // replace
-this.http.patch<Person>(`${this.url}/${id}`, changes);    // partial
-this.http.delete<void>(`${this.url}/${id}`);              // delete
+  getAll() { return this.http.get<UserResponse[]>(this.url); }                                   // all
+  getOne(id: number) { return this.http.get<UserResponse>(`${this.url}/${id}`); }                // one
+  create(user: RegisterRequest) { return this.http.post<UserResponse>(this.url, user); }         // create
+  replace(id: number, user: RegisterRequest) { return this.http.put<UserResponse>(`${this.url}/${id}`, user); } // replace
+  update(id: number, changes: Partial<RegisterRequest>) { return this.http.patch<UserResponse>(`${this.url}/${id}`, changes); } // partial
+  delete(id: number) { return this.http.delete<void>(`${this.url}/${id}`); }                    // delete
+}
 ```
 
 > These return Observables: nothing is sent until you `.subscribe()` (or use `toSignal()` / `httpResource()`). Full service + component examples: see the services cheat sheet.
@@ -279,7 +322,7 @@ curl http://localhost:3000/people/1
 
 curl -X POST http://localhost:3000/people \
   -H "Content-Type: application/json" \
-  -d '{"name":"New Guy","email":"new@mail.com","birthdate":"2000-01-01","height":170,"gender":"OTHER","subscription":"free","agreeToTerms":true}'
+  -d '{"name":"New Guy","email":"new@mail.com","birthdate":"2000-01-01","height":170,"gender":"other","subscription":"free","agreeToTerms":true}'
 
 curl -X PATCH http://localhost:3000/people/1 \
   -H "Content-Type: application/json" \
@@ -324,7 +367,7 @@ Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Proc
 kill $(lsof -t -i:3000)
 ```
 
-Or use another port: `--port 3001` (and change `apiUrl`).
+Or use another port: `--port 3001` (and change `apiUrl` in `src/environments/environment.ts`).
 
 ### My data is messed up / people disappeared
 

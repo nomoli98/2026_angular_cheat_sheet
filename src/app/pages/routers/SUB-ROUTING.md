@@ -4,7 +4,7 @@
 
 A component that has **its own `<router-outlet>`**, so part of the page changes while the rest stays. A **named outlet** is a second outlet that changes on its own, like a side panel.
 
-Files: `components/routers/sub-outlet.routes.example.ts`, `components/routers/sub-outlet/`, `components/routers/children/`
+Files: `pages/routers/sub-outlet.routes.example.ts`, `pages/routers/sub-outlet/`, `pages/routers/children/`
 
 Basics first: [ROUTING.md](./ROUTING.md).
 
@@ -36,10 +36,10 @@ app.html
 // app.routes.ts
 {
   path: 'router',
-  loadChildren: () => import('./components/routers/app.routes.example').then((r) => r.routes),
+  loadChildren: () => import('./pages/routers/app.routes.example').then((r) => r.routes),
 },
 
-// components/routers/app.routes.example.ts
+// pages/routers/app.routes.example.ts
 {
   path: 'sub-outlet',
   loadChildren: () => import('./sub-outlet.routes.example').then((r) => r.routes),
@@ -49,7 +49,7 @@ app.html
 ## 2. Declare the parent component and its `children`
 
 ```ts
-// components/routers/sub-outlet.routes.example.ts
+// pages/routers/sub-outlet.routes.example.ts
 export const routes: Routes = [
   {
     path: '',                                  // = /router/sub-outlet

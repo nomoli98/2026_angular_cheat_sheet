@@ -8,11 +8,11 @@
 
 ```ts sub-outlet.component.ts
 import { Component, inject } from '@angular/core';
-import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-sub-outlet',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterLink],
   templateUrl: './sub-outlet.component.html',
 })
 export class SubOutletComponent {
@@ -29,7 +29,7 @@ export class SubOutletComponent {
 }
 ```
 
-```ts sub-outlet.routes.ts
+```ts sub-outlet.routes.example.ts
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
@@ -38,6 +38,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./sub-outlet/sub-outlet.component').then((m) => m.SubOutletComponent),
     children: [
+      // B. to a named router-outlet
       {
         path: '3',
         outlet: 'panel',

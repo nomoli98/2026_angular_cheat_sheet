@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CodeSnippetComponent } from '../../../../../../angular-22-cheat-sheet/src/app/shared/code-snippet/code-snippet.component';
+import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import { LoginFormComponent } from '../unit-test/login-form/login-form.component';
 import setup from './snippets/setup.md';
 import config from './snippets/config.md';

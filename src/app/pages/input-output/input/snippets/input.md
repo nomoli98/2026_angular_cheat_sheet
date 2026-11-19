@@ -8,19 +8,21 @@
 
 ```ts input.component.ts
 import { Component, signal } from '@angular/core';
-import { RegisterData } from '../../../core/models/user.interface';
-import { GenderEnum } from '../../../core/enums/gender.enum';
+import { CommonModule } from '@angular/common';
+import { GenderEnum } from '@core/enums/gender.enum';
 import { ChildComponentComponent } from './child-component/child-component.component';
+import { RegisterRequest } from '@core/requests/register.request';
 
 @Component({
   selector: 'app-input',
-  imports: [ChildComponentComponent],
+  standalone: true,
+  imports: [CommonModule, ChildComponentComponent],
   templateUrl: './input.component.html',
 })
 export class InputComponent {
   String = signal<string>('Parent given value');
 
-  User = signal<RegisterData>({
+  User = signal<RegisterRequest>({
     name: 'Bob',
     email: 'bob@email.bob',
     password: 'BobIsTheBest99#',
@@ -34,8 +36,11 @@ export class InputComponent {
 ```
 
 ```html child-component.component.html
+<h3>Child component: </h3>
+
 <p>This is the string you passed : {{ inputString() }}</p>
 
+<p>And this is the user:</p>
 <ul>
   <li>{{ inputUser().name }}</li>
   <li>{{ inputUser().email }}</li>
@@ -45,19 +50,22 @@ export class InputComponent {
 
 ```ts child-component.component.ts
 import { Component, input } from '@angular/core';
-import { RegisterData } from '../../../../core/models/user.interface';
-import { GenderEnum } from '../../../../core/enums/gender.enum';
+import { CommonModule } from '@angular/common';
+import { GenderEnum } from '@core/enums/gender.enum';
+import { RegisterRequest } from '@core/requests/register.request';
 
 @Component({
   selector: 'app-child-component',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './child-component.component.html',
 })
 export class ChildComponentComponent {
-  // If the input is ABSOLUTELY necessary to make the component work, add required.
+  // if the input is ABSOLUTELY necessary to make the component work add required.
   inputString = input.required<string>();
 
-  // Otherwise, leave required out and give a default value.
-  inputUser = input<RegisterData>({
+  //Otherwise, you can leave the required out and give a default value, to fill the gaps in case there is no user passed to the component.
+  inputUser = input<RegisterRequest>({
     name: 'Default',
     email: 'default@email.fake',
     password: '',

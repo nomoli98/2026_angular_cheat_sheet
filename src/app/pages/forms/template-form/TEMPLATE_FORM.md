@@ -174,6 +174,8 @@ The rules:
 ### Step 2: import it in the component and use it
 
 ```ts
+import { StrongPasswordDirective } from '@core/validators/template-form/strong-password.directive';
+
 imports: [FormsModule, StrongPasswordDirective],
 ```
 

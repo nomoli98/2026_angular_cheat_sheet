@@ -24,7 +24,7 @@ Files:
 ```bash
 ng test                    # watch mode: re-runs when you save
 ng test --watch=false      # run once and stop
-ng test --include src/app/components/tests/unit-test/counter/counter.component.spec.ts   # one file
+ng test --include src/app/pages/tests/unit-test/counter/counter.component.spec.ts   # one file
 ```
 
 - Test files end with **`.spec.ts`** and sit **next to** the file they test.

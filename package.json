@@ -9,7 +9,10 @@
     "test": "ng test",
     "e2e": "playwright test",
     "predev": "node scripts/ensure-fake-api.js",
-    "dev": "concurrently -k -n api,ng -c cyan,magenta \"npm:api\" \"npm:start\""
+    "dev": "concurrently -k -n api,ng -c cyan,magenta \"npm:api\" \"npm:start\"",
+    "api": "json-server --watch fake-api/db.json --port 3000",
+    "api:slow": "json-server --watch fake-api/db.json --port 3000 --delay 1000",
+    "api:reset": "node -e \"require('fs').copyFileSync('fake-api/db.seed.json','fake-api/db.json')\""
   },
   "private": true,
   "packageManager": "npm@12.2.1",

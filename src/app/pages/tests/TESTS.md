@@ -29,7 +29,7 @@ All lazy-loaded from `tests.routes.ts` under `/tests/...`:
     ├── core/services/
     │   ├── auth.service.ts                  basic fake login / register service
     │   └── auth.service.spec.ts
-    └── components/tests/
+    └── pages/tests/
         ├── tests.routes.ts
         ├── unit-test/
         │   ├── counter/                     component + counter.component.spec.ts

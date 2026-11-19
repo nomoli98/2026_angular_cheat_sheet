@@ -10,8 +10,8 @@ How to pass data from a parent component to a child component with signal inputs
 
 ```ts
 import { Component, input } from '@angular/core';
-import { RegisterData } from '../../../../core/models/user.interface';
-import { GenderEnum } from '../../../../core/enums/gender.enum';
+import { GenderEnum } from '@core/enums/gender.enum';
+import { RegisterRequest } from '@core/requests/register.request';
 
 @Component({
   selector: 'app-child-component',
@@ -23,9 +23,9 @@ export class ChildComponentComponent {
   inputString = input.required<string>();
 
   // OPTIONAL: if the parent passes nothing, the default value is used.
-  inputUser = input<RegisterData>({
-    name: '',
-    email: '',
+  inputUser = input<RegisterRequest>({
+    name: 'Default',
+    email: 'default@email.fake',
     password: '',
     birthdate: '',            // empty string = no date yet
     height: 50,
@@ -74,8 +74,8 @@ Inputs are **signals**, so you **call them with `()`**:
 
 ```ts
 import { Component, signal } from '@angular/core';
-import { RegisterData } from '../../../core/models/user.interface';
-import { GenderEnum } from '../../../core/enums/gender.enum';
+import { GenderEnum } from '@core/enums/gender.enum';
+import { RegisterRequest } from '@core/requests/register.request';
 import { ChildComponentComponent } from './child-component/child-component.component';
 
 @Component({
@@ -87,7 +87,7 @@ import { ChildComponentComponent } from './child-component/child-component.compo
 export class InputComponent {
   String = signal<string>('Parent given value');
 
-  User = signal<RegisterData>({
+  User = signal<RegisterRequest>({
     name: 'Bob',
     email: 'bob@email.bob',
     password: 'BobIsTheBest99#',
@@ -126,7 +126,7 @@ Use `[inputName]="value"` (square brackets = property binding):
 ### Rename the input for the parent (alias)
 
 ```ts
-inputUser = input<RegisterData>(defaultUser, { alias: 'user' });
+inputUser = input<RegisterRequest>(defaultUser, { alias: 'user' });
 ```
 ```html
 <app-child-component [user]="User()" />
@@ -178,7 +178,7 @@ You read an `input.required()` in the **constructor**. Read it in the template, 
 
 ### Birthdate format: always `'YYYY-MM-DD'`
 
-`birthdate` is a **string** in `RegisterData`, in the same format `<input type="date">` uses.
+`birthdate` is a **string** in `RegisterRequest` (`core/requests/register.request.ts`), in the same format `<input type="date">` uses. (`UserInterface` in `core/interfaces/` uses a real `Date`.)
 
 ```ts
 birthdate: '2000-09-22';   // ✅

@@ -1,65 +1,68 @@
 ```html signal-form.component.html
-<form action="" (submit)="onSubmit($event)">
+<!-- Bootstrap: .form-label + .form-control, .is-invalid turns the field red,
+     .invalid-feedback shows the message (only when the input before it is .is-invalid) -->
+<form action="" (submit)="onSubmit($event)" class="card card-body">
 
-  <div>
-    <label for="name">Name</label>
-    <input id="name" type="text" [formField]="registerForm.name"
-           [class.invalid]="registerForm.name().touched() && registerForm.name().invalid()">
+  <div class="mb-3">
+    <label for="name" class="form-label">Name</label>
+    <input id="name" type="text" class="form-control" [formField]="registerForm.name"
+           [class.is-invalid]="registerForm.name().touched() && registerForm.name().invalid()">
     @if (registerForm.name().touched()) {
       @for (error of registerForm.name().errors(); track error.kind) {
-        <p>{{ error.message }}</p>
+        <div class="invalid-feedback">{{ error.message }}</div>
       }
     }
   </div>
 
-  <div>
-    <label for="email">Email</label>
-    <input id="email" type="email" [formField]="registerForm.email"
-           [class.invalid]="registerForm.email().touched() && registerForm.email().invalid()">
+  <div class="mb-3">
+    <label for="email" class="form-label">Email</label>
+    <input id="email" type="email" class="form-control" [formField]="registerForm.email"
+           [class.is-invalid]="registerForm.email().touched() && registerForm.email().invalid()">
     @if (registerForm.email().touched()) {
       @for (error of registerForm.email().errors(); track error.kind) {
-        <p>{{ error.message }}</p>
+        <div class="invalid-feedback">{{ error.message }}</div>
       }
     }
   </div>
 
-  <div>
-    <label for="password">Password</label>
-    <input id="password" type="password" [formField]="registerForm.password"
-           [class.invalid]="registerForm.password().touched() && registerForm.password().invalid()">
+  <div class="mb-3">
+    <label for="password" class="form-label">Password</label>
+    <input id="password" type="password" class="form-control" [formField]="registerForm.password"
+           [class.is-invalid]="registerForm.password().touched() && registerForm.password().invalid()">
     @if (registerForm.password().touched()) {
       @for (error of registerForm.password().errors(); track error.kind) {
-        <p>{{ error.message }}</p>
+        <div class="invalid-feedback">{{ error.message }}</div>
       }
     }
   </div>
 
-  <div>
-    <label for="birthdate">Birthdate</label>
-    <input id="birthdate" type="date" [formField]="registerForm.birthdate"
-           [class.invalid]="registerForm.birthdate().touched() && registerForm.birthdate().invalid()">
+  <div class="mb-3">
+    <label for="birthdate" class="form-label">Birthdate</label>
+    <input id="birthdate" type="date" class="form-control" [formField]="registerForm.birthdate"
+           [class.is-invalid]="registerForm.birthdate().touched() && registerForm.birthdate().invalid()">
     @if (registerForm.birthdate().touched()) {
       @for (error of registerForm.birthdate().errors(); track error.kind) {
-        <p>{{ error.message }}</p>
+        <div class="invalid-feedback">{{ error.message }}</div>
       }
     }
   </div>
 
-  <div>
-    <label for="height">Height</label>
-    <input id="height" type="number" [formField]="registerForm.height"
-           [class.invalid]="registerForm.height().touched() && registerForm.height().invalid()">
+  <div class="mb-3">
+    <label for="height" class="form-label">Height</label>
+    <input id="height" type="number" class="form-control" [formField]="registerForm.height"
+           [class.is-invalid]="registerForm.height().touched() && registerForm.height().invalid()">
     @if (registerForm.height().touched()) {
       @for (error of registerForm.height().errors(); track error.kind) {
-        <p>{{ error.message }}</p>
+        <div class="invalid-feedback">{{ error.message }}</div>
       }
     }
   </div>
 
-  <div>
-    <label for="gender">Gender</label>
-    <select id="gender" [formField]="registerForm.gender"
-            [class.invalid]="registerForm.gender().touched() && registerForm.gender().invalid()">
+  <div class="mb-3">
+    <label for="gender" class="form-label">Gender</label>
+    <!-- <select> uses .form-select instead of .form-control -->
+    <select id="gender" class="form-select" [formField]="registerForm.gender"
+            [class.is-invalid]="registerForm.gender().touched() && registerForm.gender().invalid()">
       <option value="">Choose a gender...</option>
       <option value="{{GenderEnum.FEMALE}}">{{ GenderEnum.FEMALE }}</option>
       <option value="{{GenderEnum.MALE}}">{{ GenderEnum.MALE }}</option>
@@ -67,63 +70,72 @@
     </select>
     @if (registerForm.gender().touched()) {
       @for (error of registerForm.gender().errors(); track error.kind) {
-        <p>{{ error.message }}</p>
+        <div class="invalid-feedback">{{ error.message }}</div>
       }
     }
   </div>
 
-  <div>
-    <div>
-      <input type="radio" value="free" id="free"
+  <!-- Radios and checkboxes: .form-check wrapper + .form-check-input + .form-check-label -->
+  <div class="mb-3">
+    <div class="form-check">
+      <input type="radio" value="free" id="free" class="form-check-input"
              [formField]="registerForm.subscription"
              (click)="toggleSubscription('free', $event)" />
-      <label for="free">Free</label>
+      <label for="free" class="form-check-label">Free</label>
     </div>
-    <div>
-      <input type="radio" value="premium" id="premium"
+    <div class="form-check">
+      <input type="radio" value="premium" id="premium" class="form-check-input"
              [formField]="registerForm.subscription"
              (click)="toggleSubscription('premium', $event)" />
-      <label for="premium">Premium</label>
+      <label for="premium" class="form-check-label">Premium</label>
     </div>
     @if (registerForm.subscription().touched()) {
       @for (error of registerForm.subscription().errors(); track error.kind) {
-        <p>{{ error.message }}</p>
+        <!-- d-block: the message isn't right after an .is-invalid input, so force it visible -->
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
       }
     }
   </div>
 
-  <div>
-    <input type="checkbox" id="agreeToTerms" [formField]="registerForm.agreeToTerms" />
-    <label for="agreeToTerms">I agree to the terms</label>
+  <div class="mb-3 form-check">
+    <input type="checkbox" id="agreeToTerms" class="form-check-input" [formField]="registerForm.agreeToTerms" />
+    <label for="agreeToTerms" class="form-check-label">I agree to the terms</label>
     @if (registerForm.agreeToTerms().touched()) {
       @for (error of registerForm.agreeToTerms().errors(); track error.kind) {
-        <p>{{ error.message }}</p>
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
       }
     }
   </div>
 
-  <button type="submit" [disabled]="registerForm().invalid()">Submit</button>
+  <button type="submit" class="btn btn-primary" [disabled]="registerForm().invalid()">Submit</button>
 </form>
 ```
 
 ```ts signal-form.component.ts
 import { Component, signal } from '@angular/core';
 import { email, form, FormField, max, min, required, validate } from '@angular/forms/signals';
-import { GenderEnum } from '../../../core/enums/gender.enum';
-import { RegisterData } from '../../../core/models/user.interface';
-import { strongPassword } from '../../../core/validators/signal-form/strong-password.validator';
-import { birthdate } from '../../../core/validators/signal-form/birthdate.validator';
-import { initialRegisterData } from '../../../core/factories/register.factory';
+import { GenderEnum } from '@core/enums/gender.enum';
+import { RegisterRequest } from '@core/requests/register.request';
+import { strongPassword } from '@core/validators/signal-form/strong-password.validator';
+import { birthdate } from '@core/validators/signal-form/birthdate.validator';
 
 @Component({
   imports: [FormField],
   selector: 'app-signal-form',
   templateUrl: './signal-form.component.html',
-  styleUrl: './signal-form.component.css',
 })
 export class SignalFormComponent {
   protected readonly GenderEnum = GenderEnum;
-  protected EmptyForm = signal<RegisterData>(initialRegisterData());
+  protected EmptyForm = signal<RegisterRequest>({
+    name: '',
+    email: '',
+    password: '',
+    birthdate: '',
+    height: 50,
+    gender: GenderEnum.OTHER,
+    subscription: 'free',
+    agreeToTerms: false,
+  });
 
   // You pass you model (userDate) into the form() to create a Field Tree to access the data
   protected registerForm = form(this.EmptyForm, (field) => {
@@ -197,8 +209,17 @@ export class SignalFormComponent {
   }
 
   resetForm() {
-    this.EmptyForm.set(initialRegisterData()); // 1. values back to defaults (fresh object)
-    this.registerForm().reset(); // 2. clear touched/dirty
+    this.EmptyForm.set({
+      name: '',
+      email: '',
+      password: '',
+      birthdate: '',
+      height: 50,
+      gender: GenderEnum.OTHER,
+      subscription: 'free',
+      agreeToTerms: false,
+    });
+    this.registerForm().reset();
   }
 
   // helper function to be sure that the radio btn toggle correctly
@@ -217,12 +238,5 @@ export class SignalFormComponent {
   }
 
   protected readonly form = form;
-}
-```
-
-```css signal-form.component.css
-/* A red border on invalid fields */
-.invalid {
-  border: 1px solid red;
 }
 ```

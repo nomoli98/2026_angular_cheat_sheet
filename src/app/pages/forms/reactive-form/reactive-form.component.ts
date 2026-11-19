@@ -1,17 +1,17 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import reactiveForm from './snippets/reactive-form.md';
-import { CodeSnippetComponent } from '@app/shared/code-snippet/code-snippet.component';
-import { strongPasswordValidator } from '@app/core/validators/reactive-form/strong-password.validator';
-import { birthdateValidator } from '@app/core/validators/reactive-form/birthdate.validator';
-import { enumValidator } from '@app/core/validators/reactive-form/in-enum.validator';
-import { GenderEnum } from '@app/core/enums/gender.enum';
-import { inValidator } from '@app/core/validators/reactive-form/in-string-list.validator';
-import { RegisterRequest } from '@app/core/requests/register.request';
+import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
+import { strongPasswordValidator } from '@core/validators/reactive-form/strong-password.validator';
+import { birthdateValidator } from '@core/validators/reactive-form/birthdate.validator';
+import { enumValidator } from '@core/validators/reactive-form/in-enum.validator';
+import { GenderEnum } from '@core/enums/gender.enum';
+import { inValidator } from '@core/validators/reactive-form/in-string-list.validator';
+import { RegisterRequest } from '@core/requests/register.request';
 
 @Component({
   imports: [CodeSnippetComponent, ReactiveFormsModule],
-  selector: 'app-template-form',
+  selector: 'app-reactive-form',
   templateUrl: './reactive-form.component.html',
 })
 export class ReactiveFormComponent {

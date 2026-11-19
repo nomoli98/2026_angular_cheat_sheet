@@ -8,15 +8,17 @@ Files: `signal-form.component.ts`, `signal-form.component.html`
 
 ---
 
-## 1. Define the model type and its initial value
+## 1. Define the model type
 
 ```ts
-// core/models/user.interface.ts
-export interface RegisterData {
+// core/requests/register.request.ts
+import { GenderEnum } from '@core/enums/gender.enum';
+
+export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
-  birthdate: Date | null;
+  birthdate: string; // 'YYYY-MM-DD', '' when empty
   height: number;
   gender: GenderEnum;
   subscription: 'free' | 'premium';
@@ -24,15 +26,11 @@ export interface RegisterData {
 }
 ```
 
-```ts
-// core/factories/register.factory.ts
-export function initialRegisterData(): RegisterData {
-  return { name: '', email: '', password: '', birthdate: null, height: 50,
-           gender: GenderEnum.OTHER, subscription: 'free', agreeToTerms: false };
-}
-```
+Import it in the component with the short alias:
 
-Use a **function** that returns a new object each time. That way the reset always starts from a clean object.
+```ts
+import { RegisterRequest } from '@core/requests/register.request';
+```
 
 ## 2. Import `FormField` in the component
 
@@ -45,10 +43,19 @@ import { email, form, FormField, max, min, required, validate } from '@angular/f
 })
 ```
 
-## 3. Create the model signal
+## 3. Create the model signal with its initial value
 
 ```ts
-protected EmptyForm = signal<RegisterData>(initialRegisterData());
+protected EmptyForm = signal<RegisterRequest>({
+  name: '',
+  email: '',
+  password: '',
+  birthdate: '',
+  height: 50,
+  gender: GenderEnum.OTHER,
+  subscription: 'free',
+  agreeToTerms: false,
+});
 ```
 
 ## 4. Create the form with `form(model, schema)`
@@ -148,8 +155,18 @@ Reset takes two steps:
 
 ```ts
 resetForm() {
-  this.EmptyForm.set(initialRegisterData()); // 1. values back to defaults
-  this.registerForm().reset();               // 2. clear touched / dirty
+  // 1. values back to defaults (always a NEW object, never the old one mutated)
+  this.EmptyForm.set({
+    name: '',
+    email: '',
+    password: '',
+    birthdate: '',
+    height: 50,
+    gender: GenderEnum.OTHER,
+    subscription: 'free',
+    agreeToTerms: false,
+  });
+  this.registerForm().reset(); // 2. clear touched / dirty
 }
 ```
 
@@ -232,6 +249,12 @@ export function birthdate<T extends Date | string | null | undefined>(
 birthdate(field.birthdate, { minAge: 18, maxAge: 120 });
 ```
 
-The validators in this repo are in `core/validators/signal-form/`:
+The validators in this repo are in `core/validators/signal-form/`. Import them with the `@core` alias:
+
+```ts
+import { strongPassword } from '@core/validators/signal-form/strong-password.validator';
+import { birthdate } from '@core/validators/signal-form/birthdate.validator';
+```
+
 - `strong-password.validator.ts`: `strongPassword(field.x)`
 - `birthdate.validator.ts`: `birthdate(field.x, { minAge, maxAge })`

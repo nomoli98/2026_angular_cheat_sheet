@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { CodeSnippetComponent } from '../../../../../../angular-22-cheat-sheet/src/app/shared/code-snippet/code-snippet.component';
+import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import unnamedOutlet from './snippets/unnamed-outlet.md';
 import namedOutlet from './snippets/named-outlet.md';
 

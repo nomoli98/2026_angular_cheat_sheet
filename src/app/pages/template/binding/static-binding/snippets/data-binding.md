@@ -6,7 +6,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-static-binding',
+  selector: 'app-binding',
   templateUrl: './static-binding.component.html',
 })
 export class StaticBindingComponent {

@@ -1,9 +1,9 @@
-```ts app.routes.ts
+```ts app.routes.example.ts
 {
+  // ':id' = a variable part of the URL → /router/basics/user/42
   path: 'basics',
   loadComponent: () => import('./basics/basics.component').then((m) => m.BasicsComponent),
   children: [
-    // ':id' = a variable part of the URL → /basics/user/42
     {
       path: 'user/:id',
       loadComponent: () => import('./basics/user/user.component').then((m) => m.UserComponent),
@@ -31,14 +31,15 @@ import { Component, input } from '@angular/core';
   templateUrl: './user.component.html',
 })
 export class UserComponent {
-  id = input<string>(); // from the path:  /user/:id  (same name as ':id')
-  tab = input<string>(); // from the query: ?tab=posts (same name as 'tab')
+  // Filled by the router thanks to withComponentInputBinding() in app.config.ts
+  id = input<string>(); // from the path:   /user/:id   → /user/42
+  tab = input<string>(); // from the query: ?tab=posts
 }
 ```
 
 ```html user.component.html
-<p>User id: {{ id() }}</p>
-<p>Tab: {{ tab() ?? 'none' }}</p>
+<p>User id: <strong>{{ id() }}</strong></p>
+<p>Tab: <strong>{{ tab() ?? 'none' }}</strong></p>
 ```
 
 ```html basics.component.html
@@ -48,6 +49,15 @@ export class UserComponent {
 <!-- Path param from a variable + a query param -->
 <a [routerLink]="['user', 2]" [queryParams]="{ tab: 'posts' }">user/2?tab=posts</a>
 
+<!-- Same thing from the TS -->
+<button (click)="goToUser42()">user/42?tab=settings (TS)</button>
+
 <!-- The child route (UserComponent) is displayed here -->
 <router-outlet />
+```
+
+```ts basics.component.ts
+goToUser42() {
+  this.router.navigate(['/router/basics/user', 42], { queryParams: { tab: 'settings' } });
+}
 ```

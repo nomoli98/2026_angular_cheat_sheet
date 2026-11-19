@@ -1,21 +1,24 @@
-```ts app.routes.ts
+```ts app.routes.example.ts
 import { Routes } from '@angular/router';
-import { HomeComponent } from './home/home.component';
+import { IndexComponent } from '@pages/@index/index.component';
 
+// Loaded under 'router' in app.routes.ts, so every path here starts with /router
 export const routes: Routes = [
-  // 1. component: downloaded when the app starts
-  { path: '', component: HomeComponent },
-
-  // 2. loadComponent: ONE component, downloaded the first time you visit it
   {
-    path: 'profile',
-    loadComponent: () => import('./profile/profile.component').then((m) => m.ProfileComponent),
+    // 1. component: downloaded when the app starts, even if the user never visits that route
+    path: '',
+    component: IndexComponent,
   },
-
-  // 3. loadChildren: a whole routes FILE, downloaded the first time you visit one of its pages
   {
-    path: 'form',
-    loadChildren: () => import('./forms/form.routes').then((r) => r.routes),
+    // 2. loadComponent: ONE component, downloaded the first time you visit it → /router/loaded
+    path: 'loaded',
+    loadComponent: () => import('../@index/index.component').then((m) => m.IndexComponent),
+  },
+  {
+    // 3. loadChildren: a whole routes FILE, downloaded the first time you visit one of its pages
+    //    → /router/routes/reactive-form
+    path: 'routes',
+    loadChildren: () => import('../forms/form.routes').then((r) => r.routes),
   },
 ];
 ```
@@ -23,7 +26,7 @@ export const routes: Routes = [
 ```ts form.routes.ts
 import { Routes } from '@angular/router';
 
-// The paths are added after the parent: 'form' + 'reactive-form' = /form/reactive-form
+// The paths are added after the parent: 'routes' + 'reactive-form' = /router/routes/reactive-form
 export const routes: Routes = [
   {
     path: 'reactive-form',
@@ -33,13 +36,28 @@ export const routes: Routes = [
 ];
 ```
 
+```ts app.routes.ts
+// How the example file above is plugged into the real app
+{
+  path: 'router',
+  loadChildren: () => import('./pages/routers/app.routes.example').then((r) => r.routes),
+},
+```
+
 ```ts app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes)],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    // withComponentInputBinding: route params (:id) and query params go into the component's input()
+    provideRouter(routes, withComponentInputBinding()),
+  ],
 };
 ```
 

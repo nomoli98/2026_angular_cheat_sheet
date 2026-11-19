@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CodeSnippetComponent } from '../../../../../../../angular-22-cheat-sheet/src/app/shared/code-snippet/code-snippet.component';
+import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import forLoop from './snippets/for.md';
 
 @Component({

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { ChildComponentComponent } from './child-component/child-component.component';
-import { CodeSnippetComponent } from '../../../../../../angular-22-cheat-sheet/src/app/shared/code-snippet/code-snippet.component';
+import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import outputCode from './snippets/output.md';
 
 @Component({

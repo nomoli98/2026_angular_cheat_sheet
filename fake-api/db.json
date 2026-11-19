@@ -6,7 +6,7 @@
       "email": "bob@email.bob",
       "birthdate": "2000-09-22",
       "height": 195,
-      "gender": "MALE",
+      "gender": "male",
       "subscription": "premium",
       "agreeToTerms": true
     },
@@ -16,7 +16,7 @@
       "email": "alice.dupont@mail.com",
       "birthdate": "1995-03-14",
       "height": 168,
-      "gender": "FEMALE",
+      "gender": "female",
       "subscription": "free",
       "agreeToTerms": true
     },
@@ -26,7 +26,7 @@
       "email": "charlie.n@mail.com",
       "birthdate": "1988-11-02",
       "height": 175,
-      "gender": "MALE",
+      "gender": "male",
       "subscription": "premium",
       "agreeToTerms": true
     },
@@ -36,7 +36,7 @@
       "email": "dana.k@mail.com",
       "birthdate": "2002-07-30",
       "height": 160,
-      "gender": "FEMALE",
+      "gender": "female",
       "subscription": "free",
       "agreeToTerms": true
     },
@@ -46,7 +46,7 @@
       "email": "sam.rivera@mail.com",
       "birthdate": "1999-01-19",
       "height": 172,
-      "gender": "OTHER",
+      "gender": "other",
       "subscription": "free",
       "agreeToTerms": true
     },
@@ -56,7 +56,7 @@
       "email": "emma.leroy@mail.com",
       "birthdate": "1992-05-08",
       "height": 165,
-      "gender": "FEMALE",
+      "gender": "female",
       "subscription": "premium",
       "agreeToTerms": true
     },
@@ -66,7 +66,7 @@
       "email": "farid.b@mail.com",
       "birthdate": "1985-12-25",
       "height": 181,
-      "gender": "MALE",
+      "gender": "male",
       "subscription": "free",
       "agreeToTerms": true
     },
@@ -76,7 +76,7 @@
       "email": "grace.okafor@mail.com",
       "birthdate": "2001-04-03",
       "height": 170,
-      "gender": "FEMALE",
+      "gender": "female",
       "subscription": "premium",
       "agreeToTerms": true
     },
@@ -86,7 +86,7 @@
       "email": "hugo.schmidt@mail.com",
       "birthdate": "1997-08-17",
       "height": 188,
-      "gender": "MALE",
+      "gender": "male",
       "subscription": "free",
       "agreeToTerms": true
     },
@@ -96,7 +96,7 @@
       "email": "ines.costa@mail.com",
       "birthdate": "1990-10-10",
       "height": 158,
-      "gender": "FEMALE",
+      "gender": "female",
       "subscription": "premium",
       "agreeToTerms": true
     }

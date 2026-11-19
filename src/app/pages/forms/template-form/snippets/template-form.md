@@ -1,117 +1,122 @@
 ```html template-form.component.html
 <!-- #form="ngForm" gives us access to the whole form (valid, invalid...) -->
-<form #form="ngForm" (ngSubmit)="onSubmit(form)">
+<!-- Bootstrap: .form-label + .form-control, .is-invalid turns the field red,
+     .invalid-feedback shows the message (only when the input before it is .is-invalid) -->
+<form #form="ngForm" (ngSubmit)="onSubmit(form)" class="card card-body">
 
   <!-- NAME -->
   <!-- #name="ngModel" gives us access to this field (invalid, touched...) -->
-  <div>
-    <label for="name">Name</label>
-    <input type="text" id="name" name="name" placeholder="name123"
+  <div class="mb-3">
+    <label for="name" class="form-label">Name</label>
+    <input type="text" id="name" name="name" placeholder="name123" class="form-control"
            [(ngModel)]="user.name" #name="ngModel"
            required
-           [class.invalid]="name.invalid && name.touched" />
+           [class.is-invalid]="name.invalid && name.touched" />
     @if (name.invalid && name.touched) {
-      <p>Enter valid name</p>
+      <div class="invalid-feedback">Enter valid name</div>
     }
   </div>
 
   <!-- EMAIL -->
-  <div>
-    <label for="email">Email</label>
-    <input type="text" id="email" name="email" placeholder="example@email.com"
+  <div class="mb-3">
+    <label for="email" class="form-label">Email</label>
+    <input type="text" id="email" name="email" placeholder="example@email.com" class="form-control"
            [(ngModel)]="user.email" #email="ngModel"
            required email
-           [class.invalid]="email.invalid && email.touched" />
+           [class.is-invalid]="email.invalid && email.touched" />
     @if (email.invalid && email.touched) {
-      <p>Enter valid email address</p>
+      <div class="invalid-feedback">Enter valid email address</div>
     }
   </div>
 
   <!-- PASSWORD: custom validator "appStrongPassword" -->
-  <div>
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" placeholder="Password123"
+  <div class="mb-3">
+    <label for="password" class="form-label">Password</label>
+    <input type="password" id="password" name="password" placeholder="Password123" class="form-control"
            [(ngModel)]="user.password" #password="ngModel"
            required appStrongPassword
-           [class.invalid]="password.invalid && password.touched" />
+           [class.is-invalid]="password.invalid && password.touched" />
     @if (password.invalid && password.touched) {
-      <p>Password needs 8+ characters, an uppercase letter, a lowercase letter and a number</p>
+      <div class="invalid-feedback">Password needs 8+ characters, an uppercase letter, a lowercase letter and a number</div>
     }
   </div>
 
   <!-- BIRTHDATE: custom validator "appBirthdate" (age between 0 and 135) -->
-  <div>
-    <label for="birthdate">Birthdate</label>
-    <input type="date" id="birthdate" name="birthdate"
+  <div class="mb-3">
+    <label for="birthdate" class="form-label">Birthdate</label>
+    <input type="date" id="birthdate" name="birthdate" class="form-control"
            [(ngModel)]="user.birthdate" #birthdate="ngModel"
            required appBirthdate [minAge]="0" [maxAge]="135"
-           [class.invalid]="birthdate.invalid && birthdate.touched" />
+           [class.is-invalid]="birthdate.invalid && birthdate.touched" />
     @if (birthdate.invalid && birthdate.touched) {
-      <p>Enter valid birthdate</p>
+      <div class="invalid-feedback">Enter valid birthdate</div>
     }
   </div>
 
   <!-- HEIGHT: between 50 and 275 -->
-  <div>
-    <label for="height">Height</label>
-    <input type="number" id="height" name="height"
+  <div class="mb-3">
+    <label for="height" class="form-label">Height</label>
+    <input type="number" id="height" name="height" class="form-control"
            [(ngModel)]="user.height" #height="ngModel"
            min="50" max="275"
-           [class.invalid]="height.invalid && height.touched" />
+           [class.is-invalid]="height.invalid && height.touched" />
     @if (height.invalid && height.touched) {
-      <p>Height must be between 50 and 275</p>
+      <div class="invalid-feedback">Height must be between 50 and 275</div>
     }
   </div>
 
   <!-- GENDER: custom validator "appInEnum" (value must be in GenderEnum) -->
-  <div>
-    <label for="gender">Gender</label>
-    <select id="gender" name="gender"
+  <!-- <select> uses .form-select instead of .form-control -->
+  <div class="mb-3">
+    <label for="gender" class="form-label">Gender</label>
+    <select id="gender" name="gender" class="form-select"
             [(ngModel)]="user.gender" #gender="ngModel"
             required [appInEnum]="GenderEnum"
-            [class.invalid]="gender.invalid && gender.touched">
+            [class.is-invalid]="gender.invalid && gender.touched">
       <option value="">Choose a gender...</option>
       <option [value]="GenderEnum.FEMALE">{{ GenderEnum.FEMALE }}</option>
       <option [value]="GenderEnum.MALE">{{ GenderEnum.MALE }}</option>
       <option [value]="GenderEnum.OTHER">{{ GenderEnum.OTHER }}</option>
     </select>
     @if (gender.invalid && gender.touched) {
-      <p>Enter valid gender</p>
+      <div class="invalid-feedback">Enter valid gender</div>
     }
   </div>
 
   <!-- SUBSCRIPTION: custom validator "appInList" -->
   <!-- Both radios share the same name, so they are one field -->
-  <div>
-    <div>
-      <input type="radio" name="subscription" value="free" id="free"
+  <!-- Radios and checkboxes: .form-check wrapper + .form-check-input + .form-check-label -->
+  <div class="mb-3">
+    <div class="form-check">
+      <input type="radio" name="subscription" value="free" id="free" class="form-check-input"
              [(ngModel)]="user.subscription" #subscription="ngModel"
              required [appInList]="['free', 'premium']" />
-      <label for="free">Free</label>
+      <label for="free" class="form-check-label">Free</label>
     </div>
-    <div>
-      <input type="radio" name="subscription" value="premium" id="premium"
+    <div class="form-check">
+      <input type="radio" name="subscription" value="premium" id="premium" class="form-check-input"
              [(ngModel)]="user.subscription"
              required [appInList]="['free', 'premium']" />
-      <label for="premium">Premium</label>
+      <label for="premium" class="form-check-label">Premium</label>
     </div>
     @if (subscription.invalid && subscription.touched) {
-      <p>Choose a Subscription</p>
+      <!-- d-block: the message isn't right after an .is-invalid input, so force it visible -->
+      <div class="invalid-feedback d-block">Choose a Subscription</div>
     }
   </div>
 
   <!-- TERMS: "required" on a checkbox means it must be checked -->
-  <div>
-    <input type="checkbox" name="agreeToTerms" id="agreeToTerms"
+  <div class="mb-3 form-check">
+    <input type="checkbox" name="agreeToTerms" id="agreeToTerms" class="form-check-input"
            [(ngModel)]="user.agreeToTerms" #agreeToTerms="ngModel"
            required />
-    <label for="agreeToTerms">I agree to the terms</label>
+    <label for="agreeToTerms" class="form-check-label">I agree to the terms</label>
     @if (agreeToTerms.invalid && agreeToTerms.touched) {
-      <p>You need to agree to the terms</p>
+      <div class="invalid-feedback d-block">You need to agree to the terms</div>
     }
   </div>
 
-  <button type="submit" [disabled]="form.invalid || loading()">
+  <button class="btn btn-primary" type="submit" [disabled]="form.invalid || loading()">
     @if (!loading()) {
       Register
     } @else {
@@ -124,11 +129,11 @@
 ```ts template-form.component.ts
 import { Component, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { GenderEnum } from '../../../core/enums/gender.enum';
-import { StrongPasswordDirective } from '../../../core/validators/template-form/strong-password.directive';
-import { BirthdateDirective } from '../../../core/validators/template-form/birthday.directive';
-import { InEnumDirective } from '../../../core/validators/template-form/in-enum.directive';
-import { InListDirective } from '../../../core/validators/template-form/in-list.directive';
+import { StrongPasswordDirective } from '@core/validators/template-form/strong-password.directive';
+import { BirthdateDirective } from '@core/validators/template-form/birthday.directive';
+import { InEnumDirective } from '@core/validators/template-form/in-enum.directive';
+import { InListDirective } from '@core/validators/template-form/in-list.directive';
+import { GenderEnum } from '@core/enums/gender.enum';
 
 @Component({
   imports: [
@@ -140,7 +145,6 @@ import { InListDirective } from '../../../core/validators/template-form/in-list.
   ],
   selector: 'app-template-form',
   templateUrl: './template-form.component.html',
-  styleUrl: './template-form.component.css',
 })
 export class TemplateFormComponent {
   loading = signal<boolean>(false);
@@ -157,8 +161,6 @@ export class TemplateFormComponent {
     agreeToTerms: false,
   };
 
-  protected readonly GenderEnum = GenderEnum;
-
   onSubmit(form: NgForm) {
     // Show the error messages on every field
     form.control.markAllAsTouched();
@@ -171,12 +173,7 @@ export class TemplateFormComponent {
     // Call your service here
     console.log(this.user);
   }
-}
-```
 
-```css template-form.component.css
-/* A red border on invalid fields */
-.invalid {
-  border: 1px solid red;
+  protected readonly GenderEnum = GenderEnum;
 }
 ```

@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { CodeSnippetComponent } from '../../../../../../angular-22-cheat-sheet/src/app/shared/code-snippet/code-snippet.component';
+import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import { CounterComponent } from './counter/counter.component';
 import { GreetingComponent } from './greeting/greeting.component';
 import { LoginFormComponent } from './login-form/login-form.component';
