@@ -17,7 +17,9 @@ export class AuthService {
   }
 
   login(request: LoginRequest) {
-    this._http.get<UserEntity>(`${this._url}`, request);
+    const res =this._http.get<UserEntity>(`${this._url}`, request.email);
+    if (res.password !== request.password) throw new Error('bad credentials');
+    return res;
   }
 
   logout() {}
