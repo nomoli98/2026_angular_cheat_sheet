@@ -1,0 +1,17 @@
+/* Masonry layout: the cards flow down the 1st column, then the 2nd,
+   so a short card never leaves an empty space next to a tall one. */
+.index-columns {
+  column-count: 1;
+  column-gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .index-columns {
+    column-count: 2; /* md and up, like the old col-md-6 */
+  }
+}
+
+/* never cut a card in two between the columns */
+.index-columns .card {
+  break-inside: avoid;
+}

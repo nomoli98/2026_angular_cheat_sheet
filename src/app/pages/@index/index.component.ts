@@ -5,5 +5,6 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink],
   selector: 'app-index',
   templateUrl: './index.component.html',
+  styleUrl: './index.component.css',
 })
 export class IndexComponent {}

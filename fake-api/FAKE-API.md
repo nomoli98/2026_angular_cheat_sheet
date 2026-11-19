@@ -464,14 +464,21 @@ Run them in two terminals instead: `npm run api` + `npm start`. Or hide the API'
 
 ### `EADDRINUSE: address already in use :::3000`
 
-Something already uses port 3000 (often an old json-server that didn't stop). Close the other terminal, or kill it:
+Something already uses port 3000 (often an old json-server that didn't stop, or the one Playwright started). Close the other terminal, or stop it:
+
+```powershell
+# PowerShell: see who it is (usually "node")
+Get-NetTCPConnection -LocalPort 3000 -State Listen | ForEach-Object { Get-Process -Id $_.OwningProcess }
+# ...and stop it
+Get-NetTCPConnection -LocalPort 3000 -State Listen | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+```
 
 ```bash
-# PowerShell
-Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Process
 # Mac / Linux
 kill $(lsof -t -i:3000)
 ```
+
+> ⚠️ Keep `-State Listen`. Without it you also get closing connections, shown as process **`Idle` (Id 0)**: that's not a real program, and `Stop-Process` fails on it.
 
 Or use another port: `--port 3001` (and change `apiUrl` in both `src/environments/` files).
 
