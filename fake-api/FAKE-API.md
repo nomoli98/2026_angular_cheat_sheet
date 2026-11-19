@@ -4,12 +4,12 @@
 
 A fake backend that runs on `http://localhost:3000` so you can practise **services**, `HttpClient` and **CRUD** without writing a real server.
 The data is a list of people shaped like `UserEntity` (`src/app/core/entities/user.entity.ts`), **password included**, exactly as stored in `db.json`.
-The service removes the password and gives a `UserResponse`. Components get it through a **controller** (signals, see `core/controllers/CONTROLLER.md`).
+The service removes the password and gives a `UserResponse`. The **controller** checks the logged-in user's role before calling the service (see `core/controllers/CONTROLLER.md`).
 
 ```
-Component ◀─signals─ UserController ◀─UserResponse─ UserService ◀─UserEntity─ json-server (localhost:3000) ◀──▶ fake-api/db.json
-                     (subscribes, keeps     (removes the password)    (sends everything, password too)
-                      loading / error)
+Component ─▶ UserController ─▶ UserService ─▶ json-server (localhost:3000) ◀──▶ fake-api/db.json
+             (allowed? role)    (UserEntity → UserResponse,   (sends everything, password too)
+                                 removes the password)
 ```
 
 ---
@@ -162,7 +162,8 @@ One person in `db.json`:
   "height": 195,
   "gender": "male",
   "subscription": "premium",
-  "agreeToTerms": true
+  "agreeToTerms": true,
+  "role": "admin"
 }
 ```
 
@@ -184,6 +185,7 @@ RegisterRequest ──POST/PUT──▶  UserEntity  ──(remove password)─�
 // The person EXACTLY as json-server stores and returns it. Only the service uses this.
 import { GenderEnum } from '@core/enums/gender.enum';
 import { SubscriptionEnum } from '@core/enums/subscription.enum';
+import { RoleEnum } from '@core/enums/role.enum';
 
 export interface UserEntity {
   id: number; // json-server gives every person an id
@@ -195,6 +197,7 @@ export interface UserEntity {
   gender: GenderEnum;
   subscription: SubscriptionEnum;
   agreeToTerms: boolean;
+  role: RoleEnum;             // 'admin' | 'user', see core/controllers/CONTROLLER.md
 }
 ```
 
@@ -203,6 +206,7 @@ export interface UserEntity {
 // What the service gives to components: the entity WITHOUT the password.
 import { GenderEnum } from '@core/enums/gender.enum';
 import { SubscriptionEnum } from '@core/enums/subscription.enum';
+import { RoleEnum } from '@core/enums/role.enum';
 
 export interface UserResponse {
   id: number;
@@ -212,6 +216,7 @@ export interface UserResponse {
   height: number;
   gender: GenderEnum;
   subscription: SubscriptionEnum;
+  role: RoleEnum;
 }
 ```
 
@@ -227,6 +232,7 @@ export function UserMapper(user: UserEntity): UserResponse {
     height: user.height,
     gender: user.gender,
     subscription: user.subscription,
+    role: user.role,
   };
 }
 ```
@@ -251,6 +257,8 @@ export interface RegisterRequest {
 
 > 💡 Every person has a password of the form `<FirstName>IsTheBest99#` (`BobIsTheBest99#`, `AliceIsTheBest99#`...), so it passes the strong-password validator. json-server sends the `password` back in every answer, that's why `UserEntity` has it and the service has to remove it. A real API would never send it back at all.
 
+> 💡 **Roles:** Bob is `"admin"`, everybody else is `"user"`. New accounts are always `"user"`: `UserService.create` adds `role: RoleEnum.USER` to the request (`RegisterRequest` has no role, a user can't choose to be admin).
+
 > ⚠️ `"gender"` in `db.json` must be the **values** of `GenderEnum` (`'male'`, `'female'`, `'other'`), not the keys (`MALE`...). If you edit the JSON by hand, keep them lowercase.
 
 ---
@@ -265,8 +273,8 @@ What **json-server** returns (the service then turns every `UserEntity` into a `
 | ------ | ------ | --- | ---- | ----------- |
 | **Read** all | `GET` | `/people` | – | `UserEntity[]` |
 | **Read** one | `GET` | `/people/1` | – | `UserEntity` (or `404`) |
-| **Create** | `POST` | `/people` | `RegisterRequest` (no id) | the new `UserEntity` with its `id` |
-| **Update** (replace everything) | `PUT` | `/people/1` | full `RegisterRequest` | updated `UserEntity` |
+| **Create** | `POST` | `/people` | `RegisterRequest` (no id) + `role: 'user'` | the new `UserEntity` with its `id` |
+| **Update** (replace everything) | `PUT` | `/people/1` | full `RegisterRequest` + the current `role` | updated `UserEntity` |
 | **Update** (only some fields) | `PATCH` | `/people/1` | `Partial<RegisterRequest>` e.g. `{ "subscription": "premium" }` | updated `UserEntity` |
 | **Delete** | `DELETE` | `/people/1` | – | `{}` |
 | **Log in** (fake) | `GET` | `/people?email=bob@email.bob` | – | `[UserEntity]` if the email exists, `[]` if not. The **service** then checks the password. |
@@ -278,7 +286,7 @@ What **json-server** returns (the service then turns every `UserEntity` into a `
 - **Checks before writing** (in the services):
   - `AuthService.register()` → `emailExists` first, errors with `email already taken` instead of creating a duplicate.
   - `UserService.updateFully` / `updatePartial` / `delete` → `exists(id)` first, errors with `user not found` and sends nothing.
-- `PUT` → fields you don't send are **deleted**. Use `PATCH` to change only one field.
+- `PUT` → fields you don't send are **deleted**. Use `PATCH` to change only one field. That's why `updateFully` reads the user first and sends their `role` back.
 - Body requests need the header `Content-Type: application/json` (`HttpClient` adds it for you).
 - **Log in:** json-server has no login, so `AuthService.login()` does it in 2 steps:
   1. asks json-server for the person with that email: `GET /people?email=...` → `[user]` or `[]`,
@@ -382,9 +390,9 @@ Import it from the file that is always there, `environment.ts`. Angular swaps it
 | `core/services/auth.service.ts` | `register` (refuses a taken email, then `UserService.create`), `login`, `logout`, `currentUser` signal |
 | `core/validators/reactive-form/email-taken.validator.ts` | async validator: `emailExists` while the user types (see `REACTIVE_FORM.md`) |
 | `core/mapper/user.mapper.ts` | `UserMapper(entity)` → `UserResponse` (removes the password). A plain function: call it, don't `inject()` it |
-| `core/controllers/*.controller.ts` | the layer **components** use: they subscribe to the services and keep the results in signals (see `core/controllers/CONTROLLER.md`) |
+| `core/controllers/*.controller.ts` | what **components** call: check the logged-in user's role, then call the service and return a **Promise** (`firstValueFrom`), or throw `unauthorized` / `forbidden` (see `core/controllers/CONTROLLER.md`) |
 
-All methods return **Observables**: nothing is sent until you `.subscribe()` (or `firstValueFrom()` / `toSignal()`).
+All **service** methods return **Observables**: nothing is sent until you `.subscribe()` (or `firstValueFrom()` / `toSignal()`). The **controllers** return Promises: `await controller.getAll()`.
 
 How a boolean + a check chain together (`switchMap` = "when the first answer arrives, start the second request"):
 
@@ -414,7 +422,7 @@ curl http://localhost:3000/people/1
 
 curl -X POST http://localhost:3000/people \
   -H "Content-Type: application/json" \
-  -d '{"name":"New Guy","email":"new@mail.com","password":"NewGuyIsTheBest99#","birthdate":"2000-01-01","height":170,"gender":"other","subscription":"free","agreeToTerms":true}'
+  -d '{"name":"New Guy","email":"new@mail.com","password":"NewGuyIsTheBest99#","birthdate":"2000-01-01","height":170,"gender":"other","subscription":"free","agreeToTerms":true,"role":"user"}'
 
 curl -X PATCH http://localhost:3000/people/1 \
   -H "Content-Type: application/json" \

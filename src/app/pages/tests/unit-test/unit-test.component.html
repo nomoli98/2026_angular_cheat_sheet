@@ -41,10 +41,10 @@
 </section>
 
 <section class="card card-body mb-3">
-  <h3>4. A form (+ a fake controller)</h3>
+  <h3>4. A form (+ a fake service)</h3>
   <p>
-    Type in the fields, check validation, submit. The form talks to <code>AuthController</code>. The first half uses the
-    real controller and service with a fake backend, the second half replaces <code>AuthController</code> with a fake (a "mock"). Run <code>npm run dev</code> and try <code>bob&#64;email.bob</code> / <code>BobIsTheBest99#</code>.
+    Type in the fields, check validation, submit. The first half uses the real <code>AuthService</code> with a fake
+    backend, the second half replaces <code>AuthService</code> with a fake (a "mock"). Run <code>npm run dev</code> and try <code>bob&#64;email.bob</code> / <code>BobIsTheBest99#</code>.
   </p>
   <div class="border rounded p-3 mb-3">
     <app-login-form />

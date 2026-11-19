@@ -1,385 +1,328 @@
-# Controllers: state between the components and the services
+# Controllers: check the permission, then call the service
 
-> 📖 **Official docs:** [Signals](https://angular.dev/guide/signals) · [Services and DI](https://angular.dev/guide/di) · [RxJS `finalize`](https://rxjs.dev/api/operators/finalize)
+> 📖 **Official docs:** [Services and DI](https://angular.dev/guide/di) · [RxJS `firstValueFrom`](https://rxjs.dev/api/index/function/firstValueFrom) · [MDN `async` / `await`](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS/Promises)
 
-A **controller** is a service that sits between the components and the HTTP services. It calls the service, **subscribes**, and keeps the result in **signals** (the data, `loading`, `error`). The component only reads signals and calls methods.
+A **controller** works like a backend controller: it **checks** that the logged-in user is allowed to do the action, then **calls the service**. It returns a **Promise**, not an Observable, so the component just writes `await controller.getAll()`.
 
 ```
-Component ──calls──▶ Controller ──calls──▶ Service ──HTTP──▶ json-server
-    ▲                   │  subscribes,           returns
-    └──reads signals────┘  fills signals         Observables
+Component ──await──▶ Controller ──allowed?──▶ Service ──HTTP──▶ json-server
+                        │          firstValueFrom(Observable) → Promise
+                        │
+                        └── not allowed → throw ('unauthorized' / 'forbidden')
+                                          the service is NOT called, nothing is sent
 ```
 
-| Layer | Knows about | Returns | Example |
-| ----- | ----------- | ------- | ------- |
-| **Service** (`core/services/`) | HTTP, URLs, `UserEntity`, the mapper | `Observable<...>` | `UserService.getAll()` |
-| **Controller** (`core/controllers/`) | the services, the state, error messages | `void` (results go in signals) | `UserController.loadAll()` → `users()` |
-| **Component** | the controller, the HTML | – | `@for (user of users.users(); ...)` |
+| Layer | Job | Returns |
+| ----- | --- | ------- |
+| **Service** (`core/services/`) | HTTP, URLs, `UserEntity` → `UserResponse` | `Observable<...>` |
+| **Controller** (`core/controllers/`) | "is the logged-in user allowed?" + Observable → Promise | `Promise<...>` |
+| **Component** | the form / the page | – (it `await`s) |
 
-Why a controller layer?
-- **No `subscribe` in components**: no forgotten subscribe, no repeated `loading.set(true)` / `error` code in every component.
-- **One place for the state**: the list of users is in `UserController.users()`, every component sees the same list.
-- **Readable errors**: `'bad credentials'` becomes `'Wrong email or password'` in one place.
+> ⚠️ This is a **front-end** check: it hides what the user can't do and avoids useless requests. It is **not** security, anyone can call json-server with curl. A real API must check the permissions again on the server.
 
 ---
 
 ## 1. Files
 
 ```
-src/app/core/controllers/
-├── auth.controller.ts       ← login, register, logout + currentUser, loading, error
-├── user.controller.ts       ← list / one / create / update / delete + users, selected, loading, error
-├── error-message.ts         ← any error → a text for the user
-├── auth.controller.spec.ts
-├── user.controller.spec.ts
-└── CONTROLLER.md            ← this file
+src/app/core/
+├── enums/role.enum.ts            ← RoleEnum.ADMIN = 'admin', RoleEnum.USER = 'user'
+└── controllers/
+    ├── permissions.ts            ← isLoggedIn(), isAdmin(), isAdminOrSelf(), deny()
+    ├── auth.controller.ts        ← login, register (public), logout (logged in)
+    ├── user.controller.ts        ← getAll, getOne, create, updateFully, updatePartial, delete
+    ├── auth.controller.spec.ts
+    ├── user.controller.spec.ts
+    └── CONTROLLER.md             ← this file
 ```
 
 ---
 
-## 2. Write a controller, step by step
+## 2. The role
 
-### 2.1 A `@Service()` that injects the service
+Every person has a `role` (in `UserEntity`, `UserResponse` and `db.json`):
 
 ```ts
-import { computed, inject, Service, signal } from '@angular/core';
-import { finalize, Observable } from 'rxjs';
-import { UserService } from '@core/services/user.service';
+// src/app/core/enums/role.enum.ts
+export enum RoleEnum {
+  ADMIN = 'admin',
+  USER = 'user',
+}
+```
 
-@Service() // one instance for the whole app (like providedIn: 'root')
+| Who | Role |
+| --- | ---- |
+| Bob (`bob@email.bob` / `BobIsTheBest99#`) | `admin` |
+| everybody else in `db.seed.json` | `user` |
+| every new account (`UserService.create`) | `user`, always: the service adds `role: RoleEnum.USER` |
+
+> 💡 `UserService.updateFully` (PUT) keeps the current role: PUT replaces the whole object and `RegisterRequest` has no `role`, so without that the role would be deleted.
+
+---
+
+## 3. Write a controller, step by step
+
+### 3.1 The permission helpers (`permissions.ts`)
+
+```ts
+export function isLoggedIn(user: UserResponse | null): user is UserResponse {
+  return user !== null;
+}
+
+export function isAdmin(user: UserResponse | null): boolean {
+  return user?.role === RoleEnum.ADMIN;
+}
+
+// Admin, or the user working on their OWN account
+export function isAdminOrSelf(user: UserResponse | null, id: number): boolean {
+  return isAdmin(user) || user?.id === id;
+}
+
+// Throws the right error when the check fails
+export function deny(user: UserResponse | null): never {
+  throw new Error(user ? 'forbidden' : 'unauthorized');
+}
+```
+
+| Error | When | Same as HTTP |
+| ----- | ---- | ------------ |
+| `unauthorized` | nobody is logged in | `401 Unauthorized` |
+| `forbidden` | logged in, but not allowed | `403 Forbidden` |
+
+> 💡 `never` = "this function never returns normally" (it always throws). TypeScript then knows the code after `if (...) deny(user);` only runs when the check passed.
+
+### 3.2 The controller: check, then call
+
+```ts
+@Service()
 export class UserController {
   private readonly _userService = inject(UserService);
+  private readonly _authService = inject(AuthService);
+
+  // admin only
+  async getAll(): Promise<UserResponse[]> {
+    const user = this._authService.currentUser();         // 1. who is asking?
+    if (!isAdmin(user)) deny(user);                       // 2. not allowed → throw
+    return firstValueFrom(this._userService.getAll());    // 3. allowed → Observable → Promise
+  }
+
+  // admin, or yourself
+  async delete(id: number): Promise<void> {
+    const user = this._authService.currentUser();
+    if (!isAdminOrSelf(user, id)) deny(user);
+    await firstValueFrom(this._userService.delete(id), { defaultValue: undefined });
+  }
 }
 ```
 
-### 2.2 The state: private writable signals, public read-only ones
+- The controller reads the logged-in user **itself** (`AuthService.currentUser()`), the component passes nothing.
+- `async` in front of the method: it **always** returns a Promise, even when it throws.
+
+### 3.3 `firstValueFrom`: Observable → Promise
 
 ```ts
-private readonly _users = signal<UserResponse[]>([]);
-private readonly _loading = signal(false);
-private readonly _error = signal<string | null>(null);
+import { firstValueFrom } from 'rxjs';
 
-readonly users = this._users.asReadonly();      // components can READ, not .set()
-readonly loading = this._loading.asReadonly();
-readonly error = this._error.asReadonly();
-readonly count = computed(() => this._users().length); // derived value
+const users = await firstValueFrom(this._userService.getAll());
 ```
 
-> 💡 `asReadonly()`: only the controller can change the state. A component calling `users.set([])` would not compile.
+| | |
+| - | - |
+| What it does | subscribes, waits for the **first** value, gives it back as a Promise |
+| The Observable errors | the Promise is **rejected** with the same error (→ `catch`) |
+| The Observable ends with no value | rejected with `EmptyError`, unless you give `{ defaultValue: ... }` (that's why `delete` has `{ defaultValue: undefined }`) |
+| HTTP Observables | send **one** value then end, so `firstValueFrom` is a perfect fit |
 
-### 2.3 The actions: call, subscribe, fill the signals
+> ⚠️ Not for Observables that keep sending values (a timer, a signal turned into an Observable...): you'd only get the first one. Use `subscribe` for those.
 
-Every action does the same 4 steps, so they're in one helper:
+### 3.4 Why a plain `throw` is fine here
 
-```ts
-private _run<T>(request: Observable<T>, onSuccess: (value: T) => void): void {
-  this._loading.set(true);                               // 1. loading on
-  this._error.set(null);                                 // 2. old error off
-  request.pipe(finalize(() => this._loading.set(false))) // 4. loading off (success OR error)
-    .subscribe({
-      next: onSuccess,                                   // 3a. put the result in a signal
-      error: (err) => this._error.set(errorMessage(err)),// 3b. or a readable error
-    });
-}
-
-loadAll(): void {
-  this._run(this._userService.getAll(), (users) => this._users.set(users));
-}
-```
-
-| Piece | Why |
-| ----- | --- |
-| `finalize(...)` | runs when the Observable **ends**, after a success **or** an error. Without it, an error leaves `loading` stuck on `true` |
-| `errorMessage(err)` | see section 5 |
-| returns `void` | the result is in a signal, not returned |
-
-### 2.4 After a write: update the list locally
-
-No need to call `loadAll()` again after a create/update/delete: the service already returns the new user, so update the signal with `.update()`:
+Inside an `async` method, `throw` doesn't crash anything: it turns into a **rejected Promise**, and the component's `try/catch` gets it, exactly like an HTTP error.
 
 ```ts
-create(request: RegisterRequest, onSuccess?: () => void): void {
-  this._run(this._userService.create(request), (user) => {
-    this._users.update((users) => [...users, user]);          // add
-    onSuccess?.();
-  });
-}
-
-updatePartial(id: number, changes: Partial<RegisterRequest>, onSuccess?: () => void): void {
-  this._run(this._userService.updatePartial(id, changes), (user) => {
-    this._users.update((users) => users.map((u) => (u.id === user.id ? user : u))); // replace
-    onSuccess?.();
-  });
-}
-
-delete(id: number, onSuccess?: () => void): void {
-  this._run(this._userService.delete(id), () => {
-    this._users.update((users) => users.filter((u) => u.id !== id)); // remove
-    onSuccess?.();
-  });
-}
-```
-
-> ⚠️ Always give `.update()` a **new** array (`[...users, user]`, `.map`, `.filter`). `users.push(user)` changes the same array: the signal doesn't see a change and the HTML doesn't update.
-
-### 2.5 `onSuccess`: do something after it worked
-
-The controller doesn't know about pages, so things like "go to the home page after register" are passed in by the component:
-
-```ts
-private readonly _router = inject(Router);
-
-onSubmit() {
-  this.auth.register(request, () => this._router.navigate(['/']));
+async getAll() {
+  if (!isAdmin(user)) throw new Error('forbidden'); // → rejected Promise, not a crash
+  ...
 }
 ```
 
 ---
 
-## 3. What each controller gives you
-
-### `AuthController`
-
-| Member | Type | What it is |
-| ------ | ---- | ---------- |
-| `currentUser()` | `UserResponse \| null` | the logged-in user (comes from `AuthService`) |
-| `isLoggedIn()` | `boolean` | `currentUser() !== null` |
-| `loading()` | `boolean` | a login/register is running |
-| `error()` | `string \| null` | readable error of the last call |
-| `login(request, onSuccess?)` | `void` | `AuthService.login` |
-| `register(request, onSuccess?)` | `void` | `AuthService.register` (refuses a taken email) |
-| `logout()` | `void` | empties `currentUser` and `error` |
-| `clearError()` | `void` | hides the error |
+## 4. Who can do what
 
 ### `UserController`
 
-| Member | Type | What it is |
-| ------ | ---- | ---------- |
-| `users()` | `UserResponse[]` | the list (filled by `loadAll`, kept in sync by create/update/delete) |
-| `selected()` | `UserResponse \| null` | the user loaded by `loadOne` |
-| `count()` | `number` | `users().length` |
-| `loading()` / `error()` | `boolean` / `string \| null` | same as above |
-| `loadAll()` / `loadOne(id)` | `void` | fill `users` / `selected` |
-| `create(request, onSuccess?)` | `void` | adds to `users` |
-| `updateFully(id, request, onSuccess?)` / `updatePartial(id, changes, onSuccess?)` | `void` | replaces in `users` (and `selected`) |
-| `delete(id, onSuccess?)` | `void` | removes from `users` |
-| `clearError()` | `void` | hides the error |
+| Method | Allowed | Returns |
+| ------ | ------- | ------- |
+| `getAll()` | admin | `Promise<UserResponse[]>` |
+| `getOne(id)` | admin, or yourself | `Promise<UserResponse>` |
+| `create(request)` | admin (people make their own account with `AuthController.register`) | `Promise<UserResponse>` |
+| `updateFully(id, request)` | admin, or yourself | `Promise<UserResponse>` |
+| `updatePartial(id, changes)` | admin, or yourself | `Promise<UserResponse>` |
+| `delete(id)` | admin, or yourself | `Promise<void>` |
+
+### `AuthController`
+
+| Method | Allowed | Returns |
+| ------ | ------- | ------- |
+| `login(request)` | everybody (public) | `Promise<UserResponse>` |
+| `register(request)` | everybody (public) | `Promise<UserResponse>` |
+| `logout()` | logged in | `Promise<void>` |
+
+Change a rule? Change the `if` in that method. Need a new rule (e.g. "premium only")? Add a helper in `permissions.ts`:
+
+```ts
+export function isPremium(user: UserResponse | null): boolean {
+  return user?.subscription === SubscriptionEnum.PREMIUM;
+}
+```
 
 ---
 
-## 4. Use it in a component
+## 5. Use it in a component
 
-### 4.1 The login form (`pages/tests/unit-test/login-form/`)
-
-```ts
-export class LoginFormComponent {
-  protected readonly auth = inject(AuthController);
-
-  loginForm = new FormGroup({ /* email, password */ });
-
-  onSubmit() {
-    this.auth.login(this.loginForm.getRawValue()); // no subscribe!
-  }
-
-  logout() {
-    this.auth.logout();
-    this.loginForm.reset();
-  }
-}
-```
-
-```html
-@if (auth.currentUser(); as user) {
-  <p>Welcome, {{ user.name }}!</p>
-  <button type="button" (click)="logout()">Log out</button>
-} @else {
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-    <!-- inputs -->
-    @if (auth.error(); as error) {
-      <p>{{ error }}</p>
-    }
-    <button type="submit" [disabled]="loginForm.invalid || auth.loading()">
-      {{ auth.loading() ? 'Logging in...' : 'Log in' }}
-    </button>
-  </form>
-}
-```
-
-### 4.2 A list of users
+`async` method + `await` + `try/catch`. Put the result in a **signal** so the template shows it.
 
 ```ts
 export class UserListComponent {
-  protected readonly users = inject(UserController);
+  private readonly _userController = inject(UserController);
+
+  users = signal<UserResponse[]>([]);
+  loading = signal(false);
+  error = signal<string | null>(null);
 
   constructor() {
-    this.users.loadAll(); // load once when the component is created
+    this.load(); // no await needed here: load() handles its own errors
+  }
+
+  async load() {
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      this.users.set(await this._userController.getAll());
+    } catch (err) {
+      this.error.set((err as Error).message); // 'forbidden', 'unauthorized', or an HTTP error
+    } finally {
+      this.loading.set(false); // success OR error
+    }
+  }
+
+  async delete(id: number) {
+    try {
+      await this._userController.delete(id);
+      this.users.update((users) => users.filter((u) => u.id !== id));
+    } catch (err) {
+      this.error.set((err as Error).message);
+    }
   }
 }
 ```
 
 ```html
-@if (users.loading()) {
+@if (loading()) {
   <p>Loading...</p>
 }
-@if (users.error(); as error) {
-  <p class="text-danger">{{ error }}</p>
+@if (error() === 'forbidden') {
+  <p>Only an admin can see this page.</p>
+} @else if (error() === 'unauthorized') {
+  <p>Log in first.</p>
 }
 
-<p>{{ users.count() }} people</p>
-<ul>
-  @for (user of users.users(); track user.id) {
-    <li>
-      {{ user.name }}
-      <button type="button" (click)="users.delete(user.id)">Delete</button>
-    </li>
-  }
-</ul>
-```
-
-Delete → the controller removes the user from `users()` → the `@for` updates by itself.
-
----
-
-## 5. `errorMessage()`: readable errors
-
-`core/controllers/error-message.ts` turns any error into a text:
-
-| Error | Message |
-| ----- | ------- |
-| `HttpErrorResponse` status `0` | `The server is not reachable. Is the API running?` |
-| `HttpErrorResponse` status `404` | `Not found` |
-| other `HttpErrorResponse` | `Server error (500)` |
-| `Error('bad credentials')` (from `AuthService.login`) | `Wrong email or password` |
-| `Error('email already taken')` (from `AuthService.register`) | `This email is already taken` |
-| `Error('user not found')` (from `UserService` update/delete) | `This user does not exist` |
-| any other `Error` | its `message` |
-
-A service throws a new error? Add a `case` in the `switch`.
-
----
-
-## 6. One shared instance, or one per component?
-
-`@Service()` = **one** controller for the whole app. That's what you want for `AuthController` (everyone sees the same logged-in user). But the state **stays** when you change page: an old `error()` is still there when you come back. Call `clearError()` when needed.
-
-Want a **fresh** controller for each component (e.g. two independent user lists)?
-
-```ts
-@Service({ autoProvided: false }) // not provided automatically anymore
-export class UserController { ... }
-
-@Component({
-  providers: [UserController], // 👈 a new one for this component (and its children)
-  ...
-})
-export class UserListComponent {
-  protected readonly users = inject(UserController);
+@for (user of users(); track user.id) {
+  <p>{{ user.name }} ({{ user.role }}) <button (click)="delete(user.id)">Delete</button></p>
 }
 ```
 
-It's created with the component and destroyed with it.
+> 💡 `(click)="delete(user.id)"` works with an `async` method: Angular calls it, the Promise runs on its own.
+
+> 💡 Try it: log in as Bob (admin) → the list loads. Log in as Alice (`alice.dupont@mail.com` / `AliceIsTheBest99#`) → `forbidden`.
+
+| Observable (service) | Promise (controller) |
+| -------------------- | -------------------- |
+| `service.getAll().subscribe({ next, error })` | `try { const users = await controller.getAll(); } catch (err) { }` |
+| `finalize(() => ...)` | `finally { ... }` |
+| nothing happens until `subscribe()` | starts **right away** when you call it |
 
 ---
 
-## 7. Test it
+## 6. Test it
 
-### 7.1 Test a controller: fake the service
-
-The controller doesn't do HTTP itself, so give it a fake service that answers with `of(...)` (success) or `throwError(...)` (error):
+The controller only needs two fakes: **who is logged in** (a signal in a fake `AuthService`) and **a fake service** that answers with `of(...)`.
 
 ```ts
-const fakeUserService = { getAll: vi.fn(), delete: vi.fn() /* ... */ };
+const currentUser = signal<UserResponse | null>(null);
+const fakeAuthService = { currentUser };
+const fakeUserService = { getAll: vi.fn().mockReturnValue(of([bob, alice])) /* ... */ };
 
 beforeEach(() => {
+  vi.clearAllMocks();
+  currentUser.set(null); // nobody logged in at the start of each test
   TestBed.configureTestingModule({
-    providers: [{ provide: UserService, useValue: fakeUserService }],
+    providers: [
+      { provide: AuthService, useValue: fakeAuthService },
+      { provide: UserService, useValue: fakeUserService },
+    ],
   });
   controller = TestBed.inject(UserController);
 });
 
-it('loadAll() fills the users signal', () => {
-  fakeUserService.getAll.mockReturnValue(of([bob, alice]));
+it('returns the list for an admin', async () => {
+  currentUser.set(bob); // log in as an admin
 
-  controller.loadAll();
-
-  expect(controller.users()).toEqual([bob, alice]);
+  expect(await controller.getAll()).toEqual([bob, alice]);
 });
 
-it('shows a readable error', () => {
-  fakeUserService.delete.mockReturnValue(throwError(() => new Error('user not found')));
+it('is forbidden for a simple user, and the service is NOT called', async () => {
+  currentUser.set(alice);
 
-  controller.delete(999);
-
-  expect(controller.error()).toBe('This user does not exist');
+  await expect(controller.getAll()).rejects.toThrow('forbidden');
+  expect(fakeUserService.getAll).not.toHaveBeenCalled();
 });
 ```
 
-`of(...)` answers **right away**, so no `await` is needed. To test `loading` **during** the call, use a `Subject` and answer when you want:
+| Check | How |
+| ----- | --- |
+| Allowed → the result | `expect(await controller.x()).toEqual(...)` |
+| Not allowed → the error | `await expect(controller.x()).rejects.toThrow('forbidden')` |
+| Not allowed → nothing sent | `expect(fakeService.x).not.toHaveBeenCalled()` |
 
-```ts
-const answer = new Subject<UserResponse>();
-fakeAuthService.login.mockReturnValue(answer);
+> ⚠️ Don't forget the `await` before `expect(...).rejects`: without it the test ends before the Promise, and passes even when it's wrong.
 
-controller.login({ email: 'bob@email.bob', password: 'x' });
-expect(controller.loading()).toBe(true);   // still waiting
-
-answer.next(bob);
-answer.complete();
-expect(controller.loading()).toBe(false);  // finalize ran
-```
-
-### 7.2 Test a component: fake the controller
-
-The fake only needs what the component uses. Signals for the state, `vi.fn()` for the methods:
-
-```ts
-const fakeAuth = {
-  currentUser: signal(null),
-  error: signal<string | null>(null),
-  loading: signal(false),
-  login: vi.fn(),
-  logout: vi.fn(),
-};
-
-TestBed.configureTestingModule({
-  providers: [{ provide: AuthController, useValue: fakeAuth }],
-});
-
-it('shows the error the controller gives', async () => {
-  fakeAuth.error.set('Wrong email or password'); // just set the signal
-  await fixture.whenStable();
-
-  expect(html.textContent).toContain('Wrong email or password');
-});
-```
-
-Full examples: `auth.controller.spec.ts`, `user.controller.spec.ts`, `pages/tests/unit-test/login-form/login-form.component.spec.ts`.
+Full examples: `auth.controller.spec.ts`, `user.controller.spec.ts`.
 
 ---
 
 ## 🐛 Troubleshooting
 
-### `loading()` stays `true` forever
+### I get `[object Promise]` / `Promise {<pending>}` instead of the data
 
-- The `finalize(...)` is missing → add it in the `pipe`, so it runs after an error too.
-- The Observable never ends (e.g. a `Subject` in a test without `.complete()`). HTTP Observables always end.
+You forgot `await`: `const users = controller.getAll()` gives the Promise, not the users. Write `await controller.getAll()` inside an `async` method.
 
-### The list doesn't update after create / delete
+### `'await' expressions are only allowed within async functions`
 
-You changed the array in place (`users.push(...)`, `users.splice(...)`). Give `.update()` a **new** array: `[...users, user]`, `users.filter(...)`, `users.map(...)`.
+Add `async` in front of the method: `async load() { ... }`.
 
-### Nothing happens when I call a controller method
+### `Uncaught (in promise) Error: forbidden` in the console
 
-Check the controller **subscribes** (`_run(...)` does). An Observable that nobody subscribes to sends no request. In the browser Network tab you should see the request.
+Nobody caught the rejected Promise. Put the `await` in a `try { } catch { }`.
 
-### The error shows something like `user not found` instead of a nice text
+### `EmptyError: no elements in sequence`
 
-That message has no `case` in `error-message.ts` yet. Add it.
+`firstValueFrom` got an Observable that ended without a value. Give it a default: `firstValueFrom(obs, { defaultValue: undefined })`.
 
-### An old error is still shown when I come back to a page
+### `forbidden` for Bob too
 
-The controller is shared (`@Service()`), so its state survives page changes. Call `controller.clearError()` (e.g. in the component's constructor), or give the component its own controller (section 6).
+- Bob isn't logged in **as admin**: check `db.json` has `"role": "admin"` for him. Old `db.json` from before the roles? Run `npm run api:reset`.
+- The check ran **before** the login finished. `await` the login first, then call the controller.
 
-### `NG0201: No provider found for HttpClient` in a component test
+### `unauthorized` right after a page refresh
 
-The component uses the **real** controller → real service → `HttpClient`. Either fake the controller (7.2), or add `provideHttpClient(), provideHttpClientTesting()` to the test providers.
+`currentUser` lives in memory: a refresh logs you out. Keeping the login (token, localStorage) is for the tokens cheat sheet.
+
+### A new user registered from the app is not admin
+
+Normal: `UserService.create` always sets `role: 'user'`. Make admins by editing `db.json` (or `db.seed.json` + `npm run api:reset`).
+
+### The role disappeared after a PUT
+
+`updateFully` must send the role back (it does, see section 2). If you write your own PUT, send `role` too, or use PATCH.

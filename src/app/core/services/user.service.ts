@@ -6,6 +6,7 @@ import { map, Observable, switchMap, throwError } from 'rxjs';
 import { UserMapper } from '@core/mapper/user.mapper';
 import { UserEntity } from '@core/entities/user.entity';
 import { UserResponse } from '@core/responses/user.response';
+import { RoleEnum } from '@core/enums/role.enum';
 
 @Service()
 export class UserService {
@@ -14,7 +15,10 @@ export class UserService {
   private readonly _mapper = UserMapper; // a plain function, not a service → no inject()
 
   create(request: RegisterRequest): Observable<UserResponse> {
-    return this._http.post<UserEntity>(this._url, request).pipe(map((user) => this._mapper(user)));
+    // Every new account is a simple user. Only db.json makes admins.
+    return this._http
+      .post<UserEntity>(this._url, { ...request, role: RoleEnum.USER })
+      .pipe(map((user) => this._mapper(user)));
   }
 
   getAll(): Observable<UserResponse[]> {
@@ -41,11 +45,16 @@ export class UserService {
       .pipe(map((users) => users.length > 0));
   }
 
+  // PUT replaces EVERYTHING, and RegisterRequest has no role → we keep the current one,
+  // otherwise the role would be deleted. The check request gives us the user anyway.
   updateFully(id: number, request: RegisterRequest): Observable<UserResponse> {
-    return this.ifExists(id, () =>
-      this._http
-        .put<UserEntity>(`${this._url}/${id}`, request)
-        .pipe(map((user) => this._mapper(user))),
+    return this._http.get<UserEntity[]>(this._url, { params: { id } }).pipe(
+      switchMap(([current]) =>
+        current
+          ? this._http.put<UserEntity>(`${this._url}/${id}`, { ...request, role: current.role })
+          : throwError(() => new Error('user not found')),
+      ),
+      map((user) => this._mapper(user)),
     );
   }
 
@@ -60,7 +69,6 @@ export class UserService {
   delete(id: number): Observable<void> {
     return this.ifExists(id, () => this._http.delete<void>(`${this._url}/${id}`));
   }
-
 
   private ifExists<T>(id: number, request: () => Observable<T>): Observable<T> {
     return this.exists(id).pipe(

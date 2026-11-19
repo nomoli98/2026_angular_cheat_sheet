@@ -1,0 +1,8 @@
+<button (click)="onClick()">Get All Users</button>
+
+<ul>
+  @for (u of _users(); track u.id) {
+    <li>{{ u.name }}</li>
+  }
+</ul>
+

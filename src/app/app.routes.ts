@@ -27,6 +27,10 @@ export const routes: Routes = [
     loadChildren: () => import('./pages/tests/tests.routes').then((r) => r.routes),
   },
   {
+    path: 'service',
+    loadChildren: () => import('./pages/services/service.routes').then((r) => r.routes),
+  },
+  {
     // 404: matches every URL nobody else matched. ALWAYS LAST.
     path: '**',
     loadComponent: () =>

@@ -6,6 +6,7 @@ import { UserService } from './user.service';
 import { UserEntity } from '@core/entities/user.entity';
 import { GenderEnum } from '@core/enums/gender.enum';
 import { SubscriptionEnum } from '@core/enums/subscription.enum';
+import { RoleEnum } from '@core/enums/role.enum';
 import { environment } from '@env/environment';
 
 const url = `${environment.apiUrl}/people`;
@@ -20,6 +21,7 @@ const bob: UserEntity = {
   gender: GenderEnum.MALE,
   subscription: SubscriptionEnum.PREMIUM,
   agreeToTerms: true,
+  role: RoleEnum.ADMIN,
 };
 
 describe('UserService', () => {
@@ -107,13 +109,39 @@ describe('UserService', () => {
     });
 
     it('errors and sends NO put when the user does not exist', async () => {
-      const { id: _id, ...request } = bob;
+      const { id: _id, role: _role, ...request } = bob;
       const result = firstValueFrom(service.updateFully(999, request));
 
       existsRequest(999).flush([]);
       httpTesting.expectNone(`${url}/999`);
 
       await expect(result).rejects.toThrow('user not found');
+    });
+
+    it('updateFully() keeps the current role (PUT would delete it)', async () => {
+      const { id: _id, role: _role, ...request } = bob; // a RegisterRequest has no role
+      const result = firstValueFrom(service.updateFully(1, { ...request, height: 200 }));
+
+      existsRequest(1).flush([bob]); // bob is admin
+      const req = httpTesting.expectOne(`${url}/1`);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body.role).toBe(RoleEnum.ADMIN); // 👈 still admin
+      req.flush({ ...bob, height: 200 });
+
+      expect((await result).role).toBe(RoleEnum.ADMIN);
+    });
+  });
+
+  describe('create', () => {
+    it('always creates a simple user', async () => {
+      const { id: _id, role: _role, ...request } = bob;
+      const result = firstValueFrom(service.create(request));
+
+      const req = httpTesting.expectOne(url);
+      expect(req.request.body.role).toBe(RoleEnum.USER);
+      req.flush({ ...bob, id: 11, role: RoleEnum.USER });
+
+      expect((await result).role).toBe(RoleEnum.USER);
     });
   });
 });

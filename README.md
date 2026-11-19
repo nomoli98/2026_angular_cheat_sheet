@@ -67,12 +67,12 @@ src/app/
 └── core/
     ├── requests/            what we SEND to the API (register.request.ts → RegisterRequest)
     ├── responses/           what the services give BACK to the app, no password (user.response.ts → UserResponse)
-    ├── enums/               gender.enum.ts, subscription.enum.ts
+    ├── enums/               gender.enum.ts, subscription.enum.ts, role.enum.ts
     ├── validators/          custom form validators: reactive-form/, template-form/, signal-form/
     ├── entities/            what json-server stores, password included (user.entity.ts → UserEntity)
     ├── mapper/              UserEntity → UserResponse (user.mapper.ts), removes the password
     ├── services/            HTTP calls, return Observables (auth.service.ts, user.service.ts), see fake-api/FAKE-API.md
-    └── controllers/         state in signals over the services (auth.controller.ts, user.controller.ts), see CONTROLLER.md
+    └── controllers/         check the permission (role), then call the service, return Promises (auth.controller.ts, user.controller.ts), see CONTROLLER.md
 ```
 
 ### Path aliases

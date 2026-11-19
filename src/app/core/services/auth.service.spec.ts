@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { UserEntity } from '@core/entities/user.entity';
 import { GenderEnum } from '@core/enums/gender.enum';
 import { SubscriptionEnum } from '@core/enums/subscription.enum';
+import { RoleEnum } from '@core/enums/role.enum';
 import { environment } from '@env/environment';
 
 const url = `${environment.apiUrl}/people`;
@@ -21,6 +22,7 @@ const bob: UserEntity = {
   gender: GenderEnum.MALE,
   subscription: SubscriptionEnum.PREMIUM,
   agreeToTerms: true,
+  role: RoleEnum.ADMIN,
 };
 
 describe('AuthService', () => {
@@ -86,7 +88,7 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    const { id: _id, ...newBob } = bob; // a RegisterRequest (no id)
+    const { id: _id, role: _role, ...newBob } = bob; // a RegisterRequest (no id, no role)
 
     it('creates the user when the email is free', async () => {
       const result = firstValueFrom(service.register(newBob));
@@ -97,7 +99,7 @@ describe('AuthService', () => {
         .flush([]);
       // 2. the creation: POST /people
       const req = httpTesting.expectOne((r) => r.method === 'POST' && r.url === url);
-      expect(req.request.body).toEqual(newBob);
+      expect(req.request.body).toEqual({ ...newBob, role: RoleEnum.USER }); // new accounts are users
       req.flush(bob);
 
       expect((await result).name).toBe('Bob Martin');

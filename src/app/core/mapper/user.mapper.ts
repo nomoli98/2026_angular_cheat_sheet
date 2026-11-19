@@ -10,6 +10,7 @@ export function UserMapper(user: UserEntity): UserResponse {
     height: user.height,
     gender: user.gender,
     subscription: user.subscription,
+    role: user.role,
   };
 }
 

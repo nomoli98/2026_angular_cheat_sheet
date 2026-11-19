@@ -3,11 +3,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { throwError } from 'rxjs';
 import { LoginFormComponent } from './login-form.component';
-import { AuthController } from '@core/controllers/auth.controller';
+import { AuthService } from '@core/services/auth.service';
 import { UserEntity } from '@core/entities/user.entity';
 import { GenderEnum } from '@core/enums/gender.enum';
 import { SubscriptionEnum } from '@core/enums/subscription.enum';
+import { RoleEnum } from '@core/enums/role.enum';
 import { environment } from '@env/environment';
 
 // Small helper: type a value in an <input>, like a user would
@@ -27,6 +29,7 @@ const bob: UserEntity = {
   gender: GenderEnum.MALE,
   subscription: SubscriptionEnum.PREMIUM,
   agreeToTerms: true,
+  role: RoleEnum.ADMIN,
 };
 
 describe('LoginFormComponent', () => {
@@ -38,7 +41,7 @@ describe('LoginFormComponent', () => {
   const password = () => html.querySelector('#password') as HTMLInputElement;
   const button = () => html.querySelector('button') as HTMLButtonElement;
 
-  // ── With the REAL AuthController + AuthService, but a FAKE backend ──
+  // ── With the REAL AuthService, but a FAKE backend ──────────
   // provideHttpClientTesting(): no request leaves the test.
   // HttpTestingController catches them and the TEST decides the answer.
   describe('with the real service', () => {
@@ -111,33 +114,29 @@ describe('LoginFormComponent', () => {
     });
   });
 
-  // ── With a FAKE AuthController (a "mock") ────────────────
-  // Use a fake when you only want to test the component: no service, no HTTP.
-  // The fake only needs what the component uses: signals + methods.
-  describe('with a fake controller', () => {
+  // ── With a FAKE AuthService (a "mock") ─────────────────────
+  // Use a fake when you only want to test the component, not the service.
+  describe('with a fake service', () => {
     const fakeAuth = {
       currentUser: signal(null),
-      error: signal<string | null>(null),
-      loading: signal(false),
-      login: vi.fn(),
+      // always says "wrong password": an Observable that errors right away
+      login: vi.fn().mockReturnValue(throwError(() => new Error('bad credentials'))),
       logout: vi.fn(),
     };
 
     beforeEach(async () => {
       vi.clearAllMocks(); // the spies forget the calls from the previous test
-      fakeAuth.error.set(null);
-      fakeAuth.loading.set(false);
 
       TestBed.configureTestingModule({
-        // "When the component asks for AuthController, give it fakeAuth instead"
-        providers: [{ provide: AuthController, useValue: fakeAuth }],
+        // "When the component asks for AuthService, give it fakeAuth instead"
+        providers: [{ provide: AuthService, useValue: fakeAuth }],
       });
       fixture = TestBed.createComponent(LoginFormComponent);
       html = fixture.nativeElement;
       await fixture.whenStable();
     });
 
-    it('sends the typed email and password to the controller', async () => {
+    it('sends the typed email and password to the service', async () => {
       type(email(), 'bob@email.bob');
       type(password(), '1234');
       await fixture.whenStable();
@@ -147,30 +146,24 @@ describe('LoginFormComponent', () => {
       expect(fakeAuth.login).toHaveBeenCalledWith({ email: 'bob@email.bob', password: '1234' });
     });
 
-    it('shows the error the controller gives', async () => {
-      fakeAuth.error.set('Wrong email or password'); // just set the signal
+    it('shows an error when the service says no', async () => {
+      type(email(), 'bob@email.bob');
+      type(password(), '1234');
+      await fixture.whenStable();
+
+      button().click();
       await fixture.whenStable();
 
       expect(html.textContent).toContain('Wrong email or password');
-    });
-
-    it('disables the button while loading', async () => {
-      type(email(), 'bob@email.bob');
-      type(password(), '1234');
-      fakeAuth.loading.set(true);
-      await fixture.whenStable();
-
-      expect(button().disabled).toBe(true);
-      expect(button().textContent).toContain('Logging in...');
     });
   });
 });
 ```
 
 ```ts login-form.component.ts
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthController } from '@core/controllers/auth.controller';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-login-form',
@@ -178,8 +171,9 @@ import { AuthController } from '@core/controllers/auth.controller';
   templateUrl: './login-form.component.html',
 })
 export class LoginFormComponent {
-  // The component talks to the CONTROLLER: no Observable, no subscribe here.
-  protected readonly auth = inject(AuthController);
+  protected readonly auth = inject(AuthService);
+
+  error = signal(false);
 
   loginForm = new FormGroup({
     email: new FormControl('', {
@@ -190,8 +184,12 @@ export class LoginFormComponent {
   });
 
   onSubmit() {
+    this.error.set(false);
     // getRawValue() = { email, password } = a LoginRequest
-    this.auth.login(this.loginForm.getRawValue());
+    this.auth.login(this.loginForm.getRawValue()).subscribe({
+      // next: nothing to do, the service already filled auth.currentUser()
+      error: () => this.error.set(true), // wrong email/password (or API down)
+    });
   }
 
   logout() {
@@ -217,13 +215,11 @@ export class LoginFormComponent {
       <input id="password" type="password" formControlName="password" />
     </div>
 
-    @if (auth.error(); as error) {
-      <p>{{ error }}</p>
+    @if (error()) {
+      <p>Wrong email or password</p>
     }
 
-    <button type="submit" [disabled]="loginForm.invalid || auth.loading()">
-      {{ auth.loading() ? 'Logging in...' : 'Log in' }}
-    </button>
+    <button type="submit" [disabled]="loginForm.invalid">Log in</button>
   </form>
 }
 ```

@@ -1,10 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { signal } from '@angular/core';
+import { of } from 'rxjs';
 import { UserController } from './user.controller';
 import { UserService } from '@core/services/user.service';
+import { AuthService } from '@core/services/auth.service';
 import { UserResponse } from '@core/responses/user.response';
 import { GenderEnum } from '@core/enums/gender.enum';
 import { SubscriptionEnum } from '@core/enums/subscription.enum';
+import { RoleEnum } from '@core/enums/role.enum';
 
 const bob: UserResponse = {
   id: 1,
@@ -14,86 +17,109 @@ const bob: UserResponse = {
   height: 195,
   gender: GenderEnum.MALE,
   subscription: SubscriptionEnum.PREMIUM,
+  role: RoleEnum.ADMIN,
 };
-const alice: UserResponse = { ...bob, id: 2, name: 'Alice Dupont', email: 'alice@mail.com' };
+const alice: UserResponse = {
+  ...bob,
+  id: 2,
+  name: 'Alice Dupont',
+  email: 'alice@mail.com',
+  role: RoleEnum.USER,
+};
 
 describe('UserController', () => {
   let controller: UserController;
 
-  // Fake UserService: answers right away with of(...) / throwError(...)
+  // Fake AuthService: the test decides who is logged in
+  const currentUser = signal<UserResponse | null>(null);
+  const fakeAuthService = { currentUser };
+
+  // Fake UserService: answers right away with of(...)
   const fakeUserService = {
-    getAll: vi.fn(),
-    getOne: vi.fn(),
-    create: vi.fn(),
-    updateFully: vi.fn(),
-    updatePartial: vi.fn(),
-    delete: vi.fn(),
+    getAll: vi.fn().mockReturnValue(of([bob, alice])),
+    getOne: vi.fn().mockReturnValue(of(alice)),
+    create: vi.fn().mockReturnValue(of(alice)),
+    updateFully: vi.fn().mockReturnValue(of(alice)),
+    updatePartial: vi.fn().mockReturnValue(of(alice)),
+    delete: vi.fn().mockReturnValue(of(undefined)),
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    currentUser.set(null);
     TestBed.configureTestingModule({
-      providers: [{ provide: UserService, useValue: fakeUserService }],
+      providers: [
+        { provide: AuthService, useValue: fakeAuthService },
+        { provide: UserService, useValue: fakeUserService },
+      ],
     });
     controller = TestBed.inject(UserController);
-
-    // start every test with Bob and Alice in the list
-    fakeUserService.getAll.mockReturnValue(of([bob, alice]));
-    controller.loadAll();
   });
 
-  it('loadAll() fills the users signal', () => {
-    expect(controller.users()).toEqual([bob, alice]);
-    expect(controller.count()).toBe(2);
-    expect(controller.loading()).toBe(false);
+  describe('getAll (admin only)', () => {
+    it('returns the list for an admin', async () => {
+      currentUser.set(bob);
+
+      expect(await controller.getAll()).toEqual([bob, alice]);
+    });
+
+    it('is forbidden for a simple user, and the service is NOT called', async () => {
+      currentUser.set(alice);
+
+      await expect(controller.getAll()).rejects.toThrow('forbidden');
+      expect(fakeUserService.getAll).not.toHaveBeenCalled();
+    });
+
+    it('is unauthorized when nobody is logged in', async () => {
+      await expect(controller.getAll()).rejects.toThrow('unauthorized');
+    });
   });
 
-  it('loadOne() fills selected', () => {
-    fakeUserService.getOne.mockReturnValue(of(alice));
+  describe('getOne / update / delete (admin or yourself)', () => {
+    it('a user can read their own account', async () => {
+      currentUser.set(alice);
 
-    controller.loadOne(2);
+      expect(await controller.getOne(2)).toEqual(alice);
+    });
 
-    expect(controller.selected()).toEqual(alice);
+    it("a user cannot read someone else's account", async () => {
+      currentUser.set(alice);
+
+      await expect(controller.getOne(1)).rejects.toThrow('forbidden');
+    });
+
+    it('a user can update their own account', async () => {
+      currentUser.set(alice);
+
+      await controller.updatePartial(2, { height: 170 });
+
+      expect(fakeUserService.updatePartial).toHaveBeenCalledWith(2, { height: 170 });
+    });
+
+    it('an admin can delete anybody', async () => {
+      currentUser.set(bob);
+
+      await controller.delete(2);
+
+      expect(fakeUserService.delete).toHaveBeenCalledWith(2);
+    });
+
+    it("a user cannot delete someone else's account", async () => {
+      currentUser.set(alice);
+
+      await expect(controller.delete(1)).rejects.toThrow('forbidden');
+      expect(fakeUserService.delete).not.toHaveBeenCalled();
+    });
   });
 
-  it('create() adds the new user to the list', () => {
-    const charlie = { ...bob, id: 3, name: 'Charlie' };
-    fakeUserService.create.mockReturnValue(of(charlie));
+  describe('create (admin only)', () => {
+    it('is forbidden for a simple user', async () => {
+      currentUser.set(alice);
+      const { id: _id, role: _role, ...request } = alice;
 
-    controller.create({ ...charlie, password: 'x', agreeToTerms: true });
-
-    expect(controller.users().map((u) => u.name)).toEqual([
-      'Bob Martin',
-      'Alice Dupont',
-      'Charlie',
-    ]);
-  });
-
-  it('updatePartial() replaces the user in the list', () => {
-    fakeUserService.updatePartial.mockReturnValue(of({ ...bob, height: 200 }));
-
-    controller.updatePartial(1, { height: 200 });
-
-    expect(controller.users()[0].height).toBe(200);
-    expect(controller.count()).toBe(2);
-  });
-
-  it('delete() removes the user from the list and calls onSuccess', () => {
-    fakeUserService.delete.mockReturnValue(of(undefined));
-    const onSuccess = vi.fn();
-
-    controller.delete(1, onSuccess);
-
-    expect(controller.users()).toEqual([alice]);
-    expect(onSuccess).toHaveBeenCalled();
-  });
-
-  it('keeps the list and shows an error when the user does not exist', () => {
-    fakeUserService.delete.mockReturnValue(throwError(() => new Error('user not found')));
-
-    controller.delete(999);
-
-    expect(controller.users()).toEqual([bob, alice]); // unchanged
-    expect(controller.error()).toBe('This user does not exist');
+      await expect(
+        controller.create({ ...request, password: 'x', agreeToTerms: true }),
+      ).rejects.toThrow('forbidden');
+    });
   });
 });
