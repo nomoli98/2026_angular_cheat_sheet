@@ -1,0 +1,15 @@
+<div class="snippet">
+  <div class="snippet-bar">
+    <div class="snippet-tabs">
+      @for (tab of tabs(); track tab.label; let i = $index) {
+        <button type="button" class="snippet-tab" [class.active]="activeIndex() === i" (click)="activeIndex.set(i)">
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+    <button type="button" class="snippet-copy" (click)="copy()">
+      {{ copied() ? 'Copied!' : 'Copy' }}
+    </button>
+  </div>
+  <pre><code class="hljs" [innerHTML]="active().highlighted"></code></pre>
+</div>

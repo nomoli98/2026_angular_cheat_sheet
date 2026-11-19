@@ -2,13 +2,39 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
-    "angular-22-cheat-sheet": {
+    "angular-cheat-sheet": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "none",
+          "skipTests": true,
+          "type": "component",
+          "standalone": true
+        },
+        "@schematics/angular:directive": {
+          "type": "directive"
+        },
+        "@schematics/angular:guard": {
+          "typeSeparator": "."
+        },
+        "@schematics/angular:interceptor": {
+          "typeSeparator": "."
+        },
+        "@schematics/angular:pipe": {
+          "typeSeparator": "."
+        },
+        "@schematics/angular:resolver": {
+          "typeSeparator": "."
+        },
+        "@schematics/angular:service": {
+          "type": "service"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -25,8 +51,13 @@
               }
             ],
             "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "node_modules/highlight.js/styles/github-dark.min.css",
               "src/styles.css"
-            ]
+            ],
+            "loader": {
+              ".md": "text"
+            }
           },
           "configurations": {
             "production": {
@@ -56,16 +87,19 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "angular-22-cheat-sheet:build:production"
+              "buildTarget": "angular-cheat-sheet:build:production"
             },
             "development": {
-              "buildTarget": "angular-22-cheat-sheet:build:development"
+              "buildTarget": "angular-cheat-sheet:build:development"
             }
           },
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "runnerConfig": true
+          }
         }
       }
     }

@@ -1,0 +1,117 @@
+<h2>Signal Form</h2>
+
+<!-- Bootstrap: .form-label + .form-control, .is-invalid turns the field red,
+     .invalid-feedback shows the message (only when the input before it is .is-invalid) -->
+<form action="" (submit)="onSubmit($event)" class="card card-body">
+
+  <div class="mb-3">
+    <label for="name" class="form-label">Name</label>
+    <input id="name" type="text" class="form-control" [formField]="registerForm.name"
+           [class.is-invalid]="registerForm.name().touched() && registerForm.name().invalid()">
+    @if (registerForm.name().touched()) {
+      @for (error of registerForm.name().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="email" class="form-label">Email</label>
+    <input id="email" type="email" class="form-control" [formField]="registerForm.email"
+           [class.is-invalid]="registerForm.email().touched() && registerForm.email().invalid()">
+    @if (registerForm.email().touched()) {
+      @for (error of registerForm.email().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="password" class="form-label">Password</label>
+    <input id="password" type="password" class="form-control" [formField]="registerForm.password"
+           [class.is-invalid]="registerForm.password().touched() && registerForm.password().invalid()">
+    @if (registerForm.password().touched()) {
+      @for (error of registerForm.password().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="birthdate" class="form-label">Birthdate</label>
+    <input id="birthdate" type="date" class="form-control" [formField]="registerForm.birthdate"
+           [class.is-invalid]="registerForm.birthdate().touched() && registerForm.birthdate().invalid()">
+    @if (registerForm.birthdate().touched()) {
+      @for (error of registerForm.birthdate().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="height" class="form-label">Height</label>
+    <input id="height" type="number" class="form-control" [formField]="registerForm.height"
+           [class.is-invalid]="registerForm.height().touched() && registerForm.height().invalid()">
+    @if (registerForm.height().touched()) {
+      @for (error of registerForm.height().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="gender" class="form-label">Gender</label>
+    <!-- <select> uses .form-select instead of .form-control -->
+    <select id="gender" class="form-select" [formField]="registerForm.gender"
+            [class.is-invalid]="registerForm.gender().touched() && registerForm.gender().invalid()">
+      <option value="">Choose a gender...</option>
+      <option value="{{GenderEnum.FEMALE}}">{{ GenderEnum.FEMALE }}</option>
+      <option value="{{GenderEnum.MALE}}">{{ GenderEnum.MALE }}</option>
+      <option value="{{GenderEnum.OTHER}}">{{ GenderEnum.OTHER }}</option>
+    </select>
+    @if (registerForm.gender().touched()) {
+      @for (error of registerForm.gender().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <!-- Radios and checkboxes: .form-check wrapper + .form-check-input + .form-check-label -->
+  <div class="mb-3">
+    <div class="form-check">
+      <input type="radio" value="free" id="free" class="form-check-input"
+             [formField]="registerForm.subscription"
+             (click)="toggleSubscription('free', $event)" />
+      <label for="free" class="form-check-label">Free</label>
+    </div>
+    <div class="form-check">
+      <input type="radio" value="premium" id="premium" class="form-check-input"
+             [formField]="registerForm.subscription"
+             (click)="toggleSubscription('premium', $event)" />
+      <label for="premium" class="form-check-label">Premium</label>
+    </div>
+    @if (registerForm.subscription().touched()) {
+      @for (error of registerForm.subscription().errors(); track error.kind) {
+        <!-- d-block: the message isn't right after an .is-invalid input, so force it visible -->
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3 form-check">
+    <input type="checkbox" id="agreeToTerms" class="form-check-input" [formField]="registerForm.agreeToTerms" />
+    <label for="agreeToTerms" class="form-check-label">I agree to the terms</label>
+    @if (registerForm.agreeToTerms().touched()) {
+      @for (error of registerForm.agreeToTerms().errors(); track error.kind) {
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <button type="submit" class="btn btn-primary" [disabled]="registerForm().invalid()">Submit</button>
+</form>
+
+<section class="card card-body mt-3">
+  <h3>Code</h3>
+  <app-code-snippet [code]="snippets.signalForm" />
+</section>

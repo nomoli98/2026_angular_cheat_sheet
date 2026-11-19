@@ -1,0 +1,45 @@
+<h2>Conditions</h2>
+
+<section class="card card-body mb-3">
+  <h3>&#64;If, &#64;else</h3>
+  @if (firstOption()) {
+    <p>This is the first option</p>
+  } @else if (secondOption()) {
+    <p>This is the second option</p>
+  } @else {
+    <p>This is none</p>
+  }
+
+  <div>
+    <button (click)="firstOption.set(true);secondOption.set(false)">Show first option</button>
+    <button (click)="secondOption.set(true);firstOption.set(false)">Show second option</button>
+    <button (click)="firstOption.set(false);secondOption.set(false)">Show none</button>
+  </div>
+
+  <p>You cannot show both options, because if the first &#64;if is true, that will be the one showed.</p>
+
+  <app-code-snippet [code]="snippets.ifElse" />
+</section>
+
+<section class="card card-body mb-3">
+  <h3>&#64;switch</h3>
+  @switch (switchOptions) {
+    @case ('A') {
+      <p>Show A</p>
+    }
+    @case ('B') {
+      <p>Show B</p>
+    }
+    @default {
+      <p>Show default</p>
+    }
+  }
+
+  <div>
+    <button (click)="switchOptions='A'">Show option A</button>
+    <button (click)="switchOptions='B'">Show option B</button>
+    <button (click)="switchOptions='N'">Show neither</button>
+  </div>
+
+  <app-code-snippet [code]="snippets.switch" />
+</section>

@@ -1,3 +1,35 @@
 import { Routes } from '@angular/router';
+import { IndexComponent } from '@pages/@index/index.component';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  {
+    path: '',
+    component: IndexComponent,
+  },
+  {
+    path: 'template',
+    loadChildren: () => import('./pages/template/template.routes').then((r) => r.routes),
+  },
+  {
+    path: 'form',
+    loadChildren: () => import('./pages/forms/form.routes').then((r) => r.routes),
+  },
+  {
+    path: 'router',
+    loadChildren: () => import('./pages/routers/app.routes.example').then((r) => r.routes),
+  },
+  {
+    path: 'input-output',
+    loadChildren: () => import('./pages/input-output/input-output.routes').then((r) => r.routes),
+  },
+  {
+    path: 'tests',
+    loadChildren: () => import('./pages/tests/tests.routes').then((r) => r.routes),
+  },
+  {
+    // 404: matches every URL nobody else matched. ALWAYS LAST.
+    path: '**',
+    loadComponent: () =>
+      import('./pages/routers/not-found/not-found.component').then((m) => m.NotFoundComponent),
+  },
+];

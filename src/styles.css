@@ -1,1 +1,90 @@
-/* You can add global styles to this file, and also import other style files */
+/*
+ * Global styles, loaded AFTER bootstrap.min.css (see "styles" in angular.json).
+ *
+ * The goal: keep the demo pages' HTML readable. Instead of adding
+ * class="btn btn-outline-primary" to every button, plain elements
+ * (no class attribute) get a Bootstrap look here, using Bootstrap's
+ * own CSS variables (--bs-...) so the colours stay in sync.
+ *
+ *  keeps the specificity at 0, so any real Bootstrap class
+ * you add in a template (e.g. class="btn btn-danger") still wins.
+ */
+
+body {
+  background-color: var(--bs-tertiary-bg);
+}
+
+/* ---------- Headings ---------- */
+
+/* Page title */
+main h2 {
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Section titles */
+main h3 {
+  font-size: 1.25rem;
+  color: var(--bs-primary);
+}
+
+main h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+}
+
+/* ---------- Plain buttons look like .btn .btn-outline-primary .btn-sm ---------- */
+
+main button:not([class]) {
+  padding: 0.25rem 0.75rem;
+  margin: 0 0.25rem 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--bs-primary);
+  background-color: transparent;
+  border: 1px solid var(--bs-primary);
+  border-radius: var(--bs-border-radius);
+  transition: background-color 0.15s, color 0.15s;
+}
+
+main button:not([class]):hover:not(:disabled) {
+  color: #fff;
+  background-color: var(--bs-primary);
+}
+
+main button:not([class]):disabled {
+  opacity: 0.5;
+}
+
+/* ---------- Inputs without a Bootstrap class look like .form-control .form-control-sm ---------- */
+
+main input:not(.form-control):not([type='checkbox']):not([type='radio']),
+main select:not(.form-select) {
+  padding: 0.25rem 0.5rem;
+  margin: 0 0.25rem 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+}
+
+main input:not(.form-control):not([type='checkbox']):not([type='radio']):focus,
+main select:not(.form-select):focus {
+  outline: 0;
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* ---------- Forms ---------- */
+
+main form {
+  max-width: 32rem;
+}
+
+/* .card is a flex column, which stretches direct children to full width.
+   Keep buttons/inputs placed directly in a card at their natural size. */
+main .card > :is(button, input, select, img) {
+  align-self: flex-start;
+}

@@ -1,0 +1,31 @@
+<h2>Responsive binding</h2>
+
+<section class="card card-body mb-3">
+  <h3>Conditional binding</h3>
+  <div><button [disabled]="clicked" (click)="clicked = !clicked">Click to disable</button></div>
+
+  <app-code-snippet [code]="snippets.conditionalBinding" />
+</section>
+
+<section class="card card-body mb-3">
+  <h3>Signals</h3>
+
+  <p>Useful when the values can change:</p>
+  <p>{{value()}}</p>
+  <div><button (click)="value.set('Changed value')">Change value</button></div>
+
+  <p>And can be used to change attributes and properties</p>
+  <div>
+    <input [placeholder]="inputPlaceholder()" />
+    <button [disabled]="isDisabled()">Button</button>
+  </div>
+  <p [class.underlined]="isUnderlined()">On a class</p>
+
+  <div>
+    <button (click)="inputPlaceholder.set('new placeholder')">Change placeholder</button>
+    <button (click)="isDisabled.set(!isDisabled())">Toggle button</button>
+    <button (click)="isUnderlined.set(!isUnderlined())">Toggle underline</button>
+  </div>
+
+  <app-code-snippet [code]="snippets.signals" />
+</section>

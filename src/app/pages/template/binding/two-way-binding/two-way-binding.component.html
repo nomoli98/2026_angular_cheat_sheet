@@ -1,0 +1,26 @@
+<h2>Two way binding</h2>
+
+<section class="card card-body mb-3">
+  <p>Using FormsModule and ng Model:</p>
+
+  <div><input type="text" [(ngModel)]="inputValue"></div>
+  <p>{{inputValue}}</p>
+
+  <p>No signal needed!</p>
+
+  <div class="counter">
+    <button (click)="updateCount(-1)">-</button>
+    <span>{{ modelCount() }}</span>
+    <button (click)="updateCount(+1)">+</button>
+  </div>
+
+  <p>Thought sometimes a signal would be better</p>
+
+  <div class="counter">
+    <button (click)="signalCount.set(signalCount()-1)">-</button>
+    <span> {{ signalCount() }} </span>
+    <button (click)="signalCount.set(signalCount()+1)">+</button>
+  </div>
+
+  <app-code-snippet [code]="snippets.twoWayBinding" />
+</section>

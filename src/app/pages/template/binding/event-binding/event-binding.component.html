@@ -1,0 +1,18 @@
+<h2>Event binding</h2>
+
+<section class="card card-body mb-3">
+  <h3>Native events</h3>
+  <p>Using native event (click, keyup, keydown, mouseover, onchange,... See
+    https://developer.mozilla.org/en-US/docs/Web/API/Element#events for more) we can link elements in the DOM and do
+    simple changes.</p>
+
+  <p>We can put the logic in the event ("(click) = "value.set('New value')") like here: </p>
+  <p>{{value()}}</p>
+  <div><button (click)="value.set('New value')">Change value</button></div>
+
+  <p>Or we can reference methods in the .ts file</p>
+  <p>{{pressedKey()}}</p>
+  <div><input (keyup)="showPressedKey($event)"/></div>
+
+  <app-code-snippet [code]="snippets.nativeEvents" />
+</section>
