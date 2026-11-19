@@ -1,14 +1,34 @@
 ```ts login-form.component.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { throwError } from 'rxjs';
 import { LoginFormComponent } from './login-form.component';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthService } from '@core/services/auth.service';
+import { UserEntity } from '@core/entities/user.entity';
+import { GenderEnum } from '@core/enums/gender.enum';
+import { SubscriptionEnum } from '@core/enums/subscription.enum';
+import { environment } from '@env/environment';
 
 // Small helper: type a value in an <input>, like a user would
 function type(input: HTMLInputElement, value: string) {
   input.value = value;
   input.dispatchEvent(new Event('input')); // tells the form "the value changed"
 }
+
+// What the fake API would send back for Bob
+const bob: UserEntity = {
+  id: 1,
+  name: 'Bob Martin',
+  email: 'bob@email.bob',
+  password: 'BobIsTheBest99#',
+  birthdate: '2000-09-22',
+  height: 195,
+  gender: GenderEnum.MALE,
+  subscription: SubscriptionEnum.PREMIUM,
+  agreeToTerms: true,
+};
 
 describe('LoginFormComponent', () => {
   let fixture: ComponentFixture<LoginFormComponent>;
@@ -19,13 +39,41 @@ describe('LoginFormComponent', () => {
   const password = () => html.querySelector('#password') as HTMLInputElement;
   const button = () => html.querySelector('button') as HTMLButtonElement;
 
-  // ── With the REAL AuthService ─────────────────────────────
+  // ── With the REAL AuthService, but a FAKE backend ──────────
+  // provideHttpClientTesting(): no request leaves the test.
+  // HttpTestingController catches them and the TEST decides the answer.
   describe('with the real service', () => {
+    let httpTesting: HttpTestingController;
+
     beforeEach(async () => {
+      TestBed.configureTestingModule({
+        providers: [provideHttpClient(), provideHttpClientTesting()],
+      });
+      httpTesting = TestBed.inject(HttpTestingController);
       fixture = TestBed.createComponent(LoginFormComponent);
       html = fixture.nativeElement;
       await fixture.whenStable();
     });
+
+    afterEach(() => {
+      httpTesting.verify(); // fails if a request was sent but never answered
+    });
+
+    // Fill the form, click, and answer the GET /people?email=... request
+    async function loginAs(typedEmail: string, typedPassword: string, apiAnswer: UserEntity[]) {
+      type(email(), typedEmail);
+      type(password(), typedPassword);
+      await fixture.whenStable();
+
+      button().click();
+
+      const req = httpTesting.expectOne(
+        (r) => r.url === `${environment.apiUrl}/people` && r.params.get('email') === typedEmail,
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(apiAnswer); // 👈 the "server" answers
+      await fixture.whenStable();
+    }
 
     it('disables the button when the form is empty', () => {
       expect(button().disabled).toBe(true);
@@ -46,24 +94,31 @@ describe('LoginFormComponent', () => {
     });
 
     it('shows the welcome message after a good login', async () => {
-      type(email(), 'bob@email.bob');
-      type(password(), 'BobIsTheBest99#');
-      await fixture.whenStable();
+      await loginAs('bob@email.bob', 'BobIsTheBest99#', [bob]);
 
-      button().click();
-      await fixture.whenStable();
+      expect(html.textContent).toContain('Welcome, Bob Martin!');
+    });
 
-      expect(html.textContent).toContain('Welcome, Bob!');
+    it('shows an error with a wrong password', async () => {
+      await loginAs('bob@email.bob', 'wrong', [bob]);
+
+      expect(html.textContent).toContain('Wrong email or password');
+    });
+
+    it('shows an error with an unknown email', async () => {
+      await loginAs('nobody@mail.com', 'whatever', []); // json-server found nobody
+
+      expect(html.textContent).toContain('Wrong email or password');
     });
   });
 
   // ── With a FAKE AuthService (a "mock") ─────────────────────
-  // Use a fake when you only want to test the component, not the service
-  // (e.g. a real service would call a server).
+  // Use a fake when you only want to test the component, not the service.
   describe('with a fake service', () => {
     const fakeAuth = {
       currentUser: signal(null),
-      login: vi.fn().mockReturnValue(false), // always says "wrong password"
+      // always says "wrong password": an Observable that errors right away
+      login: vi.fn().mockReturnValue(throwError(() => new Error('bad credentials'))),
       logout: vi.fn(),
     };
 
@@ -86,7 +141,7 @@ describe('LoginFormComponent', () => {
 
       button().click();
 
-      expect(fakeAuth.login).toHaveBeenCalledWith('bob@email.bob', '1234');
+      expect(fakeAuth.login).toHaveBeenCalledWith({ email: 'bob@email.bob', password: '1234' });
     });
 
     it('shows an error when the service says no', async () => {
@@ -106,7 +161,7 @@ describe('LoginFormComponent', () => {
 ```ts login-form.component.ts
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-login-form',
@@ -119,14 +174,20 @@ export class LoginFormComponent {
   error = signal(false);
 
   loginForm = new FormGroup({
-    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
     password: new FormControl('', { nonNullable: true, validators: Validators.required }),
   });
 
   onSubmit() {
-    const { email, password } = this.loginForm.getRawValue();
-    const ok = this.auth.login(email, password);
-    this.error.set(!ok);
+    this.error.set(false);
+    // getRawValue() = { email, password } = a LoginRequest
+    this.auth.login(this.loginForm.getRawValue()).subscribe({
+      // next: nothing to do, the service already filled auth.currentUser()
+      error: () => this.error.set(true), // wrong email/password (or API down)
+    });
   }
 
   logout() {

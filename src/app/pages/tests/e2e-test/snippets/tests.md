@@ -17,8 +17,8 @@ test('Bob can log in and log out', async ({ page }) => {
   await page.getByRole('button', { name: 'Log in' }).click();
 
   // exact: true → only the element whose WHOLE text is this
-  // (the code snippet on the page also contains 'Welcome, Bob!')
-  await expect(page.getByText('Welcome, Bob!', { exact: true })).toBeVisible();
+  // (the code snippet on the page also contains 'Welcome, Bob Martin!')
+  await expect(page.getByText('Welcome, Bob Martin!', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Log out' }).click();
 

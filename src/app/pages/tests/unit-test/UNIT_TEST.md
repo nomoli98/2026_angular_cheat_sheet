@@ -70,6 +70,9 @@ describe('CounterComponent', () => {   // a group of tests (usually: one per fil
 | Create a spy (fake function) | `const spy = vi.fn();` |
 | Get a service | `service = TestBed.inject(AuthService);` |
 | Replace a service with a fake | `TestBed.configureTestingModule({ providers: [{ provide: AuthService, useValue: fake }] });` |
+| Fake the backend (no server) | `providers: [provideHttpClient(), provideHttpClientTesting()]` |
+| Answer an HTTP request | `TestBed.inject(HttpTestingController).expectOne(url).flush(data);` |
+| Wait for an Observable in a test | `const value = await firstValueFrom(service.getAll());` |
 
 ---
 
@@ -181,38 +184,80 @@ it('emits a message when the button is clicked', () => {
 
 ---
 
-## 5. A service
+## 5. A service (that calls an API)
 
 A service has no HTML, so no fixture. Ask Angular for it with `TestBed.inject()` and call its methods.
 
+`AuthService` calls the fake API (`GET /people?email=...`). In a unit test you **don't** want a real server, so:
+
+| Provider | What it does |
+|---|---|
+| `provideHttpClient()` | the normal `HttpClient` |
+| `provideHttpClientTesting()` | catches every request: **nothing leaves the test** |
+| `HttpTestingController` | lets the test find a request and **answer it** |
+
 ```ts
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
+  let httpTesting: HttpTestingController;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],   // 👈 fake backend
+    });
     service = TestBed.inject(AuthService);   // like inject(AuthService) in a component
+    httpTesting = TestBed.inject(HttpTestingController);
   });
 
-  it('logs in with the right email and password', () => {
-    const result = service.login('bob@email.bob', 'BobIsTheBest99#');
-
-    expect(result).toBe(true);
-    expect(service.currentUser()?.name).toBe('Bob');
+  afterEach(() => {
+    httpTesting.verify();   // fails if a request was sent but never answered
   });
 
-  it('refuses a wrong password', () => {
-    expect(service.login('bob@email.bob', 'wrong')).toBe(false);
+  it('logs in with the right email and password', async () => {
+    // 1. call the method (firstValueFrom: Observable → Promise, and it subscribes)
+    const result = firstValueFrom(service.login({ email: 'bob@email.bob', password: 'BobIsTheBest99#' }));
+
+    // 2. find the request and answer it, like the server would
+    const req = httpTesting.expectOne((r) => r.url === url && r.params.get('email') === 'bob@email.bob');
+    req.flush([bob]);
+
+    // 3. check the result
+    const user = await result;
+    expect(user.name).toBe('Bob Martin');
+    expect(service.currentUser()?.name).toBe('Bob Martin');
+  });
+
+  it('refuses a wrong password', async () => {
+    const result = firstValueFrom(service.login({ email: 'bob@email.bob', password: 'wrong' }));
+
+    httpTesting.expectOne((r) => r.url === url).flush([bob]);
+
+    await expect(result).rejects.toThrow('bad credentials');   // the Observable errored
     expect(service.currentUser()).toBeNull();
   });
 });
 ```
 
-> Every test gets a **new** service, so a user registered in one test is gone in the next one.
+(`url` = `` `${environment.apiUrl}/people` ``, `bob` = a `UserEntity`, see the full file `core/services/auth.service.spec.ts`.)
 
-`AuthService` is a fake on purpose: a list of users in memory, no server, no token. Bob is already registered.
+| `HttpTestingController` | What it does |
+|---|---|
+| `expectOne(url)` / `expectOne((r) => ...)` | finds **exactly one** matching request (fails if 0 or 2+) |
+| `req.request.method` / `req.request.params` | check what was sent |
+| `req.flush(data)` | answers with `data` (status 200) |
+| `req.flush('Not found', { status: 404, statusText: 'Not Found' })` | answers with an error |
+| `expectNone(url)` | fails if a matching request was sent |
+| `verify()` | fails if a request is still waiting for an answer |
+
+> ⚠️ An Observable sends **nothing** until someone subscribes. `firstValueFrom(...)` subscribes for you. Without it, `expectOne` fails with "found none".
+
+> Every test gets a **new** service, so the logged-in user from one test is gone in the next one.
 
 ---
 
@@ -246,21 +291,27 @@ it('shows the welcome message after a good login', async () => {
   type(password(), 'BobIsTheBest99#');
   await fixture.whenStable();     // the button becomes enabled
 
-  button().click();
+  button().click();               // the real AuthService sends GET /people?email=...
+  httpTesting.expectOne((r) => r.params.get('email') === 'bob@email.bob').flush([bob]);
   await fixture.whenStable();     // the welcome message appears
 
-  expect(html.textContent).toContain('Welcome, Bob!');
+  expect(html.textContent).toContain('Welcome, Bob Martin!');
 });
 ```
 
+Same setup as the service test: `provideHttpClient()` + `provideHttpClientTesting()` in `configureTestingModule`, and `httpTesting.verify()` in `afterEach`.
+
 ### Replace the service with a fake
 
-Why? To test **only the component**. With a real service that calls a server, your test would need the server.
+Why? To test **only the component**: no HTTP at all, the fake decides the answer.
 
 ```ts
+import { throwError } from 'rxjs';
+
 const fakeAuth = {
   currentUser: signal(null),
-  login: vi.fn().mockReturnValue(false),   // always answers "wrong password"
+  // login() returns an Observable → the fake returns one that errors right away
+  login: vi.fn().mockReturnValue(throwError(() => new Error('bad credentials'))),
   logout: vi.fn(),
 };
 
@@ -282,7 +333,7 @@ it('sends the typed email and password to the service', async () => {
 
   button().click();
 
-  expect(fakeAuth.login).toHaveBeenCalledWith('bob@email.bob', '1234');
+  expect(fakeAuth.login).toHaveBeenCalledWith({ email: 'bob@email.bob', password: '1234' });
 });
 ```
 
@@ -292,6 +343,8 @@ The fake only needs what the component **uses** (`currentUser`, `login`, `logout
 |---|---|
 | `vi.fn()` | Fake function, returns `undefined` |
 | `vi.fn().mockReturnValue(true)` | Fake function, returns `true` |
+| `vi.fn().mockReturnValue(of(user))` | Fake function, returns an Observable that gives `user` (`of` from `rxjs`) |
+| `vi.fn().mockReturnValue(throwError(() => new Error('x')))` | Fake function, returns an Observable that errors |
 | `vi.spyOn(service, 'login')` | Watches the **real** method (still runs it) |
 | `vi.spyOn(service, 'login').mockReturnValue(true)` | Replaces the real method |
 
@@ -330,6 +383,15 @@ Check the spelling: `setInput('nam', ...)` with a typo doesn't always throw an e
 ### `NG0201: No provider found for XxxService`
 
 The service isn't `providedIn: 'root'`. Add it in the test: `TestBed.configureTestingModule({ providers: [XxxService] })`.
+
+### `NG0201: No provider found for HttpClient` (or `_HttpClient`)
+
+The component or service uses `HttpClient` (directly or through a service). Add both in the test:
+`TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] })`.
+
+### `Expected one matching request ..., found none`
+
+Nobody subscribed, so the request was never sent. In a service test wrap the call in `firstValueFrom(...)`, in a component check that the method calls `.subscribe()`.
 
 ### `querySelector(...)` returns `null`
 

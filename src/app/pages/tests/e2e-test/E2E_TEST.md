@@ -114,7 +114,7 @@ test('Bob can log in', async ({ page }) => {        // `page` = a browser tab
   await page.getByRole('button', { name: 'Log in' }).click();
 
   // 2. check
-  await expect(page.getByText('Welcome, Bob!', { exact: true })).toBeVisible();
+  await expect(page.getByText('Welcome, Bob Martin!', { exact: true })).toBeVisible();
 });
 ```
 
@@ -135,7 +135,7 @@ Find elements **the way a user sees them** (text, label, role), not with CSS cla
 | A title | `page.getByRole('heading', { name: 'Index' })` | `<h1>`...`<h6>` |
 | A field by its label | `page.getByLabel('Email')` | `<label for="email">Email</label><input id="email">` |
 | A field by its placeholder | `page.getByPlaceholder('name123')` | `<input placeholder="name123">` |
-| Some text | `page.getByText('Welcome, Bob!')` | any element with that text |
+| Some text | `page.getByText('Welcome, Bob Martin!')` | any element with that text |
 | A test id | `page.getByTestId('cart')` | `<div data-testid="cart">` |
 | CSS (last resort) | `page.locator('#email')` | |
 

@@ -200,12 +200,37 @@ export interface UserEntity {
 ```ts
 // src/app/core/responses/user.response.ts
 // What the service gives to components: the entity WITHOUT the password.
-import { UserEntity } from '@core/entities/user.entity';
+import { GenderEnum } from '@core/enums/gender.enum';
+import { SubscriptionEnum } from '@core/enums/subscription.enum';
 
-export type UserResponse = Omit<UserEntity, 'password'>;
+export interface UserResponse {
+  id: number;
+  name: string;
+  email: string;
+  birthdate: string;
+  height: number;
+  gender: GenderEnum;
+  subscription: SubscriptionEnum;
+}
 ```
 
-> 💡 `Omit<UserEntity, 'password'>` = "all the fields of `UserEntity` except `password`". If you add a field to `UserEntity`, `UserResponse` gets it too, no copy-paste.
+```ts
+// src/app/core/mapper/user.mapper.ts
+// UserEntity → UserResponse: copies only the fields components may see.
+export function UserMapper(user: UserEntity): UserResponse {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    birthdate: user.birthdate,
+    height: user.height,
+    gender: user.gender,
+    subscription: user.subscription,
+  };
+}
+```
+
+> 💡 Short alternative: `export type UserResponse = Omit<UserEntity, 'password'>;` = "all the fields of `UserEntity` except `password`".
 
 ```ts
 // src/app/core/requests/register.request.ts
@@ -243,16 +268,30 @@ What **json-server** returns (the service then turns every `UserEntity` into a `
 | **Update** (replace everything) | `PUT` | `/people/1` | full `RegisterRequest` | updated `UserEntity` |
 | **Update** (only some fields) | `PATCH` | `/people/1` | `Partial<RegisterRequest>` e.g. `{ "subscription": "premium" }` | updated `UserEntity` |
 | **Delete** | `DELETE` | `/people/1` | – | `{}` |
-| **Log in** (fake) | `GET` | `/people?email=bob@email.bob&password=BobIsTheBest99%23` | – | `[UserEntity]` if it matches, `[]` if not |
+| **Log in** (fake) | `GET` | `/people?email=bob@email.bob` | – | `[UserEntity]` if the email exists, `[]` if not. The **service** then checks the password. |
 
 - `POST` → the `id` is **auto-generated** (next number). Don't send one.
 - `PUT` → fields you don't send are **deleted**. Use `PATCH` to change only one field.
 - Body requests need the header `Content-Type: application/json` (`HttpClient` adds it for you).
-- **Log in:** json-server has no login, so we filter: one result = right email + password, `[]` = wrong. Pass the values with `params`, so special characters like `#` get encoded (`%23`):
+- **Log in:** json-server has no login, so `AuthService.login()` does it in 2 steps:
+  1. asks json-server for the person with that email: `GET /people?email=...` → `[user]` or `[]`,
+  2. compares the password **in the service**: no user or wrong password → the Observable errors with `bad credentials`, otherwise it returns the `UserResponse` (no password) and fills `currentUser`.
 
 ```ts
-this.http.get<UserEntity[]>(this.url, { params: { email, password } });
+// src/app/core/services/auth.service.ts
+login(request: LoginRequest): Observable<UserResponse> {
+  return this._http.get<UserEntity[]>(this._url, { params: { email: request.email } }).pipe(
+    map((users) => {
+      const user = users[0];
+      if (!user || user.password !== request.password) throw new Error('bad credentials');
+      return UserMapper(user);
+    }),
+    tap((user) => this._currentUser.set(user)),
+  );
+}
 ```
+
+> 💡 Use `params` (not `` `${url}?email=${email}` ``): Angular encodes special characters for you (`+`, `#`, `&`...). And the password never goes in the URL.
 
 > ⚠️ Only for a fake API. A real API logs you in with `POST /login` and the password in the **body**, never in the URL (URLs end up in logs and in the browser history).
 
@@ -328,7 +367,15 @@ export const environment = {
 
 Import it from the file that is always there, `environment.ts`. Angular swaps it for you.
 
-> The service that calls this API (`UserEntity` in, `UserResponse` out) is covered in the services cheat sheet.
+### 8.3 The services
+
+| File | What it does |
+| ---- | ------------ |
+| `core/services/user.service.ts` | CRUD on `/people`: `create`, `getAll`, `getOne`, `updateFully` (PUT), `updatePartial` (PATCH), `delete` |
+| `core/services/auth.service.ts` | `register` (uses `UserService.create`), `login`, `logout`, `currentUser` signal |
+| `core/mapper/user.mapper.ts` | `UserMapper(entity)` → `UserResponse` (removes the password). A plain function: call it, don't `inject()` it |
+
+All methods return **Observables**: nothing is sent until you `.subscribe()` (or `firstValueFrom()` / `toSignal()`).
 
 ---
 

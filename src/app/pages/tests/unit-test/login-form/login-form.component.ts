@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-login-form',
@@ -7,7 +8,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
   templateUrl: './login-form.component.html',
 })
 export class LoginFormComponent {
-  // protected readonly auth = inject(AuthService);
+  protected readonly auth = inject(AuthService);
 
   error = signal(false);
 
@@ -20,13 +21,16 @@ export class LoginFormComponent {
   });
 
   onSubmit() {
-    const { email, password } = this.loginForm.getRawValue();
-    // const ok = this.auth.login(email, password);
-    // this.error.set(!ok);
+    this.error.set(false);
+    // getRawValue() = { email, password } = a LoginRequest
+    this.auth.login(this.loginForm.getRawValue()).subscribe({
+      // next: nothing to do, the service already filled auth.currentUser()
+      error: () => this.error.set(true), // wrong email/password (or API down)
+    });
   }
 
   logout() {
-    // this.auth.logout();
+    this.auth.logout();
     this.loginForm.reset();
   }
 }

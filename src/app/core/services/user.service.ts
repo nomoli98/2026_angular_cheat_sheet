@@ -11,9 +11,9 @@ import { UserResponse } from '@core/responses/user.response';
 export class UserService {
   private readonly _http = inject(HttpClient);
   private readonly _url = `${environment.apiUrl}/people`;
-  private readonly _mapper = inject(UserMapper);
+  private readonly _mapper = UserMapper; // a plain function, not a service → no inject()
 
-  create(request: RegisterRequest) {
+  create(request: RegisterRequest): Observable<UserResponse> {
     return this._http.post<UserEntity>(this._url, request).pipe(map((user) => this._mapper(user)));
   }
 
@@ -41,7 +41,7 @@ export class UserService {
       .pipe(map((user) => this._mapper(user)));
   }
 
-  delete(id: number) {
-    this._http.delete<UserEntity>(`${this._url}/${id}`);
+  delete(id: number): Observable<void> {
+    return this._http.delete<void>(`${this._url}/${id}`);
   }
 }
