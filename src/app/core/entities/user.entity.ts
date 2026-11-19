@@ -1,11 +1,12 @@
 import { GenderEnum } from '@core/enums/gender.enum';
 import { SubscriptionEnum } from '@core/enums/subscription.enum';
 
-export interface UserInterface {
+export interface UserEntity {
+  id: number;
   name: string;
   email: string;
   password: string;
-  birthdate: Date;
+  birthdate: string;
   height: number;
   gender: GenderEnum;
   subscription: SubscriptionEnum;
