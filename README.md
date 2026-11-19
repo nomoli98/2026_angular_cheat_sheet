@@ -61,11 +61,13 @@ src/app/
 │   ├── forms/               form.routes.ts + one folder per kind of form
 │   ├── routers/             app.routes.example.ts, sub-outlet.routes.example.ts + the routing demos
 │   ├── input-output/        input-output.routes.ts + input/ + output/
+│   ├── theme/               the dark mode page (THEME.md)
 │   ├── services/            service.routes.ts (protected by the guard) + auth-service/ + get-all/
 │   └── tests/               tests.routes.ts + unit-test/ + e2e-test/
 ├── shared/
 │   ├── code-snippet/        the code box (tabs + Copy button) shown on the demo pages
-│   └── auth-toggle/         the "logged in" switch in the navbar (demo: on = Bob, off = logged out)
+│   ├── auth-toggle/         the "logged in" switch in the navbar (demo: on = Bob, off = logged out)
+│   └── theme-toggle/        the "Dark mode" switch in the navbar + ThemeService (see pages/theme/THEME.md)
 └── core/
     ├── requests/            what we SEND to the API (register.request.ts → RegisterRequest)
     ├── responses/           what the services give BACK to the app, no password (user.response.ts → UserResponse)

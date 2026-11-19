@@ -1,0 +1,65 @@
+<h2>Dark mode (theme toggle)</h2>
+
+<p>
+  Bootstrap 5.3 does the work: one attribute on <code>&lt;html&gt;</code>,
+  <code>data-bs-theme="dark"</code>, and every Bootstrap color switches. Full guide:
+  <code>THEME.md</code>.
+</p>
+
+<section class="card card-body mb-3">
+  <h3>Right now</h3>
+  <p>
+    <code>theme.theme()</code> = <strong>{{ theme.theme() }}</strong>,
+    @if (theme.followsSystem()) {
+      following your <strong>system</strong> setting (nothing saved).
+    } @else {
+      <strong>your choice</strong>, saved in <code>localStorage</code>.
+    }
+  </p>
+
+  <div>
+    <button
+      type="button"
+      (click)="theme.set('light')"
+      [disabled]="theme.theme() === 'light' && !theme.followsSystem()"
+    >
+      Light
+    </button>
+    <button
+      type="button"
+      (click)="theme.set('dark')"
+      [disabled]="theme.theme() === 'dark' && !theme.followsSystem()"
+    >
+      Dark
+    </button>
+    <button type="button" (click)="theme.followSystem()" [disabled]="theme.followsSystem()">
+      Follow the system
+    </button>
+  </div>
+</section>
+
+<section class="card card-body mb-3">
+  <h3>1. ThemeService</h3>
+  <p>
+    Keeps the theme in a signal. An <code>effect()</code> writes it on
+    <code>&lt;html&gt;</code> every time it changes. No choice saved yet → it follows
+    <code>prefers-color-scheme</code> (the OS setting), and keeps following it if the OS changes.
+  </p>
+  <app-code-snippet [code]="snippets.service" />
+</section>
+
+<section class="card card-body mb-3">
+  <h3>2. The switch</h3>
+  <p>A Bootstrap <code>form-switch</code> in the navbar, next to the auth toggle.</p>
+  <app-code-snippet [code]="snippets.toggle" />
+</section>
+
+<section class="card card-body mb-3">
+  <h3>3. No white flash on load</h3>
+  <p>
+    Angular starts a few milliseconds after the page is drawn. A tiny script in
+    <code>index.html</code> sets the theme <strong>before</strong>, so a dark-mode user never sees a
+    white flash.
+  </p>
+  <app-code-snippet [code]="snippets.noFlash" />
+</section>

@@ -27,6 +27,10 @@ export const routes: Routes = [
     loadChildren: () => import('./pages/tests/tests.routes').then((r) => r.routes),
   },
   {
+    path: 'theme',
+    loadComponent: () => import('./pages/theme/theme.component').then((m) => m.ThemeComponent),
+  },
+  {
     path: 'service',
     loadChildren: () => import('./pages/services/service.routes').then((r) => r.routes),
   },
