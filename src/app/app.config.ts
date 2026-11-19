@@ -3,6 +3,7 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -10,5 +11,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     // withComponentInputBinding: route params (:id) and query params go into the component's input()
     provideRouter(routes, withComponentInputBinding()),
+    // HttpClient for the services (withFetch: uses the browser's fetch() API)
+    provideHttpClient(withFetch()),
   ],
 };

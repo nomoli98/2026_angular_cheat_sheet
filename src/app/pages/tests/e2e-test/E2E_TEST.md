@@ -22,7 +22,7 @@ Files:
 |---|---|---|
 | Tests | One component / service **alone** | The **whole app**, like a user |
 | Runs in | A fake browser (jsdom) | A real browser (Chrome, Firefox, Safari) |
-| Needs `ng serve`? | No | Yes (Playwright starts it for you) |
+| Needs `ng serve`? | No | Yes, + the fake API (Playwright starts both for you) |
 | Speed | Very fast (ms) | Slower (~1 s per test) |
 | Files | `src/**/*.spec.ts` | `e2e/*.spec.ts` |
 | Command | `ng test` | `npm run e2e` |
@@ -77,13 +77,22 @@ export default defineConfig({
 
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 
-  webServer: {                              // start the app before the tests
-    command: 'npm start',
-    url: 'http://localhost:4200',
-    reuseExistingServer: true,              // if ng serve is already running, use it
-  },
+  webServer: [                              // start the servers before the tests
+    {
+      command: 'npm run api',               // the fake API (the login calls it)
+      url: 'http://localhost:3000/people',  // Playwright waits until this URL answers
+      reuseExistingServer: true,            // if it's already running, use it
+    },
+    {
+      command: 'npm start',                 // the Angular app
+      url: 'http://localhost:4200',
+      reuseExistingServer: true,            // if ng serve is already running, use it
+    },
+  ],
 });
 ```
+
+`webServer` can be **one object** (one server) or an **array** (several servers, all started before the tests). This app needs both: the pages call the fake API.
 
 > ⚠️ Keep the tests **out of `src/`**. `ng test` runs every `src/**/*.spec.ts`, and it would try to run Playwright tests with Vitest.
 
@@ -207,7 +216,7 @@ The element never appeared. Check, in this order:
 
 ### `Timed out waiting 60000ms from config.webServer`
 
-`ng serve` didn't start in time. Run `npm start` yourself in another terminal and check it builds without errors, then run the tests again (`reuseExistingServer: true` uses it).
+`ng serve` or the fake API didn't start in time. Run `npm run dev` yourself in another terminal and check both start without errors, then run the tests again (`reuseExistingServer: true` uses them).
 
 ### The tests open the wrong app
 

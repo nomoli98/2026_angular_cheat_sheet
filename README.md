@@ -92,6 +92,8 @@ import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.componen
 
 Use `@core`, `@shared` and `@pages` in new code. Keep `./` for files in the same folder (child components, `snippets/*.md`).
 
+`src/environments/` holds the settings that change between `ng serve` and `ng build`, like the API URL (`environment.apiUrl`).
+
 The Playwright tests live outside `src/`, in `e2e/` at the root, with `playwright.config.ts`.
 
 The fake API also lives at the root, outside `src/`:

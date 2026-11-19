@@ -3,7 +3,7 @@
 > 📖 **Official docs:** [json-server v0.17 README](https://github.com/typicode/json-server/tree/v0.17.4)
 
 A fake backend that runs on `http://localhost:3000` so you can practise **services**, `HttpClient` and **CRUD** without writing a real server.
-The data is a list of people shaped like `UserResponse` (`src/app/core/responses/user.response.ts`). No password.
+The data is a list of people shaped like `UserResponse` (`src/app/core/responses/user.response.ts`), plus a `password` so the login can be checked.
 
 ```
 Angular app (localhost:4200) ──HTTP──▶ json-server (localhost:3000) ──reads/writes──▶ fake-api/db.json
@@ -154,6 +154,7 @@ One person in `db.json`:
   "id": 1,
   "name": "Bob Martin",
   "email": "bob@email.bob",
+  "password": "BobIsTheBest99#",
   "birthdate": "2000-09-22",
   "height": 195,
   "gender": "male",
@@ -203,7 +204,7 @@ export interface RegisterRequest {
 }
 ```
 
-> 💡 json-server saves whatever you send. A `POST` with a `RegisterRequest` stores the `password` in `db.json` too. That's fine for a fake API. A real API would never send it back.
+> 💡 Every person has a password of the form `<FirstName>IsTheBest99#` (`BobIsTheBest99#`, `AliceIsTheBest99#`...), so it passes the strong-password validator. json-server sends the `password` back in every `GET`, even though `UserResponse` doesn't list it. That's fine for a fake API. A real API would never send it back.
 
 > ⚠️ `"gender"` in `db.json` must be the **values** of `GenderEnum` (`'male'`, `'female'`, `'other'`), not the keys (`MALE`...). If you edit the JSON by hand, keep them lowercase.
 
@@ -221,10 +222,18 @@ Base URL: `http://localhost:3000/people`
 | **Update** (replace everything) | `PUT` | `/people/1` | full `RegisterRequest` | updated person |
 | **Update** (only some fields) | `PATCH` | `/people/1` | `Partial<RegisterRequest>` e.g. `{ "subscription": "premium" }` | updated person |
 | **Delete** | `DELETE` | `/people/1` | – | `{}` |
+| **Log in** (fake) | `GET` | `/people?email=bob@email.bob&password=BobIsTheBest99%23` | – | `[person]` if it matches, `[]` if not |
 
 - `POST` → the `id` is **auto-generated** (next number). Don't send one.
 - `PUT` → fields you don't send are **deleted**. Use `PATCH` to change only one field.
 - Body requests need the header `Content-Type: application/json` (`HttpClient` adds it for you).
+- **Log in:** json-server has no login, so we filter: one result = right email + password, `[]` = wrong. Pass the values with `params`, so special characters like `#` get encoded (`%23`):
+
+```ts
+this.http.get<UserResponse[]>(this.url, { params: { email, password } });
+```
+
+> ⚠️ Only for a fake API. A real API logs you in with `POST /login` and the password in the **body**, never in the URL (URLs end up in logs and in the browser history).
 
 ---
 
@@ -252,7 +261,7 @@ With `_page`, the total number of people is in the **response header** `X-Total-
 
 ### 8.1 Enable `HttpClient`, in `app.config.ts`
 
-Not done in this repo yet. Add `provideHttpClient` next to the providers already there:
+Already done in this repo: `provideHttpClient` sits next to the other providers.
 
 ```ts
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
@@ -264,6 +273,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
+    // HttpClient for the services (withFetch: uses the browser's fetch() API)
     provideHttpClient(withFetch()),   // 👈 DON'T FORGET THIS
   ],
 };
@@ -271,20 +281,29 @@ export const appConfig: ApplicationConfig = {
 
 ### 8.2 Keep the URL in one place
 
-The repo has no `src/environments/` folder yet. Create it with the CLI:
+Already done in this repo, with the CLI:
 
 ```bash
 ng generate environments
 ```
 
-Then put the URL in it:
+It creates two files and adds a `fileReplacements` to `angular.json`:
+
+| File | Used by |
+| ---- | ------- |
+| `src/environments/environment.ts` | `ng build` (production) |
+| `src/environments/environment.development.ts` | `ng serve` (replaces the other one) |
+
+Both must export the same properties:
 
 ```ts
-// src/environments/environment.ts
+// src/environments/environment.development.ts
 export const environment = {
-  apiUrl: 'http://localhost:3000',
+  apiUrl: 'http://localhost:3000', // the fake API (json-server)
 };
 ```
+
+Import it from the file that is always there, `environment.ts`. Angular swaps it for you.
 
 ### 8.3 Smallest possible call
 
@@ -322,7 +341,7 @@ curl http://localhost:3000/people/1
 
 curl -X POST http://localhost:3000/people \
   -H "Content-Type: application/json" \
-  -d '{"name":"New Guy","email":"new@mail.com","birthdate":"2000-01-01","height":170,"gender":"other","subscription":"free","agreeToTerms":true}'
+  -d '{"name":"New Guy","email":"new@mail.com","password":"NewGuyIsTheBest99#","birthdate":"2000-01-01","height":170,"gender":"other","subscription":"free","agreeToTerms":true}'
 
 curl -X PATCH http://localhost:3000/people/1 \
   -H "Content-Type: application/json" \
@@ -367,7 +386,7 @@ Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess | Stop-Proc
 kill $(lsof -t -i:3000)
 ```
 
-Or use another port: `--port 3001` (and change `apiUrl` in `src/environments/environment.ts`).
+Or use another port: `--port 3001` (and change `apiUrl` in both `src/environments/` files).
 
 ### My data is messed up / people disappeared
 

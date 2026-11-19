@@ -1,5 +1,5 @@
 ```bash terminal
-# Run all the e2e tests (starts ng serve if it isn't running)
+# Run all the e2e tests (starts the fake API + ng serve if they aren't running)
 npm run e2e
 
 # Open the UI mode: see each step, re-run, time-travel (best to learn!)

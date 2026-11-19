@@ -16,12 +16,19 @@ export default defineConfig({
   // The browsers to test in. Add firefox / webkit here if you want.
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 
-  // Starts `ng serve` before the tests, and stops it after.
-  // If it's already running, Playwright uses it instead.
-  webServer: {
-    command: 'npm start',
-    url: 'http://localhost:4200',
-    reuseExistingServer: true,
-  },
+  // Starts the fake API and `ng serve` before the tests, and stops them after.
+  // If one is already running (e.g. `npm run dev`), Playwright uses it instead.
+  webServer: [
+    {
+      command: 'npm run api',
+      url: 'http://localhost:3000/people',
+      reuseExistingServer: true,
+    },
+    {
+      command: 'npm start',
+      url: 'http://localhost:4200',
+      reuseExistingServer: true,
+    },
+  ],
 });
 ```
