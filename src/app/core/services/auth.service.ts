@@ -1,6 +1,6 @@
 import { inject, Service, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, tap } from 'rxjs';
+import { map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { environment } from '@env/environment';
 import { UserService } from '@core/services/user.service';
 import { UserMapper } from '@core/mapper/user.mapper';
@@ -15,15 +15,21 @@ export class AuthService {
   private readonly _url = `${environment.apiUrl}/people`;
   private readonly _userService = inject(UserService);
 
-  // The logged-in user, or null. Only the service can change it (asReadonly).
   private readonly _currentUser = signal<UserResponse | null>(null);
   readonly currentUser = this._currentUser.asReadonly();
 
   register(request: RegisterRequest): Observable<UserResponse> {
-    return this._userService.create(request);
+    return this._userService
+      .emailExists(request.email)
+      .pipe(
+        switchMap((taken) =>
+          taken
+            ? throwError(() => new Error('email already taken'))
+            : this._userService.create(request),
+        ),
+      );
   }
 
-  // Fake login: GET /people?email=... → [user] or [], then the password is checked HERE.
   login(request: LoginRequest): Observable<UserResponse> {
     return this._http.get<UserEntity[]>(this._url, { params: { email: request.email } }).pipe(
       map((users) => {

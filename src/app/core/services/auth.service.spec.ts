@@ -84,4 +84,32 @@ describe('AuthService', () => {
 
     expect(service.currentUser()).toBeNull();
   });
+
+  describe('register', () => {
+    const { id: _id, ...newBob } = bob; // a RegisterRequest (no id)
+
+    it('creates the user when the email is free', async () => {
+      const result = firstValueFrom(service.register(newBob));
+
+      // 1. the check: GET /people?email=... → [] (free)
+      httpTesting
+        .expectOne((r) => r.method === 'GET' && r.params.get('email') === bob.email)
+        .flush([]);
+      // 2. the creation: POST /people
+      const req = httpTesting.expectOne((r) => r.method === 'POST' && r.url === url);
+      expect(req.request.body).toEqual(newBob);
+      req.flush(bob);
+
+      expect((await result).name).toBe('Bob Martin');
+    });
+
+    it('refuses an email that is already taken', async () => {
+      const result = firstValueFrom(service.register(newBob));
+
+      httpTesting.expectOne((r) => r.method === 'GET').flush([bob]); // taken
+      httpTesting.expectNone((r) => r.method === 'POST'); // nothing created
+
+      await expect(result).rejects.toThrow('email already taken');
+    });
+  });
 });

@@ -202,9 +202,83 @@ import { strongPasswordValidator } from '@core/validators/reactive-form/strong-p
 import { birthdateValidator } from '@core/validators/reactive-form/birthdate.validator';
 import { enumValidator } from '@core/validators/reactive-form/in-enum.validator';
 import { inValidator } from '@core/validators/reactive-form/in-string-list.validator';
+import { emailTakenValidator } from '@core/validators/reactive-form/email-taken.validator';
 ```
 
 - `strong-password.validator.ts`: `strongPasswordValidator()`
 - `birthdate.validator.ts`: `birthdateValidator(minAge, maxAge)`
 - `in-enum.validator.ts`: `enumValidator(SomeEnum)`
 - `in-string-list.validator.ts`: `inValidator(['a', 'b'])`
+- `email-taken.validator.ts`: `emailTakenValidator()` (async, asks the API)
+
+---
+
+## Async validator: ask the server ("is this email taken?")
+
+A normal validator answers **right away**. An async validator answers **later**: it returns an **Observable** (or a Promise) of the errors.
+
+### Step 1: write it
+
+```ts
+// core/validators/reactive-form/email-taken.validator.ts
+import { inject } from '@angular/core';
+import { AsyncValidatorFn } from '@angular/forms';
+import { catchError, map, of, switchMap, timer } from 'rxjs';
+import { UserService } from '@core/services/user.service';
+
+export function emailTakenValidator(): AsyncValidatorFn {
+  const userService = inject(UserService); // ⚠️ needs an injection context (see below)
+
+  return (control) => {
+    if (!control.value) return of(null); // empty: let Validators.required handle it
+
+    return timer(400).pipe(                                       // wait 400 ms
+      switchMap(() => userService.emailExists(control.value)),    // GET /people?email=... → true/false
+      map((taken) => (taken ? { emailTaken: true } : null)),      // true → error, false → valid
+      catchError(() => of(null)),                                 // API down: don't block the form
+    );
+  };
+}
+```
+
+| Piece | Why |
+| ----- | --- |
+| `AsyncValidatorFn` | the type of an async validator (instead of `ValidatorFn`) |
+| `timer(400)` | a **debounce**: Angular cancels the previous Observable on every key, so the API is called only when the user stops typing |
+| `switchMap` | "when the timer ends, switch to the HTTP request" |
+| `catchError(() => of(null))` | if the API fails, the field stays valid instead of stuck |
+
+### Step 2: add it to the control
+
+Async validators go in a **separate** list, `asyncValidators`:
+
+```ts
+email: new FormControl('', {
+  validators: [Validators.required, Validators.email],   // sync: run first
+  asyncValidators: [emailTakenValidator()],              // async: run only if the sync ones pass
+}),
+```
+
+> ⚠️ `emailTakenValidator()` calls `inject()`, so call it in a **field initializer** (like above) or the constructor. Called inside `onSubmit()` → `NG0203: inject() must be called from an injection context`.
+
+### Step 3: show it in the HTML
+
+While the API is answering, the control is **`pending`** (not valid, not invalid):
+
+```html
+@if (formRegister.get('email')?.pending) {
+  <div class="form-text">Checking the email...</div>
+}
+@if (formRegister.get('email')?.hasError('emailTaken')) {
+  <div class="invalid-feedback">This email is already taken</div>
+}
+```
+
+| Status | Meaning |
+| ------ | ------- |
+| `pending` | the async validator is still running |
+| `valid` / `invalid` | final answer |
+| `formRegister.valid` | `false` while a field is `pending` → the submit waits for the answer |
+
+> 💡 The validator makes the UI nicer, but it's not a guarantee: two people can type the same email at the same time. That's why `AuthService.register()` checks the email **again** before creating the user.
+

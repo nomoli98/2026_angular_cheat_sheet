@@ -8,6 +8,7 @@ import { enumValidator } from '@core/validators/reactive-form/in-enum.validator'
 import { GenderEnum } from '@core/enums/gender.enum';
 import { inValidator } from '@core/validators/reactive-form/in-string-list.validator';
 import { RegisterRequest } from '@core/requests/register.request';
+import { emailTakenValidator } from '@core/validators/reactive-form/email-taken.validator';
 
 @Component({
   imports: [CodeSnippetComponent, ReactiveFormsModule],
@@ -24,7 +25,10 @@ export class ReactiveFormComponent {
 
   formRegister = this._formBuilder.group({
     name: new FormControl('', Validators.required),
-    email: new FormControl('', [Validators.required, Validators.email]),
+    email: new FormControl('', {
+      validators: [Validators.required, Validators.email],
+      asyncValidators: [emailTakenValidator()], // asks the API if the email is taken
+    }),
     password: new FormControl('', [Validators.required, strongPasswordValidator()]),
     // birthdate is a 'YYYY-MM-DD' string: <input type="date"> reads and writes that format directly
     birthdate: new FormControl('', [Validators.required, birthdateValidator(0, 135)]),

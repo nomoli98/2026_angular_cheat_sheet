@@ -269,8 +269,14 @@ What **json-server** returns (the service then turns every `UserEntity` into a `
 | **Update** (only some fields) | `PATCH` | `/people/1` | `Partial<RegisterRequest>` e.g. `{ "subscription": "premium" }` | updated `UserEntity` |
 | **Delete** | `DELETE` | `/people/1` | – | `{}` |
 | **Log in** (fake) | `GET` | `/people?email=bob@email.bob` | – | `[UserEntity]` if the email exists, `[]` if not. The **service** then checks the password. |
+| **Exists?** (id) | `GET` | `/people?id=1` | – | `[UserEntity]` or `[]` → `UserService.exists(id)` turns it into `true` / `false` |
+| **Exists?** (email) | `GET` | `/people?email=bob@email.bob` | – | `[UserEntity]` or `[]` → `UserService.emailExists(email)` turns it into `true` / `false` |
 
 - `POST` → the `id` is **auto-generated** (next number). Don't send one.
+- **Booleans:** json-server can't answer `true`/`false`. Use a **filter** (`?id=` / `?email=`): it always answers an array, never a `404`, and the service maps it: `users.length > 0`.
+- **Checks before writing** (in the services):
+  - `AuthService.register()` → `emailExists` first, errors with `email already taken` instead of creating a duplicate.
+  - `UserService.updateFully` / `updatePartial` / `delete` → `exists(id)` first, errors with `user not found` and sends nothing.
 - `PUT` → fields you don't send are **deleted**. Use `PATCH` to change only one field.
 - Body requests need the header `Content-Type: application/json` (`HttpClient` adds it for you).
 - **Log in:** json-server has no login, so `AuthService.login()` does it in 2 steps:
@@ -371,11 +377,31 @@ Import it from the file that is always there, `environment.ts`. Angular swaps it
 
 | File | What it does |
 | ---- | ------------ |
-| `core/services/user.service.ts` | CRUD on `/people`: `create`, `getAll`, `getOne`, `updateFully` (PUT), `updatePartial` (PATCH), `delete` |
-| `core/services/auth.service.ts` | `register` (uses `UserService.create`), `login`, `logout`, `currentUser` signal |
+| `core/services/user.service.ts` | CRUD on `/people`: `create`, `getAll`, `getOne`, `updateFully` (PUT), `updatePartial` (PATCH), `delete`, plus the booleans `exists(id)` and `emailExists(email)` |
+| `core/services/auth.service.ts` | `register` (refuses a taken email, then `UserService.create`), `login`, `logout`, `currentUser` signal |
+| `core/validators/reactive-form/email-taken.validator.ts` | async validator: `emailExists` while the user types (see `REACTIVE_FORM.md`) |
 | `core/mapper/user.mapper.ts` | `UserMapper(entity)` → `UserResponse` (removes the password). A plain function: call it, don't `inject()` it |
 
 All methods return **Observables**: nothing is sent until you `.subscribe()` (or `firstValueFrom()` / `toSignal()`).
+
+How a boolean + a check chain together (`switchMap` = "when the first answer arrives, start the second request"):
+
+```ts
+// UserService
+exists(id: number): Observable<boolean> {
+  return this._http.get<UserEntity[]>(this._url, { params: { id } }).pipe(map((users) => users.length > 0));
+}
+
+delete(id: number): Observable<void> {
+  return this.ifExists(id, () => this._http.delete<void>(`${this._url}/${id}`));
+}
+
+private ifExists<T>(id: number, request: () => Observable<T>): Observable<T> {
+  return this.exists(id).pipe(
+    switchMap((found) => (found ? request() : throwError(() => new Error('user not found')))),
+  );
+}
+```
 
 ---
 

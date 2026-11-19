@@ -2,7 +2,7 @@ import { inject, Service } from '@angular/core';
 import { RegisterRequest } from '@core/requests/register.request';
 import { environment } from '@env/environment';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map, Observable, switchMap, throwError } from 'rxjs';
 import { UserMapper } from '@core/mapper/user.mapper';
 import { UserEntity } from '@core/entities/user.entity';
 import { UserResponse } from '@core/responses/user.response';
@@ -29,19 +29,42 @@ export class UserService {
     return this._http.get<UserEntity>(`${this._url}/${id}`).pipe(map((user) => this._mapper(user)));
   }
 
-  updateFully(id: number, request: RegisterRequest): Observable<UserResponse> {
+  exists(id: number): Observable<boolean> {
     return this._http
-      .put<UserEntity>(`${this._url}/${id}`, request)
-      .pipe(map((user) => this._mapper(user)));
+      .get<UserEntity[]>(this._url, { params: { id } })
+      .pipe(map((users) => users.length > 0));
+  }
+
+  emailExists(email: string): Observable<boolean> {
+    return this._http
+      .get<UserEntity[]>(this._url, { params: { email } })
+      .pipe(map((users) => users.length > 0));
+  }
+
+  updateFully(id: number, request: RegisterRequest): Observable<UserResponse> {
+    return this.ifExists(id, () =>
+      this._http
+        .put<UserEntity>(`${this._url}/${id}`, request)
+        .pipe(map((user) => this._mapper(user))),
+    );
   }
 
   updatePartial(id: number, request: Partial<RegisterRequest>): Observable<UserResponse> {
-    return this._http
-      .patch<UserEntity>(`${this._url}/${id}`, request)
-      .pipe(map((user) => this._mapper(user)));
+    return this.ifExists(id, () =>
+      this._http
+        .patch<UserEntity>(`${this._url}/${id}`, request)
+        .pipe(map((user) => this._mapper(user))),
+    );
   }
 
   delete(id: number): Observable<void> {
-    return this._http.delete<void>(`${this._url}/${id}`);
+    return this.ifExists(id, () => this._http.delete<void>(`${this._url}/${id}`));
+  }
+
+
+  private ifExists<T>(id: number, request: () => Observable<T>): Observable<T> {
+    return this.exists(id).pipe(
+      switchMap((found) => (found ? request() : throwError(() => new Error('user not found')))),
+    );
   }
 }

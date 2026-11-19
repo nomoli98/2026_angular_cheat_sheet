@@ -1,0 +1,52 @@
+import { TestBed } from '@angular/core/testing';
+import { FormControl, ValidationErrors } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { UserService } from '@core/services/user.service';
+import { emailTakenValidator } from './email-taken.validator';
+
+describe('emailTakenValidator', () => {
+  // Fake UserService: emailExists() answers what the test says
+  const fakeUserService = { emailExists: vi.fn() };
+
+  // Runs the validator on a value and gives back its result
+  function validate(value: string): Promise<ValidationErrors | null> {
+    // inject() inside the validator needs an injection context
+    const validator = TestBed.runInInjectionContext(() => emailTakenValidator());
+    const result$ = validator(new FormControl(value)) as Observable<ValidationErrors | null>;
+
+    return new Promise((resolve) => {
+      result$.subscribe(resolve);
+      vi.advanceTimersByTime(400); // skip the 400 ms wait
+    });
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers(); // we control time: no real 400 ms wait
+    vi.clearAllMocks();
+    TestBed.configureTestingModule({
+      providers: [{ provide: UserService, useValue: fakeUserService }],
+    });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns { emailTaken: true } when the email exists', async () => {
+    fakeUserService.emailExists.mockReturnValue(new Observable((s) => s.next(true)));
+
+    expect(await validate('bob@email.bob')).toEqual({ emailTaken: true });
+    expect(fakeUserService.emailExists).toHaveBeenCalledWith('bob@email.bob');
+  });
+
+  it('returns null when the email is free', async () => {
+    fakeUserService.emailExists.mockReturnValue(new Observable((s) => s.next(false)));
+
+    expect(await validate('new@mail.com')).toBeNull();
+  });
+
+  it('does not call the API for an empty value', async () => {
+    expect(await validate('')).toBeNull();
+    expect(fakeUserService.emailExists).not.toHaveBeenCalled();
+  });
+});

@@ -85,13 +85,41 @@ describe('AuthService', () => {
 
     expect(service.currentUser()).toBeNull();
   });
+
+  describe('register', () => {
+    const { id: _id, ...newBob } = bob; // a RegisterRequest (no id)
+
+    it('creates the user when the email is free', async () => {
+      const result = firstValueFrom(service.register(newBob));
+
+      // 1. the check: GET /people?email=... → [] (free)
+      httpTesting
+        .expectOne((r) => r.method === 'GET' && r.params.get('email') === bob.email)
+        .flush([]);
+      // 2. the creation: POST /people
+      const req = httpTesting.expectOne((r) => r.method === 'POST' && r.url === url);
+      expect(req.request.body).toEqual(newBob);
+      req.flush(bob);
+
+      expect((await result).name).toBe('Bob Martin');
+    });
+
+    it('refuses an email that is already taken', async () => {
+      const result = firstValueFrom(service.register(newBob));
+
+      httpTesting.expectOne((r) => r.method === 'GET').flush([bob]); // taken
+      httpTesting.expectNone((r) => r.method === 'POST'); // nothing created
+
+      await expect(result).rejects.toThrow('email already taken');
+    });
+  });
 });
 ```
 
 ```ts auth.service.ts
 import { inject, Service, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, tap } from 'rxjs';
+import { map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { environment } from '@env/environment';
 import { UserService } from '@core/services/user.service';
 import { UserMapper } from '@core/mapper/user.mapper';
@@ -110,8 +138,17 @@ export class AuthService {
   private readonly _currentUser = signal<UserResponse | null>(null);
   readonly currentUser = this._currentUser.asReadonly();
 
+  // 1. is the email taken? (GET /people?email=...)  2. no → create (POST /people)
   register(request: RegisterRequest): Observable<UserResponse> {
-    return this._userService.create(request);
+    return this._userService
+      .emailExists(request.email)
+      .pipe(
+        switchMap((taken) =>
+          taken
+            ? throwError(() => new Error('email already taken'))
+            : this._userService.create(request),
+        ),
+      );
   }
 
   // Fake login: GET /people?email=... → [user] or [], then the password is checked HERE.
