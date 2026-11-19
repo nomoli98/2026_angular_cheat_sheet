@@ -2,6 +2,9 @@ import { test, expect } from '@playwright/test';
 
 // Runs before each test: open the demo page
 test.beforeEach(async ({ page }) => {
+  // The auth toggle (navbar) logs Bob in by default: start logged OUT to test the form.
+  // addInitScript runs before the app starts, so the toggle reads 'off'.
+  await page.addInitScript(() => localStorage.setItem('auth-toggle', 'off'));
   await page.goto('/tests/e2e-test');
 });
 

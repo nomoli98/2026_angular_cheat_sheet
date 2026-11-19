@@ -317,7 +317,7 @@ Nobody caught the rejected Promise. Put the `await` in a `try { } catch { }`.
 
 ### `unauthorized` right after a page refresh
 
-`currentUser` lives in memory: a refresh logs you out. Keeping the login (token, localStorage) is for the tokens cheat sheet.
+`currentUser` lives in memory: a refresh empties it. In this repo the **auth toggle** (navbar) logs Bob in again on start when it's on (see `pages/services/auth-service/AUTH_SERVICE.md`). Keeping a real login (token) is for the tokens cheat sheet.
 
 ### A new user registered from the app is not admin
 

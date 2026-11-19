@@ -61,9 +61,11 @@ src/app/
 │   ├── forms/               form.routes.ts + one folder per kind of form
 │   ├── routers/             app.routes.example.ts, sub-outlet.routes.example.ts + the routing demos
 │   ├── input-output/        input-output.routes.ts + input/ + output/
+│   ├── services/            service.routes.ts (protected by the guard) + auth-service/ + get-all/
 │   └── tests/               tests.routes.ts + unit-test/ + e2e-test/
 ├── shared/
-│   └── code-snippet/        the code box (tabs + Copy button) shown on the demo pages
+│   ├── code-snippet/        the code box (tabs + Copy button) shown on the demo pages
+│   └── auth-toggle/         the "logged in" switch in the navbar (demo: on = Bob, off = logged out)
 └── core/
     ├── requests/            what we SEND to the API (register.request.ts → RegisterRequest)
     ├── responses/           what the services give BACK to the app, no password (user.response.ts → UserResponse)
@@ -71,6 +73,7 @@ src/app/
     ├── validators/          custom form validators: reactive-form/, template-form/, signal-form/
     ├── entities/            what json-server stores, password included (user.entity.ts → UserEntity)
     ├── mapper/              UserEntity → UserResponse (user.mapper.ts), removes the password
+    ├── guards/              route guards (auth.guard.ts: not logged in → /service/auth-service)
     ├── services/            HTTP calls, return Observables (auth.service.ts, user.service.ts), see fake-api/FAKE-API.md
     └── controllers/         check the permission (role), then call the service, return Promises (auth.controller.ts, user.controller.ts), see CONTROLLER.md
 ```

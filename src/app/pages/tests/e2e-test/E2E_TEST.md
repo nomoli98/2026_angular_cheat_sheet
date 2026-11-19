@@ -104,6 +104,8 @@ export default defineConfig({
 import { test, expect } from '@playwright/test';    // ⚠️ import them (not global like in Vitest)
 
 test.beforeEach(async ({ page }) => {               // runs before each test
+  // start logged OUT: the auth toggle in the navbar logs Bob in by default
+  await page.addInitScript(() => localStorage.setItem('auth-toggle', 'off'));
   await page.goto('/tests/e2e-test');
 });
 
@@ -117,6 +119,8 @@ test('Bob can log in', async ({ page }) => {        // `page` = a browser tab
   await expect(page.getByText('Welcome, Bob Martin!', { exact: true })).toBeVisible();
 });
 ```
+
+> 💡 `page.addInitScript(fn)` runs `fn` in the page **before** the app's own code. Use it to prepare `localStorage`, cookies...
 
 > ⚠️ Put **`await`** in front of every line. Forgetting it is the #1 Playwright bug.
 
