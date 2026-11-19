@@ -4,11 +4,12 @@
 
 A fake backend that runs on `http://localhost:3000` so you can practise **services**, `HttpClient` and **CRUD** without writing a real server.
 The data is a list of people shaped like `UserEntity` (`src/app/core/entities/user.entity.ts`), **password included**, exactly as stored in `db.json`.
-The service removes the password and gives components a `UserResponse`.
+The service removes the password and gives a `UserResponse`. Components get it through a **controller** (signals, see `core/controllers/CONTROLLER.md`).
 
 ```
-Angular component ◀── UserResponse ── UserService ◀── UserEntity ── json-server (localhost:3000) ◀──▶ fake-api/db.json
-   (no password)                      (removes the password)        (sends everything, password too)
+Component ◀─signals─ UserController ◀─UserResponse─ UserService ◀─UserEntity─ json-server (localhost:3000) ◀──▶ fake-api/db.json
+                     (subscribes, keeps     (removes the password)    (sends everything, password too)
+                      loading / error)
 ```
 
 ---
@@ -381,6 +382,7 @@ Import it from the file that is always there, `environment.ts`. Angular swaps it
 | `core/services/auth.service.ts` | `register` (refuses a taken email, then `UserService.create`), `login`, `logout`, `currentUser` signal |
 | `core/validators/reactive-form/email-taken.validator.ts` | async validator: `emailExists` while the user types (see `REACTIVE_FORM.md`) |
 | `core/mapper/user.mapper.ts` | `UserMapper(entity)` → `UserResponse` (removes the password). A plain function: call it, don't `inject()` it |
+| `core/controllers/*.controller.ts` | the layer **components** use: they subscribe to the services and keep the results in signals (see `core/controllers/CONTROLLER.md`) |
 
 All methods return **Observables**: nothing is sent until you `.subscribe()` (or `firstValueFrom()` / `toSignal()`).
 

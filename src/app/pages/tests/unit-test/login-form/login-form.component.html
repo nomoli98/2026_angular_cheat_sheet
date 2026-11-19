@@ -13,10 +13,12 @@
       <input id="password" type="password" formControlName="password" />
     </div>
 
-    @if (error()) {
-      <p>Wrong email or password</p>
+    @if (auth.error(); as error) {
+      <p>{{ error }}</p>
     }
 
-    <button type="submit" [disabled]="loginForm.invalid">Log in</button>
+    <button type="submit" [disabled]="loginForm.invalid || auth.loading()">
+      {{ auth.loading() ? 'Logging in...' : 'Log in' }}
+    </button>
   </form>
 }

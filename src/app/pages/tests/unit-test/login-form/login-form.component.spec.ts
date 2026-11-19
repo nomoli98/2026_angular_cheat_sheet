@@ -2,9 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { throwError } from 'rxjs';
 import { LoginFormComponent } from './login-form.component';
-import { AuthService } from '@core/services/auth.service';
+import { AuthController } from '@core/controllers/auth.controller';
 import { UserEntity } from '@core/entities/user.entity';
 import { GenderEnum } from '@core/enums/gender.enum';
 import { SubscriptionEnum } from '@core/enums/subscription.enum';
@@ -38,7 +37,7 @@ describe('LoginFormComponent', () => {
   const password = () => html.querySelector('#password') as HTMLInputElement;
   const button = () => html.querySelector('button') as HTMLButtonElement;
 
-  // ── With the REAL AuthService, but a FAKE backend ──────────
+  // ── With the REAL AuthController + AuthService, but a FAKE backend ──
   // provideHttpClientTesting(): no request leaves the test.
   // HttpTestingController catches them and the TEST decides the answer.
   describe('with the real service', () => {
@@ -111,29 +110,33 @@ describe('LoginFormComponent', () => {
     });
   });
 
-  // ── With a FAKE AuthService (a "mock") ─────────────────────
-  // Use a fake when you only want to test the component, not the service.
-  describe('with a fake service', () => {
+  // ── With a FAKE AuthController (a "mock") ────────────────
+  // Use a fake when you only want to test the component: no service, no HTTP.
+  // The fake only needs what the component uses: signals + methods.
+  describe('with a fake controller', () => {
     const fakeAuth = {
       currentUser: signal(null),
-      // always says "wrong password": an Observable that errors right away
-      login: vi.fn().mockReturnValue(throwError(() => new Error('bad credentials'))),
+      error: signal<string | null>(null),
+      loading: signal(false),
+      login: vi.fn(),
       logout: vi.fn(),
     };
 
     beforeEach(async () => {
       vi.clearAllMocks(); // the spies forget the calls from the previous test
+      fakeAuth.error.set(null);
+      fakeAuth.loading.set(false);
 
       TestBed.configureTestingModule({
-        // "When the component asks for AuthService, give it fakeAuth instead"
-        providers: [{ provide: AuthService, useValue: fakeAuth }],
+        // "When the component asks for AuthController, give it fakeAuth instead"
+        providers: [{ provide: AuthController, useValue: fakeAuth }],
       });
       fixture = TestBed.createComponent(LoginFormComponent);
       html = fixture.nativeElement;
       await fixture.whenStable();
     });
 
-    it('sends the typed email and password to the service', async () => {
+    it('sends the typed email and password to the controller', async () => {
       type(email(), 'bob@email.bob');
       type(password(), '1234');
       await fixture.whenStable();
@@ -143,15 +146,21 @@ describe('LoginFormComponent', () => {
       expect(fakeAuth.login).toHaveBeenCalledWith({ email: 'bob@email.bob', password: '1234' });
     });
 
-    it('shows an error when the service says no', async () => {
-      type(email(), 'bob@email.bob');
-      type(password(), '1234');
-      await fixture.whenStable();
-
-      button().click();
+    it('shows the error the controller gives', async () => {
+      fakeAuth.error.set('Wrong email or password'); // just set the signal
       await fixture.whenStable();
 
       expect(html.textContent).toContain('Wrong email or password');
+    });
+
+    it('disables the button while loading', async () => {
+      type(email(), 'bob@email.bob');
+      type(password(), '1234');
+      fakeAuth.loading.set(true);
+      await fixture.whenStable();
+
+      expect(button().disabled).toBe(true);
+      expect(button().textContent).toContain('Logging in...');
     });
   });
 });

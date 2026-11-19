@@ -1,12 +1,8 @@
 <h2>Template Form</h2>
 
-<!-- #form="ngForm" gives us access to the whole form (valid, invalid...) -->
-<!-- Bootstrap: .form-label + .form-control, .is-invalid turns the field red,
-     .invalid-feedback shows the message (only when the input before it is .is-invalid) -->
 <form #form="ngForm" (ngSubmit)="onSubmit(form)" class="card card-body">
 
-  <!-- NAME -->
-  <!-- #name="ngModel" gives us access to this field (invalid, touched...) -->
+
   <div class="mb-3">
     <label for="name" class="form-label">Name</label>
     <input type="text" id="name" name="name" placeholder="name123" class="form-control"
@@ -18,7 +14,6 @@
     }
   </div>
 
-  <!-- EMAIL -->
   <div class="mb-3">
     <label for="email" class="form-label">Email</label>
     <input type="text" id="email" name="email" placeholder="example@email.com" class="form-control"
@@ -30,7 +25,6 @@
     }
   </div>
 
-  <!-- PASSWORD: custom validator "appStrongPassword" -->
   <div class="mb-3">
     <label for="password" class="form-label">Password</label>
     <input type="password" id="password" name="password" placeholder="Password123" class="form-control"
@@ -42,7 +36,6 @@
     }
   </div>
 
-  <!-- BIRTHDATE: custom validator "appBirthdate" (age between 0 and 135) -->
   <div class="mb-3">
     <label for="birthdate" class="form-label">Birthdate</label>
     <input type="date" id="birthdate" name="birthdate" class="form-control"
@@ -54,7 +47,6 @@
     }
   </div>
 
-  <!-- HEIGHT: between 50 and 275 -->
   <div class="mb-3">
     <label for="height" class="form-label">Height</label>
     <input type="number" id="height" name="height" class="form-control"
@@ -66,8 +58,7 @@
     }
   </div>
 
-  <!-- GENDER: custom validator "appInEnum" (value must be in GenderEnum) -->
-  <!-- <select> uses .form-select instead of .form-control -->
+
   <div class="mb-3">
     <label for="gender" class="form-label">Gender</label>
     <select id="gender" name="gender" class="form-select"
@@ -84,9 +75,6 @@
     }
   </div>
 
-  <!-- SUBSCRIPTION: custom validator "appInList" -->
-  <!-- Both radios share the same name, so they are one field -->
-  <!-- Radios and checkboxes: .form-check wrapper + .form-check-input + .form-check-label -->
   <div class="mb-3">
     <div class="form-check">
       <input type="radio" name="subscription" value="free" id="free" class="form-check-input"
@@ -101,12 +89,10 @@
       <label for="premium" class="form-check-label">Premium</label>
     </div>
     @if (subscription.invalid && subscription.touched) {
-      <!-- d-block: the message isn't right after an .is-invalid input, so force it visible -->
       <div class="invalid-feedback d-block">Choose a Subscription</div>
     }
   </div>
 
-  <!-- TERMS: "required" on a checkbox means it must be checked -->
   <div class="mb-3 form-check">
     <input type="checkbox" name="agreeToTerms" id="agreeToTerms" class="form-check-input"
            [(ngModel)]="user.agreeToTerms" #agreeToTerms="ngModel"

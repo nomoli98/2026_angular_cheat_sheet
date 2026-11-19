@@ -65,13 +65,14 @@ src/app/
 ├── shared/
 │   └── code-snippet/        the code box (tabs + Copy button) shown on the demo pages
 └── core/
-    ├── interfaces/          the app's models (user.interface.ts → UserInterface)
     ├── requests/            what we SEND to the API (register.request.ts → RegisterRequest)
-    ├── responses/           what the API sends BACK (user.response.ts → UserResponse)
+    ├── responses/           what the services give BACK to the app, no password (user.response.ts → UserResponse)
     ├── enums/               gender.enum.ts, subscription.enum.ts
     ├── validators/          custom form validators: reactive-form/, template-form/, signal-form/
-    ├── services/            auth.service.ts, user.service.ts (empty for now, being rewritten)
-    └── controllers/         auth.controller.ts, user.controller.ts (empty for now)
+    ├── entities/            what json-server stores, password included (user.entity.ts → UserEntity)
+    ├── mapper/              UserEntity → UserResponse (user.mapper.ts), removes the password
+    ├── services/            HTTP calls, return Observables (auth.service.ts, user.service.ts), see fake-api/FAKE-API.md
+    └── controllers/         state in signals over the services (auth.controller.ts, user.controller.ts), see CONTROLLER.md
 ```
 
 ### Path aliases

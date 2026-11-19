@@ -28,7 +28,6 @@ export class SignalFormComponent {
     agreeToTerms: false,
   });
 
-  // You pass you model (userDate) into the form() to create a Field Tree to access the data
   protected registerForm = form(this.EmptyForm, (field) => {
     required(field.name, { message: 'Name is required' });
 
@@ -93,7 +92,7 @@ export class SignalFormComponent {
     event.preventDefault();
     if (this.registerForm().invalid()) return;
 
-    //put here the service call
+    //put the service here call
     console.log('It works! ' + this.registerForm().value().name);
 
     this.resetForm();

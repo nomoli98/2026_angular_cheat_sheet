@@ -15,7 +15,8 @@ Files:
 | `counter/` | Component basics: create, read the HTML, click |
 | `greeting/` | `input()` and `output()` |
 | `../../../core/services/auth.service.spec.ts` | A service |
-| `login-form/` | A form + replacing a service with a fake |
+| `../../../core/controllers/*.spec.ts` | A controller (signals + a fake service) |
+| `login-form/` | A form + replacing a controller with a fake |
 
 ---
 
@@ -69,7 +70,7 @@ describe('CounterComponent', () => {   // a group of tests (usually: one per fil
 | Listen to an `output()` | `component.greet.subscribe(spy);` |
 | Create a spy (fake function) | `const spy = vi.fn();` |
 | Get a service | `service = TestBed.inject(AuthService);` |
-| Replace a service with a fake | `TestBed.configureTestingModule({ providers: [{ provide: AuthService, useValue: fake }] });` |
+| Replace a service / controller with a fake | `TestBed.configureTestingModule({ providers: [{ provide: AuthController, useValue: fake }] });` |
 | Fake the backend (no server) | `providers: [provideHttpClient(), provideHttpClientTesting()]` |
 | Answer an HTTP request | `TestBed.inject(HttpTestingController).expectOne(url).flush(data);` |
 | Wait for an Observable in a test | `const value = await firstValueFrom(service.getAll());` |
@@ -261,7 +262,7 @@ describe('AuthService', () => {
 
 ---
 
-## 6. A form + a fake service (mock)
+## 6. A form + a fake controller (mock)
 
 ### Type in a field
 
@@ -291,7 +292,7 @@ it('shows the welcome message after a good login', async () => {
   type(password(), 'BobIsTheBest99#');
   await fixture.whenStable();     // the button becomes enabled
 
-  button().click();               // the real AuthService sends GET /people?email=...
+  button().click();               // real AuthController → real AuthService → GET /people?email=...
   httpTesting.expectOne((r) => r.params.get('email') === 'bob@email.bob').flush([bob]);
   await fixture.whenStable();     // the welcome message appears
 
@@ -301,32 +302,34 @@ it('shows the welcome message after a good login', async () => {
 
 Same setup as the service test: `provideHttpClient()` + `provideHttpClientTesting()` in `configureTestingModule`, and `httpTesting.verify()` in `afterEach`.
 
-### Replace the service with a fake
+### Replace the controller with a fake
 
-Why? To test **only the component**: no HTTP at all, the fake decides the answer.
+Why? To test **only the component**: no controller logic, no service, no HTTP. The login form uses `AuthController` (see `core/controllers/CONTROLLER.md`), so we fake that.
+
+A controller exposes **signals** and **methods** that return nothing, so the fake is simple: real signals you `.set()` yourself, and `vi.fn()` for the methods.
 
 ```ts
-import { throwError } from 'rxjs';
-
 const fakeAuth = {
   currentUser: signal(null),
-  // login() returns an Observable → the fake returns one that errors right away
-  login: vi.fn().mockReturnValue(throwError(() => new Error('bad credentials'))),
+  error: signal<string | null>(null),
+  loading: signal(false),
+  login: vi.fn(),
   logout: vi.fn(),
 };
 
 beforeEach(async () => {
   vi.clearAllMocks();   // the spies forget the calls from the previous test
+  fakeAuth.error.set(null);
 
   TestBed.configureTestingModule({
-    providers: [{ provide: AuthService, useValue: fakeAuth }],   // 👈 "give fakeAuth instead"
+    providers: [{ provide: AuthController, useValue: fakeAuth }],   // 👈 "give fakeAuth instead"
   });
   fixture = TestBed.createComponent(LoginFormComponent);
   html = fixture.nativeElement;
   await fixture.whenStable();
 });
 
-it('sends the typed email and password to the service', async () => {
+it('sends the typed email and password to the controller', async () => {
   type(email(), 'bob@email.bob');
   type(password(), '1234');
   await fixture.whenStable();
@@ -335,9 +338,16 @@ it('sends the typed email and password to the service', async () => {
 
   expect(fakeAuth.login).toHaveBeenCalledWith({ email: 'bob@email.bob', password: '1234' });
 });
+
+it('shows the error the controller gives', async () => {
+  fakeAuth.error.set('Wrong email or password');   // just set the signal
+  await fixture.whenStable();
+
+  expect(html.textContent).toContain('Wrong email or password');
+});
 ```
 
-The fake only needs what the component **uses** (`currentUser`, `login`, `logout`).
+The fake only needs what the component **uses** (`currentUser`, `error`, `loading`, `login`, `logout`).
 
 | Spy | What it does |
 |---|---|

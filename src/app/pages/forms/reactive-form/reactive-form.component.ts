@@ -27,7 +27,7 @@ export class ReactiveFormComponent {
     name: new FormControl('', Validators.required),
     email: new FormControl('', {
       validators: [Validators.required, Validators.email],
-      asyncValidators: [emailTakenValidator()], // asks the API if the email is taken
+      asyncValidators: [emailTakenValidator()],
     }),
     password: new FormControl('', [Validators.required, strongPasswordValidator()]),
     // birthdate is a 'YYYY-MM-DD' string: <input type="date"> reads and writes that format directly
@@ -55,7 +55,7 @@ export class ReactiveFormComponent {
         subscription: this.formRegister.value.subscription!,
         agreeToTerms: this.formRegister.value.agreeToTerms!,
       };
-      //Call to you service here
+      //Call to your service here
       console.log(user);
     }
   }

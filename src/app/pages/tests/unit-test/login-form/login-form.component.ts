@@ -1,6 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '@core/services/auth.service';
+import { AuthController } from '@core/controllers/auth.controller';
 
 @Component({
   selector: 'app-login-form',
@@ -8,9 +8,8 @@ import { AuthService } from '@core/services/auth.service';
   templateUrl: './login-form.component.html',
 })
 export class LoginFormComponent {
-  protected readonly auth = inject(AuthService);
-
-  error = signal(false);
+  // The component talks to the CONTROLLER: no Observable, no subscribe here.
+  protected readonly auth = inject(AuthController);
 
   loginForm = new FormGroup({
     email: new FormControl('', {
@@ -21,12 +20,8 @@ export class LoginFormComponent {
   });
 
   onSubmit() {
-    this.error.set(false);
     // getRawValue() = { email, password } = a LoginRequest
-    this.auth.login(this.loginForm.getRawValue()).subscribe({
-      // next: nothing to do, the service already filled auth.currentUser()
-      error: () => this.error.set(true), // wrong email/password (or API down)
-    });
+    this.auth.login(this.loginForm.getRawValue());
   }
 
   logout() {
