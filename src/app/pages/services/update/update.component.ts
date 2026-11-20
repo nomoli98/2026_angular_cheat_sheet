@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { applyWhen, email, form, FormField, max, min, required } from '@angular/forms/signals';
 import { UserResponse } from '@core/responses/user.response';
@@ -8,6 +8,8 @@ import { errorMessage } from '@core/controllers/error-message';
 import { GenderEnum } from '@core/enums/gender.enum';
 import { strongPassword } from '@core/validators/signal-form/strong-password.validator';
 import { birthdate } from '@core/validators/signal-form/birthdate.validator';
+import { AuthService } from '@core/services/auth.service';
+import { isAdmin } from '@core/controllers/permissions';
 import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import update from './snippets/update.md';
 
@@ -49,6 +51,10 @@ export class UpdateComponent {
   protected readonly _updated = signal<UserResponse | null>(null);
   protected readonly _error = signal<string | null>(null);
 
+  // Who is logged in, and are they admin? computed() re-runs when the navbar toggle changes the user
+  private readonly _authService = inject(AuthService);
+  protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
+
   protected readonly _model = signal<UpdateModel>({ ...EMPTY });
 
   // Only the id is required. The other rules only matter when the field is filled in.
@@ -74,6 +80,11 @@ export class UpdateComponent {
 
     this._error.set(null);
     this._updated.set(null);
+    // 1. Check the role in the component first: not admin → don't even call the controller
+    if (!this._isAdmin()) {
+      this._error.set('forbidden: only an admin can update a user');
+      return;
+    }
 
     const { id, ...fields } = this._form().value();
     // Keep only the fields that were filled in
@@ -88,10 +99,11 @@ export class UpdateComponent {
 
     this._sent.set(changes);
     try {
+      // 2. The controller checks again, then calls the service
       this._updated.set(await this._userController.updatePartial(id, changes));
       this._model.set({ ...EMPTY, id }); // clear the fields, keep the id
     } catch (err) {
-      // 'unauthorized', 'forbidden' (not admin AND not you), 'user not found' or an HTTP error
+      // 'unauthorized', 'forbidden' (not admin), 'user not found' or an HTTP error
       this._error.set(errorMessage(err));
     }
   }

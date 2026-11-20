@@ -2,10 +2,17 @@
 
 <section class="card card-body mb-3">
   <p>
-    Calls <code>UserController.getOne(id)</code>: an <strong>admin</strong> can read anybody, a
-    simple user can only read <strong>their own</strong> account (any other id →
-    <code>forbidden</code>). An id that does not exist → <code>Not found</code>.
+    Calls <code>UserController.getOne(id)</code>: <strong>admin only</strong> (a simple user →
+    <code>forbidden</code>, even for their own id: they use <em>Get Me</em> for that). An id that
+    does not exist → <code>Not found</code>.
   </p>
+
+  @if (!_isAdmin()) {
+    <div class="alert alert-warning">
+      You are logged in as a <strong>simple user</strong>: only an admin can do this. Switch the
+      <em>Admin</em> toggle in the navbar back on.
+    </div>
+  }
 
   <form class="d-flex gap-2 align-items-start" (submit)="onSubmit($event)">
     <div>
@@ -19,14 +26,14 @@
         }
       }
     </div>
-    <button type="submit" class="btn btn-primary" [disabled]="_idForm().invalid()">Get One User</button>
+    <button type="submit" class="btn btn-primary" [disabled]="_idForm().invalid() || !_isAdmin()">Get One User</button>
   </form>
 
   @if (_error(); as error) {
     <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
   }
 
-  @if (_user(); as u) {
+  @if (_isAdmin() && _user(); as u) {
     <dl class="row mt-3 mb-0">
       <dt class="col-sm-3">Id</dt><dd class="col-sm-9">{{ u.id }}</dd>
       <dt class="col-sm-3">Name</dt><dd class="col-sm-9">{{ u.name }}</dd>

@@ -4,8 +4,14 @@
   <p>
     Calls <code>UserController.updatePartial(id, changes)</code> → <code>PATCH /people/:id</code>.
     PATCH only changes <strong>the fields you send</strong>: leave a field empty and it stays as it
-    is. Admin → anybody, simple user → only themselves.
+    is. <strong>Admin only</strong> (a simple user → <code>forbidden</code>).
   </p>
+  @if (!_isAdmin()) {
+    <div class="alert alert-warning">
+      You are logged in as a <strong>simple user</strong>: only an admin can do this. Switch the
+      <em>Admin</em> toggle in the navbar back on.
+    </div>
+  }
   <p class="text-body-secondary small mb-0">
     This really changes <code>fake-api/db.json</code>. Undo everything with
     <code>npm run api:reset</code>.
@@ -96,7 +102,7 @@
   </div>
 
   <div>
-    <button type="submit" class="btn btn-primary" [disabled]="_form().invalid()">Update</button>
+    <button type="submit" class="btn btn-primary" [disabled]="_form().invalid() || !_isAdmin()">Update</button>
   </div>
 
   @if (_sent(); as sent) {

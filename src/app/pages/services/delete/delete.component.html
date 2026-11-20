@@ -2,10 +2,17 @@
 
 <section class="card card-body mb-3">
   <p>
-    Calls <code>UserController.delete(id)</code> → <code>DELETE /people/:id</code>. Admin →
-    anybody, simple user → only themselves. An id that does not exist →
+    Calls <code>UserController.delete(id)</code> → <code>DELETE /people/:id</code>.
+    <strong>Admin only</strong> (a simple user → <code>forbidden</code>). An id that does not exist →
     <code>This user does not exist</code>.
   </p>
+
+  @if (!_isAdmin()) {
+    <div class="alert alert-warning">
+      You are logged in as a <strong>simple user</strong>: only an admin can do this. Switch the
+      <em>Admin</em> toggle in the navbar back on.
+    </div>
+  }
   <p class="text-body-secondary small">
     This really deletes the user in <code>fake-api/db.json</code>. Get everybody back with
     <code>npm run api:reset</code>.
@@ -23,7 +30,7 @@
         }
       }
     </div>
-    <button type="submit" class="btn btn-danger" [disabled]="_idForm().invalid() || _confirming()">
+    <button type="submit" class="btn btn-danger" [disabled]="_idForm().invalid() || _confirming() || !_isAdmin()">
       Delete User
     </button>
   </form>

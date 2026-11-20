@@ -74,6 +74,11 @@ export class TokenAuthService {
     return this._http.get<UserResponse>(`${this._url}/me`);
   }
 
+  // ADMIN only, checked by the SERVER: 401 (no/bad token) or 403 (not admin)
+  getUsers(): Observable<UserResponse[]> {
+    return this._http.get<UserResponse[]>(`${this._url}/users`);
+  }
+
   logout(): void {
     this._setToken(null);
   }

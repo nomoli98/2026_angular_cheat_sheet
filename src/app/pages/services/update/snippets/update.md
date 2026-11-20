@@ -11,7 +11,7 @@
     ...
   </select>
 
-  <button type="submit" [disabled]="_form().invalid()">Update</button>
+  <button type="submit" [disabled]="_form().invalid() || !_isAdmin()">Update</button>
 </form>
 ```
 
@@ -29,6 +29,10 @@ interface UpdateModel {
 }
 
 export class UpdateComponent {
+  // Who is logged in, and are they admin? Re-computed when the user changes (navbar toggle)
+  private readonly _authService = inject(AuthService);
+  protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
+
   protected readonly _model = signal<UpdateModel>({
     id: 2, name: '', email: '', password: '', birthdate: '', height: null, gender: '', subscription: '',
   });
@@ -45,6 +49,11 @@ export class UpdateComponent {
   async onSubmit(event: Event) {
     event.preventDefault();
     if (this._form().invalid()) return;
+    // 1. Check in the component: not admin → don't even call the controller
+    if (!this._isAdmin()) {
+      this._error.set('forbidden: only an admin can update a user');
+      return;
+    }
 
     const { id, ...fields } = this._form().value();
     // Keep only the fields that were filled in
@@ -54,6 +63,7 @@ export class UpdateComponent {
     // e.g. { height: 170 } → PATCH /people/2 with { "height": 170 }
 
     try {
+      // 2. The controller checks again, then calls the service
       this._updated.set(await this._userController.updatePartial(id, changes));
     } catch (err) {
       this._error.set(errorMessage(err));
@@ -64,10 +74,10 @@ export class UpdateComponent {
 
 ```ts user.controller.ts
 // core/controllers/user.controller.ts
-// admin, or yourself
+// admin only
 async updatePartial(id: number, changes: Partial<RegisterRequest>): Promise<UserResponse> {
   const user = this._authService.currentUser();
-  if (!isAdminOrSelf(user, id)) deny(user);
+  if (!isAdmin(user)) deny(user);
   return firstValueFrom(this._userService.updatePartial(id, changes));
 }
 ```

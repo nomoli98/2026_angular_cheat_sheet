@@ -12,7 +12,7 @@ Three pieces work together:
 | ----- | ---- | --- |
 | **AuthService** | `core/services/auth.service.ts` | knows **who is logged in**: `currentUser()` signal, `login()`, `logout()` |
 | **Route guard** | `core/guards/auth.guard.ts` | runs **before** a page opens: logged in → open it, otherwise → redirect |
-| **Auth toggle** | `shared/auth-toggle/` | the switch in the navbar: on = log in as Bob, off = log out (a demo helper, like a theme toggle) |
+| **Auth toggle** | `shared/auth-toggle/` | the 2 switches in the navbar: **logged in** (on = log in, off = log out) and **Admin** (on = Bob, off = Alice). A demo helper, like a theme toggle |
 
 ```
 toggle off → AuthService.logout() → currentUser() = null
@@ -64,7 +64,7 @@ Pages don't call `AuthService` directly: they go through `AuthController` (`core
 
 Both forms are **signal forms** (see `SIGNAL_FORM.md`). The login form only checks that the fields are filled: no `strongPassword()` on login, the API says if the password is right.
 
-> 💡 The toggle (section 3) is separate: after a refresh it logs **Bob** back in if it's on, whoever you logged in as.
+> 💡 The toggle (section 3) is separate: after a refresh it logs **Bob** (or **Alice** if Admin is off) back in if it's on, whoever you logged in as.
 
 ---
 
@@ -157,14 +157,22 @@ export class AuthServiceComponent {
 
 ## 3. The auth toggle (demo helper)
 
-A switch in the navbar, like a theme toggle. **On by default**, so the protected pages work right away.
+Two switches in the navbar, like a theme toggle. **On + Admin by default**, so the protected pages work right away.
 
-| | On | Off |
-| - | -- | --- |
-| What it does | `AuthService.login(Bob)`: a **real** request to json-server | `AuthService.logout()` + re-runs the guard of the current page |
-| Label | `Logged in as Bob Martin (admin)` | `Logged out` |
+| Logged in | On | Off |
+| --------- | -- | --- |
+| What it does | `AuthService.login(Bob or Alice)`: a **real** request to json-server | `AuthService.logout()` + re-runs the guard of the current page |
+| Label | `Logged in as Bob Martin` + a role badge | `Logged out` |
 | `/service/*` pages | open | redirect to `/auth/auth-service` |
 | Saved in `localStorage` (`auth-toggle`) | `'on'` | `'off'` |
+
+| Admin | On | Off |
+| ----- | -- | --- |
+| Logs in as | Bob (`admin`) | Alice (`user`): the CRUD buttons get disabled, `adminGuard` pages kick you out |
+| Saved in `localStorage` (`auth-role`) | `'admin'` | `'user'` |
+| While logged out | disabled (the choice is kept for the next login) | |
+
+Roles, `isAdmin`, `adminGuard`: see `../authorization/AUTHORIZATION.md`.
 
 ### 3.1 Log in again when the app starts
 
@@ -180,7 +188,8 @@ providers: [
 
 ```ts
 async init(): Promise<void> {
-  if (this._read() !== 'off') await this._login(); // nothing saved = 'on' (default)
+  if (this._read('auth-toggle') !== 'off') await this._login(); // nothing saved = 'on' (default)
+  // _login() uses the account of the saved role: 'auth-role' = 'user' → Alice, otherwise Bob
 }
 ```
 
@@ -198,9 +207,9 @@ await this._router.navigateByUrl(this._router.url, { onSameUrlNavigation: 'reloa
 ### 3.3 `localStorage`, safely
 
 ```ts
-private _read(): string | null {
+private _read(key: string): string | null { // 'auth-toggle' or 'auth-role'
   try {
-    return localStorage.getItem('auth-toggle');
+    return localStorage.getItem(key);
   } catch {
     return null; // blocked (private mode, sandbox...): never crash for a preference
   }
@@ -264,6 +273,10 @@ json-server isn't running. Use `npm run dev` (not `npm start`), then turn the to
 ### I turned the toggle off but I'm still on the protected page
 
 The guard didn't run again. Check both: `runGuardsAndResolvers: 'always'` on the **parent** route with `canActivate`, and `navigateByUrl(url, { onSameUrlNavigation: 'reload' })` after the logout. With `canActivateChild` it doesn't work: the child route didn't change, so its check is skipped.
+
+### The toggle logs in as Alice instead of Bob
+
+The **Admin** switch is off (saved as `auth-role = 'user'`). Turn it on, or `localStorage.removeItem('auth-role')`.
 
 ### Infinite redirect / the page never loads
 

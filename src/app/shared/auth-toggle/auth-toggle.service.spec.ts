@@ -21,6 +21,14 @@ const bob: UserResponse = {
   role: RoleEnum.ADMIN,
 };
 
+const alice: UserResponse = {
+  ...bob,
+  id: 2,
+  name: 'Alice Dupont',
+  email: 'alice.dupont@mail.com',
+  role: RoleEnum.USER,
+};
+
 describe('AuthToggleService', () => {
   let toggle: AuthToggleService;
 
@@ -28,9 +36,10 @@ describe('AuthToggleService', () => {
   const currentUser = signal<UserResponse | null>(null);
   const fakeAuth = {
     currentUser,
-    login: vi.fn(() => {
-      currentUser.set(bob);
-      return of(bob);
+    login: vi.fn((request: { email: string }) => {
+      const user = request.email === alice.email ? alice : bob;
+      currentUser.set(user);
+      return of(user);
     }),
     logout: vi.fn(() => currentUser.set(null)),
   };
@@ -82,5 +91,50 @@ describe('AuthToggleService', () => {
 
     expect(toggle.isOn()).toBe(false);
     expect(toggle.error()).toContain('npm run dev');
+  });
+
+  describe('admin switch (Bob ↔ Alice)', () => {
+    it('setRole(USER) logs in again as Alice and saves it', async () => {
+      await toggle.init(); // Bob
+
+      await toggle.setRole(RoleEnum.USER);
+
+      expect(fakeAuth.login).toHaveBeenLastCalledWith({
+        email: 'alice.dupont@mail.com',
+        password: 'AliceIsTheBest99#',
+      });
+      expect(toggle.isAdmin()).toBe(false);
+      expect(localStorage.getItem('auth-role')).toBe('user');
+    });
+
+    it('setRole(ADMIN) logs in again as Bob', async () => {
+      await toggle.init();
+      await toggle.setRole(RoleEnum.USER);
+
+      await toggle.setRole(RoleEnum.ADMIN);
+
+      expect(toggle.user()?.email).toBe('bob@email.bob');
+      expect(toggle.isAdmin()).toBe(true);
+    });
+
+    it('when logged out, setRole() only remembers the choice (no login)', async () => {
+      await toggle.setRole(RoleEnum.USER);
+
+      expect(fakeAuth.login).not.toHaveBeenCalled();
+      expect(toggle.role()).toBe(RoleEnum.USER);
+    });
+
+    it("init() logs in as Alice when 'user' was saved", async () => {
+      localStorage.setItem('auth-role', 'user');
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [provideRouter([]), { provide: AuthService, useValue: fakeAuth }],
+      });
+      toggle = TestBed.inject(AuthToggleService); // reads localStorage when it is created
+
+      await toggle.init();
+
+      expect(toggle.user()?.email).toBe('alice.dupont@mail.com');
+    });
   });
 });

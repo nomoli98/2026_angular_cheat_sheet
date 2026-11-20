@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from '@core/guards/admin.guard';
 
 // NOT protected: you need these pages to log in (protecting them would loop forever)
 export const routes: Routes = [
@@ -15,6 +16,20 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () => import('./login/login.component').then((m) => m.LoginComponent),
+  },
+  // Roles: who can do what (see authorization/AUTHORIZATION.md)
+  {
+    // not protected: adminGuard sends simple users here (?forbidden=...)
+    path: 'authorization',
+    loadComponent: () =>
+      import('./authorization/authorization.component').then((m) => m.AuthorizationComponent),
+  },
+  {
+    path: 'authorization/admin-area',
+    canActivate: [adminGuard], // admins only
+    runGuardsAndResolvers: 'always', // re-run when the Admin toggle reloads the same URL
+    loadComponent: () =>
+      import('./authorization/admin-area/admin-area.component').then((m) => m.AdminAreaComponent),
   },
   // Same job, password stored as a bcrypt hash (see bcrypt/BCRYPT.md)
   {

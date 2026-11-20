@@ -11,7 +11,7 @@ Demo pages: `/auth/token/explain` (your token, decoded, + calls to a protected r
 | Who checks the password | Angular (`bcryptjs` in the browser) | the **server** (`fake-api/auth-server.js`) |
 | What login gives back | the user | the user **+ a signed token (JWT)** |
 | After a refresh | logged out (a signal in memory) | **still logged in** (token in `localStorage`) |
-| Can the server protect a route? | no, it doesn't know who asks | yes: `GET /token/me` needs a valid token |
+| Can the server protect a route? | no, it doesn't know who asks | yes: `GET /token/me` needs a valid token, `GET /token/users` needs an **admin** token (`403` otherwise, see `../authorization/AUTHORIZATION.md`) |
 
 ```
 Angular ──▶ auth-server.js (localhost:3001) ──▶ json-server (localhost:3000) ──▶ db.json

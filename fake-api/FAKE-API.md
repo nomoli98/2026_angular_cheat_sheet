@@ -456,6 +456,7 @@ Angular ──▶ auth-server.js (localhost:3001) ──▶ json-server (localho
 | `POST /token/register` | `RegisterRequest` | `201 { token, user }`, `409` if the email is taken |
 | `POST /token/login` | `{ email, password }` | `200 { token, user }`, `401 bad credentials` |
 | `GET /token/me` | `Authorization: Bearer <token>` | `200` the user, `401 no token` / `invalid token` / `token expired` |
+| `GET /token/users` | `Authorization: Bearer <token>` | `200` all users (no passwords) for an **admin**, `403 forbidden` for a user, `401` without a valid token |
 | `GET /health` | – | `200`: Playwright waits for it before the tests |
 
 - It never writes `db.json` itself: it asks json-server over HTTP. Two programs writing the same file would overwrite each other.

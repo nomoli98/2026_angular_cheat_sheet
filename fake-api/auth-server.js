@@ -7,6 +7,7 @@
 // POST /token/register  { name, email, password, ... }  → 201 { token, user }
 // POST /token/login     { email, password }              → 200 { token, user }
 // GET  /token/me        Authorization: Bearer <token>    → 200 user, or 401
+// GET  /token/users     Authorization: Bearer <token>    → 200 users (ADMIN only), 401 or 403
 // GET  /health                                           → 200 (Playwright waits for it)
 //
 // Plain Node (no Express) so every step is visible. Start it with `npm run api:auth`
@@ -46,21 +47,43 @@ async function login(body) {
   return [200, { token: sign(user, expiresIn), user: withoutPassword(user) }];
 }
 
+// logged in (any role)
 async function me(headers) {
+  const [user, error] = await authenticate(headers);
+  if (error) return error;
+  return [200, withoutPassword(user)];
+}
+
+// ADMIN only: the AUTHORIZATION check, done by the server (the one that really protects the data)
+async function users(headers) {
+  const [user, error] = await authenticate(headers); // 1. WHO are you? (401 if we don't know)
+  if (error) return error;
+  if (user.role !== 'admin') return [403, { message: 'forbidden' }]; // 2. ALLOWED? (403 if not)
+  const all = await data('');
+  return [200, all.map(withoutPassword)];
+}
+
+// ---------- authentication: who is calling? ----------
+
+// Returns [user, null] when the token is good, or [null, [401, {...}]] when it isn't.
+// The role comes from the DATABASE, not from the token: if an admin is demoted,
+// it counts right away (the token keeps the old role until it expires).
+async function authenticate(headers) {
   const auth = headers['authorization'] ?? '';
-  if (!auth.startsWith('Bearer ')) return [401, { message: 'no token' }];
+  if (!auth.startsWith('Bearer ')) return [null, [401, { message: 'no token' }]];
 
   let payload;
   try {
     // verify() checks the SIGNATURE (nobody changed it) and the EXPIRY (exp)
     payload = jwt.verify(auth.slice('Bearer '.length), JWT_SECRET);
   } catch (err) {
-    return [401, { message: err.name === 'TokenExpiredError' ? 'token expired' : 'invalid token' }];
+    const message = err.name === 'TokenExpiredError' ? 'token expired' : 'invalid token';
+    return [null, [401, { message }]];
   }
 
   const user = await data(`/${payload.sub}`).catch(() => null);
-  if (!user) return [401, { message: 'user not found' }];
-  return [200, withoutPassword(user)];
+  if (!user) return [null, [401, { message: 'user not found' }]];
+  return [user, null];
 }
 
 // ---------- helpers ----------
@@ -119,6 +142,7 @@ const server = http.createServer(async (req, res) => {
     if (route === 'POST /token/register') return send(await register(await readBody(req)));
     if (route === 'POST /token/login') return send(await login(await readBody(req)));
     if (route === 'GET /token/me') return send(await me(req.headers));
+    if (route === 'GET /token/users') return send(await users(req.headers));
     if (route === 'GET /health') return send([200, { ok: true }]);
     send([404, { message: 'not found' }]);
   } catch (err) {

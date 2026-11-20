@@ -2,7 +2,7 @@
 <form (submit)="onSubmit($event)">
   <!-- WHICH user -->
   <input type="number" [formField]="_form.id" />
-  <button type="button" (click)="onLoad()">Load current values</button>
+  <button type="button" (click)="onLoad()" [disabled]="!_isAdmin()">Load current values</button>
 
   <!-- ALL the fields (PUT replaces everything) -->
   <input type="text" [formField]="_form.name" />
@@ -14,7 +14,7 @@
   <select [formField]="_form.subscription">...</select>
   <input type="checkbox" [formField]="_form.agreeToTerms" />
 
-  <button type="submit" [disabled]="_form().invalid()">Update Fully</button>
+  <button type="submit" [disabled]="_form().invalid() || !_isAdmin()">Update Fully</button>
 </form>
 
 @if (_error(); as error) {
@@ -39,6 +39,10 @@ export class UpdateFullyComponent {
   protected readonly _updated = signal<UserResponse | null>(null);
   protected readonly _error = signal<string | null>(null);
 
+  // Who is logged in, and are they admin? Re-computed when the user changes (navbar toggle)
+  private readonly _authService = inject(AuthService);
+  protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
+
   protected readonly _model = signal<UpdateFullyModel>({
     id: 2, name: '', email: '', password: '', birthdate: '',
     height: 170, gender: GenderEnum.OTHER, subscription: 'free', agreeToTerms: true,
@@ -56,6 +60,11 @@ export class UpdateFullyComponent {
 
   // Fill the form with the current values: set() the model signal, the inputs follow
   async onLoad() {
+    // 1. Check in the component: not admin → don't even call the controller
+    if (!this._isAdmin()) {
+      this._error.set('forbidden: only an admin can read a user');
+      return;
+    }
     const { id, name, email, birthdate, height, gender, subscription } =
       await this._userController.getOne(this._form.id().value());
     this._model.set({
@@ -68,6 +77,11 @@ export class UpdateFullyComponent {
   async onSubmit(event: Event) {
     event.preventDefault();
     if (this._form().invalid()) return;
+    // 1. Check in the component: not admin → don't even call the controller
+    if (!this._isAdmin()) {
+      this._error.set('forbidden: only an admin can update a user');
+      return;
+    }
 
     // rest syntax: take `id` out, everything else goes in `request`
     const { id, ...request } = this._form().value();
@@ -82,10 +96,10 @@ export class UpdateFullyComponent {
 
 ```ts user.controller.ts
 // core/controllers/user.controller.ts
-// admin, or yourself
+// admin only
 async updateFully(id: number, request: RegisterRequest): Promise<UserResponse> {
   const user = this._authService.currentUser();
-  if (!isAdminOrSelf(user, id)) deny(user);
+  if (!isAdmin(user)) deny(user);
   return firstValueFrom(this._userService.updateFully(id, request));
 }
 ```

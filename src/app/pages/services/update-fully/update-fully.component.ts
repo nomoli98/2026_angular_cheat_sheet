@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { email, form, FormField, max, min, required, validate } from '@angular/forms/signals';
 import { UserResponse } from '@core/responses/user.response';
 import { RegisterRequest } from '@core/requests/register.request';
@@ -7,6 +7,8 @@ import { errorMessage } from '@core/controllers/error-message';
 import { GenderEnum } from '@core/enums/gender.enum';
 import { strongPassword } from '@core/validators/signal-form/strong-password.validator';
 import { birthdate } from '@core/validators/signal-form/birthdate.validator';
+import { AuthService } from '@core/services/auth.service';
+import { isAdmin } from '@core/controllers/permissions';
 import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import updateFully from './snippets/update-fully.md';
 
@@ -26,6 +28,10 @@ export class UpdateFullyComponent {
   protected readonly _userController = inject(UserController);
   protected readonly _updated = signal<UserResponse | null>(null);
   protected readonly _error = signal<string | null>(null);
+
+  // Who is logged in, and are they admin? computed() re-runs when the navbar toggle changes the user
+  private readonly _authService = inject(AuthService);
+  protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
 
   protected readonly _model = signal<UpdateFullyModel>({
     id: 2,
@@ -63,6 +69,11 @@ export class UpdateFullyComponent {
   // Fill the form with the current values (the password is never sent back → type a new one)
   async onLoad() {
     this._error.set(null);
+    // 1. Check the role in the component first: not admin → don't even call the controller
+    if (!this._isAdmin()) {
+      this._error.set('forbidden: only an admin can read a user');
+      return;
+    }
     try {
       const { id, name, email, birthdate, height, gender, subscription } =
         await this._userController.getOne(this._form.id().value());
@@ -88,12 +99,18 @@ export class UpdateFullyComponent {
 
     this._error.set(null);
     this._updated.set(null);
+    // 1. Check the role in the component first: not admin → don't even call the controller
+    if (!this._isAdmin()) {
+      this._error.set('forbidden: only an admin can update a user');
+      return;
+    }
     // split the id from the body we send
     const { id, ...request } = this._form().value();
     try {
+      // 2. The controller checks again, then calls the service
       this._updated.set(await this._userController.updateFully(id, request));
     } catch (err) {
-      // 'unauthorized', 'forbidden' (not admin AND not you), 'user not found' or an HTTP error
+      // 'unauthorized', 'forbidden' (not admin), 'user not found' or an HTTP error
       this._error.set(errorMessage(err));
     }
   }

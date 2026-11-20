@@ -75,25 +75,37 @@ describe('UserController', () => {
     });
   });
 
-  describe('getOne / update / delete (admin or yourself)', () => {
-    it('a user can read their own account', async () => {
-      currentUser.set(alice);
+  describe('getOne / update / delete (admin only)', () => {
+    it('an admin can read anybody', async () => {
+      currentUser.set(bob);
 
       expect(await controller.getOne(2)).toEqual(alice);
     });
 
-    it("a user cannot read someone else's account", async () => {
+    it('a user cannot read an account, not even their own', async () => {
       currentUser.set(alice);
 
-      await expect(controller.getOne(1)).rejects.toThrow('forbidden');
+      await expect(controller.getOne(2)).rejects.toThrow('forbidden');
+      expect(fakeUserService.getOne).not.toHaveBeenCalled();
     });
 
-    it('a user can update their own account', async () => {
-      currentUser.set(alice);
+    it('an admin can update anybody', async () => {
+      currentUser.set(bob);
 
       await controller.updatePartial(2, { height: 170 });
 
       expect(fakeUserService.updatePartial).toHaveBeenCalledWith(2, { height: 170 });
+    });
+
+    it('a user cannot update an account, not even their own', async () => {
+      currentUser.set(alice);
+
+      await expect(controller.updatePartial(2, { height: 170 })).rejects.toThrow('forbidden');
+      await expect(
+        controller.updateFully(2, {} as Parameters<UserController['updateFully']>[1]),
+      ).rejects.toThrow('forbidden');
+      expect(fakeUserService.updatePartial).not.toHaveBeenCalled();
+      expect(fakeUserService.updateFully).not.toHaveBeenCalled();
     });
 
     it('an admin can delete anybody', async () => {
@@ -104,11 +116,16 @@ describe('UserController', () => {
       expect(fakeUserService.delete).toHaveBeenCalledWith(2);
     });
 
-    it("a user cannot delete someone else's account", async () => {
+    it('a user cannot delete an account, not even their own', async () => {
       currentUser.set(alice);
 
-      await expect(controller.delete(1)).rejects.toThrow('forbidden');
+      await expect(controller.delete(2)).rejects.toThrow('forbidden');
       expect(fakeUserService.delete).not.toHaveBeenCalled();
+    });
+
+    it('everything is unauthorized when nobody is logged in', async () => {
+      await expect(controller.getOne(2)).rejects.toThrow('unauthorized');
+      await expect(controller.delete(2)).rejects.toThrow('unauthorized');
     });
   });
 

@@ -4,13 +4,19 @@
   <p>
     Calls <code>UserController.updateFully(id, request)</code> → <code>PUT /people/:id</code>.
     PUT <strong>replaces the whole user</strong>: every field must be sent, even the ones that do
-    not change. Admin → anybody, simple user → only themselves. Use <em>Load current values</em> to
+    not change. <strong>Admin only</strong> (a simple user → <code>forbidden</code>). Use <em>Load current values</em> to
     fill the form first (the password is never sent back, so type a new one).
   </p>
   <p class="text-body-secondary small mb-0">
     This really changes <code>fake-api/db.json</code>. Undo everything with
     <code>npm run api:reset</code>.
   </p>
+  @if (!_isAdmin()) {
+    <div class="alert alert-warning mt-3 mb-0">
+      You are logged in as a <strong>simple user</strong>: only an admin can do this. Switch the
+      <em>Admin</em> toggle in the navbar back on.
+    </div>
+  }
 </section>
 
 <form class="card card-body" (submit)="onSubmit($event)">
@@ -20,7 +26,7 @@
       <input id="id" type="number" class="form-control" [formField]="_form.id"
              [class.is-invalid]="_form.id().touched() && _form.id().invalid()" />
       <button type="button" class="btn btn-outline-secondary text-nowrap" (click)="onLoad()"
-              [disabled]="_form.id().invalid()">Load current values</button>
+              [disabled]="_form.id().invalid() || !_isAdmin()">Load current values</button>
     </div>
     @if (_form.id().touched()) {
       @for (error of _form.id().errors(); track error.kind) {
@@ -114,7 +120,7 @@
   </div>
 
   <div>
-    <button type="submit" class="btn btn-primary" [disabled]="_form().invalid()">Update Fully</button>
+    <button type="submit" class="btn btn-primary" [disabled]="_form().invalid() || !_isAdmin()">Update Fully</button>
   </div>
 
   @if (_error(); as error) {

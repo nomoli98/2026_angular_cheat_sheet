@@ -4,7 +4,7 @@ import { TokenAuthService, TokenUser } from '@core/services/token-auth.service';
 import { UserResponse } from '@core/responses/user.response';
 import { LoginRequest } from '@core/requests/login.request';
 import { RegisterRequest } from '@core/requests/register.request';
-import { deny } from '@core/controllers/permissions';
+import { deny, isAdmin } from '@core/controllers/permissions';
 
 // Same as BcryptAuthController, for the token version. The pages only see Promises.
 @Service()
@@ -25,6 +25,14 @@ export class TokenAuthController {
   async me(): Promise<UserResponse> {
     if (!this._authService.currentUser()) deny(null);
     return firstValueFrom(this._authService.me());
+  }
+
+  // admin only. Checked HERE (no useless request) and AGAIN by the server (the real check):
+  // try it with the role switched off here → the server still answers 403
+  async getUsers(skipFrontCheck = false): Promise<UserResponse[]> {
+    const user = this._authService.currentUser();
+    if (!skipFrontCheck && !isAdmin(user)) deny(user);
+    return firstValueFrom(this._authService.getUsers());
   }
 
   // logged in only

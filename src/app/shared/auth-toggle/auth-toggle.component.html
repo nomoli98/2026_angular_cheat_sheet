@@ -1,22 +1,42 @@
-<div class="form-check form-switch mb-0" [title]="toggle.error() ?? ''">
-  <input
-    class="form-check-input"
-    type="checkbox"
-    role="switch"
-    id="auth-toggle"
-    [checked]="toggle.isOn()"
-    [disabled]="toggle.busy()"
-    (change)="toggle.set($any($event.target).checked)"
-  />
-  <label class="form-check-label small" for="auth-toggle">
-    @if (toggle.busy()) {
-      Logging in...
-    } @else if (toggle.user(); as user) {
-      Logged in as {{ user.name }} ({{ user.role }})
-    } @else if (toggle.error()) {
-      <span class="text-danger">Login failed</span>
-    } @else {
-      Logged out
-    }
-  </label>
+<div class="d-flex align-items-center gap-3">
+  <!-- 1. logged in / logged out -->
+  <div class="form-check form-switch mb-0" [title]="toggle.error() ?? ''">
+    <input
+      class="form-check-input"
+      type="checkbox"
+      role="switch"
+      id="auth-toggle"
+      [checked]="toggle.isOn()"
+      [disabled]="toggle.busy()"
+      (change)="toggle.set($any($event.target).checked)"
+    />
+    <label class="form-check-label small" for="auth-toggle">
+      @if (toggle.busy()) {
+        Logging in...
+      } @else if (toggle.user(); as user) {
+        Logged in as {{ user.name }}
+        <span class="badge" [class]="toggle.isAdmin() ? 'text-bg-danger' : 'text-bg-secondary'">
+          {{ user.role }}
+        </span>
+      } @else if (toggle.error()) {
+        <span class="text-danger">Login failed</span>
+      } @else {
+        Logged out
+      }
+    </label>
+  </div>
+
+  <!-- 2. admin (Bob) / simple user (Alice). Only useful when logged in -->
+  <div class="form-check form-switch mb-0" title="On: Bob (admin) · Off: Alice (user)">
+    <input
+      class="form-check-input"
+      type="checkbox"
+      role="switch"
+      id="role-toggle"
+      [checked]="toggle.role() === RoleEnum.ADMIN"
+      [disabled]="toggle.busy() || !toggle.isOn()"
+      (change)="toggle.setRole($any($event.target).checked ? RoleEnum.ADMIN : RoleEnum.USER)"
+    />
+    <label class="form-check-label small" for="role-toggle">Admin</label>
+  </div>
 </div>

@@ -18,6 +18,8 @@ Component ──await──▶ Controller ──allowed?──▶ Service ──
 | **Controller** (`core/controllers/`) | "is the logged-in user allowed?" + Observable → Promise | `Promise<...>` |
 | **Component** | the form / the page | – (it `await`s) |
 
+> 💡 Roles, the component check, `adminGuard`, the Admin toggle and the server-side check: see `pages/auth/authorization/AUTHORIZATION.md` (demo page `/auth/authorization`).
+
 > ⚠️ This is a **front-end** check: it hides what the user can't do and avoids useless requests. It is **not** security, anyone can call json-server with curl. A real API must check the permissions again on the server.
 
 ---
@@ -29,6 +31,7 @@ src/app/core/
 ├── enums/role.enum.ts            ← RoleEnum.ADMIN = 'admin', RoleEnum.USER = 'user'
 └── controllers/
     ├── permissions.ts            ← isLoggedIn(), isAdmin(), isAdminOrSelf(), deny()
+    ├── token-auth.controller.ts  ← token version: login, register, me, getUsers (admin, checked by the server too)
     ├── auth.controller.ts        ← login, register (public), logout (logged in)
     ├── user.controller.ts        ← getAll, getOne, getMe, create, updateFully, updatePartial, delete
     ├── auth.controller.spec.ts
@@ -53,7 +56,7 @@ export enum RoleEnum {
 | Who | Role |
 | --- | ---- |
 | Bob (`bob@email.bob` / `BobIsTheBest99#`) | `admin` |
-| everybody else in `db.seed.json` | `user` |
+| Alice (`alice.dupont@mail.com` / `AliceIsTheBest99#`) and everybody else in `db.seed.json` | `user` |
 | every new account (`UserService.create`) | `user`, always: the service adds `role: RoleEnum.USER` |
 
 > 💡 `UserService.updateFully` (PUT) keeps the current role: PUT replaces the whole object and `RegisterRequest` has no `role`, so without that the role would be deleted.
@@ -69,17 +72,20 @@ export function isLoggedIn(user: UserResponse | null): user is UserResponse {
   return user !== null;
 }
 
-export function isAdmin(user: UserResponse | null): boolean {
+// anything with an id and a role: a UserResponse, or the user read from a JWT
+type WithRole = Pick<UserResponse, 'id' | 'role'>;
+
+export function isAdmin(user: WithRole | null): boolean {
   return user?.role === RoleEnum.ADMIN;
 }
 
-// Admin, or the user working on their OWN account
-export function isAdminOrSelf(user: UserResponse | null, id: number): boolean {
+// Admin, or the user working on their OWN account (not used by UserController anymore: example only)
+export function isAdminOrSelf(user: WithRole | null, id: number): boolean {
   return isAdmin(user) || user?.id === id;
 }
 
 // Throws the right error when the check fails
-export function deny(user: UserResponse | null): never {
+export function deny(user: WithRole | null): never {
   throw new Error(user ? 'forbidden' : 'unauthorized');
 }
 ```
@@ -106,10 +112,10 @@ export class UserController {
     return firstValueFrom(this._userService.getAll());    // 3. allowed → Observable → Promise
   }
 
-  // admin, or yourself
+  // admin only
   async delete(id: number): Promise<void> {
     const user = this._authService.currentUser();
-    if (!isAdminOrSelf(user, id)) deny(user);
+    if (!isAdmin(user)) deny(user);
     await firstValueFrom(this._userService.delete(id), { defaultValue: undefined });
   }
 }
@@ -155,12 +161,14 @@ async getAll() {
 | Method | Allowed | Returns |
 | ------ | ------- | ------- |
 | `getAll()` | admin | `Promise<UserResponse[]>` |
-| `getOne(id)` | admin, or yourself | `Promise<UserResponse>` |
-| `getMe()` | anybody logged in (reads their own account) | `Promise<UserResponse>` |
+| `getOne(id)` | admin | `Promise<UserResponse>` |
+| `getMe()` | **anybody logged in** (reads their own account) | `Promise<UserResponse>` |
 | `create(request)` | admin (people make their own account with `AuthController.register`) | `Promise<UserResponse>` |
-| `updateFully(id, request)` | admin, or yourself | `Promise<UserResponse>` |
-| `updatePartial(id, changes)` | admin, or yourself | `Promise<UserResponse>` |
-| `delete(id)` | admin, or yourself | `Promise<void>` |
+| `updateFully(id, request)` | admin | `Promise<UserResponse>` |
+| `updatePartial(id, changes)` | admin | `Promise<UserResponse>` |
+| `delete(id)` | admin | `Promise<void>` |
+
+> 💡 Rule of thumb: **every CRUD method is admin only, except `getMe()`**. A simple user reads themselves with `getMe()` (no id to cheat with). The pages check `isAdmin()` too, to disable their buttons (see `AUTHORIZATION.md`).
 
 ### `AuthController`
 
@@ -168,6 +176,15 @@ async getAll() {
 | ------ | ------- | ------- |
 | `login(request)` | everybody (public) | `Promise<UserResponse>` |
 | `register(request)` | everybody (public), logs the new user in | `Promise<UserResponse>` |
+| `logout()` | logged in | `Promise<void>` |
+
+### `TokenAuthController`
+
+| Method | Allowed | Returns |
+| ------ | ------- | ------- |
+| `login` / `register` | everybody (public) | `Promise<UserResponse>` |
+| `me()` | logged in (the server checks the token) | `Promise<UserResponse>` |
+| `getUsers()` | admin (checked here **and** by the server: `GET /token/users` → `403`) | `Promise<UserResponse[]>` |
 | `logout()` | logged in | `Promise<void>` |
 
 Change a rule? Change the `if` in that method. Need a new rule (e.g. "premium only")? Add a helper in `permissions.ts`:
@@ -315,6 +332,14 @@ Nobody caught the rejected Promise. Put the `await` in a `try { } catch { }`.
 
 - Bob isn't logged in **as admin**: check `db.json` has `"role": "admin"` for him. Old `db.json` from before the roles? Run `npm run api:reset`.
 - The check ran **before** the login finished. `await` the login first, then call the controller.
+
+### `forbidden` for Alice on Get One / Update / Delete, even for her own id
+
+Normal: those are admin only now. A simple user reads their own account with `getMe()` (`/service/get-me`).
+
+### The buttons are disabled on the `/service` pages
+
+You're logged in as Alice: the **Admin** switch (navbar) is off. Turn it on (= Bob).
 
 ### `unauthorized` right after a page refresh
 
