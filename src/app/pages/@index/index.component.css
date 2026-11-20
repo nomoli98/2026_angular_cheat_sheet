@@ -9,7 +9,15 @@
 .index-section-title {
   font-size: 1.1rem;
   color: var(--bs-secondary-color);
-  margin: 1.5rem 0 0.5rem;
+  /* space + a thin line under the title, so it doesn't stick to the first list */
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* no big gap above the very first section title */
+.index-section:first-child .index-section-title {
+  margin-top: 0.5rem;
 }
 
 .index-group {
@@ -73,9 +81,9 @@
 /* A link that doesn't match is [hidden] (index-link.directive.ts)...
    ...so hide its <li> too... */
 .index-group li:not(:has(a:not([hidden]))),
-/* ...a group when ALL its links are hidden... */
+  /* ...a group when ALL its links are hidden... */
 .index-group:not(:has(a:not([hidden]))),
-/* ...and a whole section when all its groups are hidden */
+  /* ...and a whole section when all its groups are hidden */
 .index-section:not(:has(a:not([hidden]))) {
   display: none;
 }
