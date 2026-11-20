@@ -1,0 +1,74 @@
+<h2>Login / Logout (token)</h2>
+
+<section class="card card-body mb-3">
+  <p>
+    Same page as <a routerLink="/auth/bcrypt/login">Login (bcrypt)</a>, but with
+    <code>TokenAuthController</code>: the browser sends email + password to the
+    <strong>auth server</strong> (<code>POST /token/login</code>). The <strong>server</strong>
+    runs <code>bcrypt.compare</code> and answers a signed <strong>JWT</strong>. The browser
+    never sees the hash; it keeps the token in <code>localStorage</code>.
+  </p>
+  <p class="text-body-secondary small mb-0">
+    Log in, then <strong>refresh the page</strong>: you're still logged in (the token is saved).
+    Separate from the normal login (the navbar). Needs the auth server: <code>npm run dev</code>.
+  </p>
+</section>
+
+<section class="card card-body mb-3">
+  <h3>Right now</h3>
+  @if (_currentUser(); as user) {
+    <div class="d-flex align-items-center gap-2">
+      <span class="me-auto">
+        Logged in as <strong>{{ user.name }}</strong> ({{ user.role }}, {{ user.email }})
+      </span>
+      <button type="button" class="btn btn-outline-danger" (click)="onLogout()">Log out</button>
+    </div>
+  } @else {
+    <p class="mb-0">Nobody is logged in.</p>
+  }
+</section>
+
+<form class="card card-body" (submit)="onSubmit($event)">
+  <div class="mb-3 d-flex gap-2 align-items-center">
+    <span class="small text-body-secondary">Fill as:</span>
+    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="fill('bob')">Bob (admin)</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="fill('alice')">Alice (user)</button>
+  </div>
+
+  <div class="mb-3">
+    <label for="email" class="form-label">Email</label>
+    <input id="email" type="email" class="form-control" [formField]="_form.email"
+           [class.is-invalid]="_form.email().touched() && _form.email().invalid()" />
+    @if (_form.email().touched()) {
+      @for (error of _form.email().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="password" class="form-label">Password</label>
+    <input id="password" type="password" class="form-control" [formField]="_form.password"
+           [class.is-invalid]="_form.password().touched() && _form.password().invalid()" />
+    @if (_form.password().touched()) {
+      @for (error of _form.password().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div>
+    <button type="submit" class="btn btn-primary" [disabled]="_form().invalid() || _busy()">
+      {{ _busy() ? 'Logging in...' : 'Log in' }}
+    </button>
+  </div>
+
+  @if (_error(); as error) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+  }
+</form>
+
+<section class="card card-body mt-3">
+  <h3>Code</h3>
+  <app-code-snippet [code]="snippets.login" />
+</section>

@@ -1,70 +1,149 @@
 <h2>Index</h2>
 
-<!-- 2 columns, cards stacked without gaps (CSS columns, see index.component.css) -->
-<div class="index-columns">
-  <div class="card mb-3">
-    <div class="card-header fw-semibold">Template · Binding</div>
-    <div class="list-group list-group-flush">
-      <a class="list-group-item list-group-item-action" routerLink="/template/static-binding">Static Binding</a>
-      <a class="list-group-item list-group-item-action" routerLink="/template/responsive-binding">Responsive Binding</a>
-      <a class="list-group-item list-group-item-action" routerLink="/template/event-binding">Event Binding</a>
-      <a class="list-group-item list-group-item-action" routerLink="/template/two-way-binding">Two Way Binding</a>
-    </div>
-  </div>
+<!-- Tabs = links with ?tab=... (the URL keeps the tab). Search = a signal. -->
+<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+  <nav class="nav nav-pills">
+    @for (t of TABS; track t) {
+      <a class="nav-link text-capitalize" [class.active]="current() === t && !query()"
+         routerLink="/" [queryParams]="{ tab: t === 'all' ? null : t }">{{ t }}</a>
+    }
+  </nav>
+  <input type="search" class="form-control ms-md-auto index-search" placeholder="Search a page..."
+         aria-label="Search a page" [value]="query()" (input)="query.set($any($event.target).value)" />
+</div>
 
-  <div class="card mb-3">
-    <div class="card-header fw-semibold">Template · Syntax</div>
-    <div class="list-group list-group-flush">
-      <a class="list-group-item list-group-item-action" routerLink="/template/condition">Conditions</a>
-      <a class="list-group-item list-group-item-action" routerLink="/template/loop">Loops</a>
-    </div>
-  </div>
+<div class="index-sections">
+  @if (show('basics')) {
+    <section class="index-section">
+      @if (current() === 'all' || query()) {
+        <h3 class="index-section-title">Basics</h3>
+      }
+      <div>
+      <div class="index-group mb-3">
+        <h4 class="index-group-title">Template · Binding</h4>
+        <ul class="index-list">
+          <li><a appIndexLink routerLink="/template/static-binding">Static Binding</a></li>
+          <li><a appIndexLink routerLink="/template/responsive-binding">Responsive Binding</a></li>
+          <li><a appIndexLink routerLink="/template/event-binding">Event Binding</a></li>
+          <li><a appIndexLink routerLink="/template/two-way-binding">Two Way Binding</a></li>
+        </ul>
+      </div>
+      <div class="index-group mb-3">
+        <h4 class="index-group-title">Template · Syntax</h4>
+        <ul class="index-list">
+          <li><a appIndexLink routerLink="/template/condition">Conditions</a></li>
+          <li><a appIndexLink routerLink="/template/loop">Loops</a></li>
+        </ul>
+      </div>
+      <div class="index-group mb-3">
+        <h4 class="index-group-title">Routers</h4>
+        <ul class="index-list">
+          <li><a appIndexLink routerLink="/router/basics">Basics (links, params, 404)</a></li>
+          <li><a appIndexLink routerLink="/router/sub-outlet">subOutlet</a></li>
+        </ul>
+      </div>
+      <div class="index-group mb-3">
+        <h4 class="index-group-title">Input-Output</h4>
+        <ul class="index-list">
+          <li><a appIndexLink routerLink="/input-output/input">Input</a></li>
+          <li><a appIndexLink routerLink="/input-output/output">Output</a></li>
+        </ul>
+      </div>
+      </div>
+    </section>
+  }
 
-  <div class="card mb-3">
-    <div class="card-header fw-semibold">Forms</div>
-    <div class="list-group list-group-flush">
-      <a class="list-group-item list-group-item-action" routerLink="/form/reactive-form">Reactive Forms</a>
-      <a class="list-group-item list-group-item-action" routerLink="/form/signal-form">Signal Forms</a>
-      <a class="list-group-item list-group-item-action" routerLink="/form/template-form">Template Forms</a>
-    </div>
-  </div>
+  @if (show('forms')) {
+    <section class="index-section">
+      @if (current() === 'all' || query()) {
+        <h3 class="index-section-title">Forms</h3>
+      }
+      <div>
+      <div class="index-group mb-3">
+        <h4 class="index-group-title">Forms</h4>
+        <ul class="index-list">
+          <li><a appIndexLink routerLink="/form/reactive-form">Reactive Forms</a></li>
+          <li><a appIndexLink routerLink="/form/signal-form">Signal Forms</a></li>
+          <li><a appIndexLink routerLink="/form/template-form">Template Forms</a></li>
+        </ul>
+      </div>
+      </div>
+    </section>
+  }
 
-  <div class="card mb-3">
-    <div class="card-header fw-semibold">Routers</div>
-    <div class="list-group list-group-flush">
-      <a class="list-group-item list-group-item-action" routerLink="/router/basics">Basics (links, params, 404)</a>
-      <a class="list-group-item list-group-item-action" routerLink="/router/sub-outlet">subOutlet</a>
-    </div>
-  </div>
+  @if (show('application')) {
+    <section class="index-section">
+      @if (current() === 'all' || query()) {
+        <h3 class="index-section-title">Application</h3>
+      }
+      <div>
+        <div class="index-group mb-3">
+          <h4 class="index-group-title">Service (CRUD)</h4>
+          <ul class="index-list">
+            <li><a appIndexLink routerLink="/service/get-all">Get All</a></li>
+            <li><a appIndexLink routerLink="/service/get-one">Get One</a></li>
+            <li><a appIndexLink routerLink="/service/get-me">Get Me</a></li>
+            <li><a appIndexLink routerLink="/service/update-fully">Update Fully (PUT)</a></li>
+            <li><a appIndexLink routerLink="/service/update">Update (PATCH)</a></li>
+            <li><a appIndexLink routerLink="/service/delete">Delete</a></li>
+          </ul>
+        </div>
+      <div class="index-group mb-3">
+        <h4 class="index-group-title">Auth</h4>
+        <ul class="index-list">
+          <li><a appIndexLink routerLink="/auth/auth-service">Auth service (guard + toggle)</a></li>
+          <li><a appIndexLink routerLink="/auth/register">Register</a></li>
+          <li><a appIndexLink routerLink="/auth/login">Login / Logout</a></li>
+        </ul>
+      </div>
+      <div class="index-group mb-3">
+        <h4 class="index-group-title">Auth · bcrypt</h4>
+        <ul class="index-list">
+          <li><a appIndexLink routerLink="/auth/bcrypt/explain">How it works</a></li>
+          <li><a appIndexLink routerLink="/auth/bcrypt/register">Register</a></li>
+          <li><a appIndexLink routerLink="/auth/bcrypt/login">Login / Logout</a></li>
+        </ul>
+      </div>
+      <div class="index-group mb-3">
+        <h4 class="index-group-title">Auth · token</h4>
+        <ul class="index-list">
+          <li><a appIndexLink routerLink="/auth/token/explain">How it works</a></li>
+          <li><a appIndexLink routerLink="/auth/token/register">Register</a></li>
+          <li><a appIndexLink routerLink="/auth/token/login">Login / Logout</a></li>
+        </ul>
+      </div>
+      <div class="index-group mb-3">
+        <h4 class="index-group-title">Fake API</h4>
+        <ul class="index-list">
+          <li><a appIndexLink routerLink="/fake-api">How it works + set one up</a></li>
+        </ul>
+      </div>
+      <div class="index-group mb-3">
+        <h4 class="index-group-title">Theme</h4>
+        <ul class="index-list">
+          <li><a appIndexLink routerLink="/theme">Dark mode (theme toggle)</a></li>
+        </ul>
+      </div>
+      </div>
+    </section>
+  }
 
-  <div class="card mb-3">
-    <div class="card-header fw-semibold">Input-Output</div>
-    <div class="list-group list-group-flush">
-      <a class="list-group-item list-group-item-action" routerLink="/input-output/input">Input</a>
-      <a class="list-group-item list-group-item-action" routerLink="/input-output/output">Output</a>
-    </div>
-  </div>
+  @if (show('tests')) {
+    <section class="index-section">
+      @if (current() === 'all' || query()) {
+        <h3 class="index-section-title">Tests</h3>
+      }
+      <div>
+      <div class="index-group mb-3">
+        <h4 class="index-group-title">Tests</h4>
+        <ul class="index-list">
+          <li><a appIndexLink routerLink="/tests/unit-test">Unit tests (Vitest)</a></li>
+          <li><a appIndexLink routerLink="/tests/e2e-test">E2E tests (Playwright)</a></li>
+        </ul>
+      </div>
+      </div>
+    </section>
+  }
 
-  <div class="card mb-3">
-    <div class="card-header fw-semibold">Application · Service </div>
-    <div class="list-group list-group-flush">
-      <a class="list-group-item list-group-item-action" routerLink="/service/auth-service">Auth service (guard + toggle)</a>
-      <a class="list-group-item list-group-item-action" routerLink="/service/get-all">Get All</a>
-    </div>
-  </div>
-
-  <div class="card mb-3">
-    <div class="card-header fw-semibold">Application · Theme</div>
-    <div class="list-group list-group-flush">
-      <a class="list-group-item list-group-item-action" routerLink="/theme">Dark mode (theme toggle)</a>
-    </div>
-  </div>
-
-  <div class="card mb-3">
-    <div class="card-header fw-semibold">Tests</div>
-    <div class="list-group list-group-flush">
-      <a class="list-group-item list-group-item-action" routerLink="/tests/unit-test">Unit tests (Vitest)</a>
-      <a class="list-group-item list-group-item-action" routerLink="/tests/e2e-test">E2E tests (Playwright)</a>
-    </div>
-  </div>
+  <p class="index-empty text-body-secondary">No page matches "{{ query() }}".</p>
 </div>

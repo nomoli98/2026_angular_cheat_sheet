@@ -38,8 +38,7 @@ Each folder has its own step-by-step README.
 ## Shared files used by the three forms
 
 - `core/requests/register.request.ts`: `RegisterRequest`, the shape of the data the forms send (`birthdate` is a `'YYYY-MM-DD'` string)
-- `core/interfaces/user.interface.ts`: `UserInterface`, the user as the app uses it (`birthdate` is a `Date`)
-- `core/responses/user.response.ts`: `UserResponse`, the user as the API sends it back (no password)
+- `core/responses/user.response.ts`: `UserResponse`, the user as the services give it back (no password, `birthdate` is a `'YYYY-MM-DD'` string too)
 - `core/enums/gender.enum.ts`: `GenderEnum` (`male`, `female`, `other`)
 - `core/enums/subscription.enum.ts`: `SubscriptionEnum` (`free`, `premium`)
 - `core/validators/<kind>/`: the custom validators, one folder per kind of form (`reactive-form/`, `template-form/`, `signal-form/`)

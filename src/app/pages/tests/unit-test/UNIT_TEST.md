@@ -16,6 +16,7 @@ Files:
 | `greeting/` | `input()` and `output()` |
 | `../../../core/services/auth.service.spec.ts` | A service |
 | `login-form/` | A form + replacing a service with a fake |
+| `../../services/get-me/get-me.component.spec.ts` | The step-by-step example (section 1): a page + a fake controller |
 
 ---
 
@@ -32,24 +33,183 @@ ng test --include src/app/pages/tests/unit-test/counter/counter.component.spec.t
 
 ---
 
-## 1. The shape of every test file
+## 1. Step by step: write a test
+
+### The recipe
+
+1. **List what it should do**, in plain sentences ("shows nothing at first", "click → shows my name", "error → shows the error"). One sentence = one `it(...)`.
+2. **Create the file** next to the code: `get-me.component.ts` → `get-me.component.spec.ts`.
+3. **Write the skeleton**: `describe` + `beforeEach` that creates the thing.
+4. **Fake what it depends on** (see the table below), so you test **only this piece**.
+5. **Write one test**: Arrange (prepare) → Act (click, call) → Assert (`expect`).
+6. **Run it**, then **break it on purpose** once to be sure it really checks something.
+7. Repeat 5–6 for each sentence of step 1.
+
+What to fake? Look at what the code `inject()`s:
+
+| The thing you test uses... | In the test |
+|---|---|
+| nothing (only signals, inputs) | nothing to fake: just `TestBed.createComponent(X)` |
+| a controller / a service | a **fake** object: `{ provide: UserController, useValue: fake }` (step 4) |
+| `HttpClient` (you test the service itself) | `provideHttpClient()` + `provideHttpClientTesting()`, then answer the requests (section 5) |
+| `inject(Router)` / `routerLink` | `provideRouter([])` |
+
+### Worked example: the Get Me page
+
+The component (`pages/services/get-me/`): a button calls `UserController.getMe()`, then shows the user or the error.
 
 ```ts
-describe('CounterComponent', () => {   // a group of tests (usually: one per file)
+export class GetMeComponent {
+  protected readonly _userController = inject(UserController);
+  protected readonly _me = signal<UserResponse | null>(null);
+  protected readonly _error = signal<string | null>(null);
 
-  beforeEach(async () => {             // runs before EACH test → every test starts fresh
-    // create the thing you test
-  });
+  async onClick() {
+    this._error.set(null);
+    try {
+      this._me.set(await this._userController.getMe());
+    } catch (err) {
+      this._error.set(errorMessage(err));
+    }
+  }
+}
+```
 
-  it('starts at 0', () => {            // one test = one thing to check
-    // 1. Arrange: prepare
-    // 2. Act:     do something (click, call a method)
-    // 3. Assert:  check the result with expect(...)
+```html
+<button type="button" (click)="onClick()">Get Me</button>
+@if (_error(); as error) { <div class="alert alert-danger">{{ error }}</div> }
+@if (_me(); as u) { <dl> ... {{ u.email }} ... </dl> }
+```
+
+#### Step 1. List what it should do
+
+- before the click: no user, no error
+- click → it asks the controller **once** and shows my email
+- the controller fails (`unauthorized`) → it shows the error, no user
+
+#### Step 2. Create the file
+
+`src/app/pages/services/get-me/get-me.component.spec.ts` (right next to `get-me.component.ts`).
+
+#### Step 3. The skeleton
+
+```ts
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { GetMeComponent } from './get-me.component';
+
+describe('GetMeComponent', () => {             // a group: one per file, named after the class
+  let fixture: ComponentFixture<GetMeComponent>;
+  let html: HTMLElement;                       // the rendered page
+
+  beforeEach(async () => {                     // runs before EACH test → every test starts fresh
+    fixture = TestBed.createComponent(GetMeComponent);
+    html = fixture.nativeElement;
+    await fixture.whenStable();                // wait for the HTML to be drawn
   });
 });
 ```
 
 `describe`, `it`, `beforeEach`, `expect` and `vi` are **global**: no import needed (see `"types": ["vitest/globals"]` in `tsconfig.spec.json`).
+
+#### Step 4. Fake the controller
+
+The component injects `UserController`, which needs `AuthService`, `HttpClient`... We don't want any of that: we give a **fake** with only the method the component uses.
+
+```ts
+import { UserController } from '@core/controllers/user.controller';
+
+const fakeController = { getMe: vi.fn() };     // vi.fn() = a fake function that remembers its calls
+
+beforeEach(async () => {
+  vi.clearAllMocks();                          // forget the calls of the previous test
+  TestBed.configureTestingModule({
+    providers: [{ provide: UserController, useValue: fakeController }],   // "give the fake instead"
+  });
+  fixture = TestBed.createComponent(GetMeComponent);
+  html = fixture.nativeElement;
+  await fixture.whenStable();
+});
+```
+
+`configureTestingModule` must come **before** `createComponent`.
+
+#### Step 5. The first test
+
+```ts
+it('shows nothing before the click', () => {
+  // Arrange: done in beforeEach.  Act: nothing.  Assert:
+  expect(html.querySelector('dl')).toBeNull();
+  expect(html.querySelector('.alert-danger')).toBeNull();
+});
+```
+
+#### Step 6. Run it, then break it on purpose
+
+```bash
+ng test --include src/app/pages/services/get-me/get-me.component.spec.ts
+```
+
+Green looks like this:
+
+```
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+```
+
+Now change the first `toBeNull()` to `not.toBeNull()` and save: the test must go **red**. If it stays green, it doesn't check what you think. Red looks like this, and points at the line:
+
+```
+ FAIL  src/app/pages/services/get-me/get-me.component.spec.ts > GetMeComponent > shows nothing before the click
+AssertionError: expected null not to be null
+ ❯ src/app/pages/services/get-me/get-me.component.spec.ts:43:42
+```
+
+Put it back.
+
+#### Step 7. The other tests
+
+The controller returns a **Promise**, so the fake uses `mockResolvedValue` (success) or `mockRejectedValue` (error):
+
+```ts
+it('shows my account after a click on "Get Me"', async () => {
+  // Arrange: what the fake answers this time
+  fakeController.getMe.mockResolvedValue(alice);
+
+  // Act: click like a user, then wait for the HTML
+  html.querySelector('button')!.click();
+  await fixture.whenStable();
+
+  // Assert
+  expect(fakeController.getMe).toHaveBeenCalledTimes(1);
+  expect(html.querySelector('dl')?.textContent).toContain('alice.dupont@mail.com');
+});
+
+it('shows the error when nobody is logged in', async () => {
+  fakeController.getMe.mockRejectedValue(new Error('unauthorized'));
+
+  html.querySelector('button')!.click();
+  await fixture.whenStable();
+
+  expect(html.querySelector('.alert-danger')?.textContent).toContain('unauthorized');
+  expect(html.querySelector('dl')).toBeNull();
+});
+```
+
+(`alice` = a `UserResponse` object at the top of the file.) Full file: `pages/services/get-me/get-me.component.spec.ts`.
+
+| The real method returns... | The fake |
+|---|---|
+| a value | `vi.fn().mockReturnValue(value)` |
+| a Promise (controllers) | `vi.fn().mockResolvedValue(value)` / `.mockRejectedValue(new Error('x'))` |
+| an Observable (services) | `vi.fn().mockReturnValue(of(value))` / `.mockReturnValue(throwError(() => new Error('x')))` |
+
+### Checklist before you're done
+
+- [ ] One `it` per behaviour, with a name that reads like a sentence
+- [ ] Every test passes **alone** and with the others (`beforeEach` makes everything fresh)
+- [ ] You saw each test go red once
+- [ ] `await fixture.whenStable()` after every click / `setInput` before reading the HTML
+- [ ] `ng test --watch=false` passes for the whole project
 
 ---
 

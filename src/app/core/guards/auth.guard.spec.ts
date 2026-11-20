@@ -45,6 +45,6 @@ describe('authGuard', () => {
     const result = runGuard('/service/get-all') as UrlTree;
 
     expect(result).toBeInstanceOf(UrlTree);
-    expect(result.toString()).toBe('/service/auth-service?returnUrl=%2Fservice%2Fget-all');
+    expect(result.toString()).toBe('/auth/auth-service?returnUrl=%2Fservice%2Fget-all');
   });
 });

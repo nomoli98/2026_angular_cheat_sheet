@@ -21,15 +21,23 @@ Each topic is a folder in `src/app/pages/` with **working demo pages** and a **`
 | ↳ Basics: the 3 ways, links, params, redirects, 404 | [ROUTING.md](src/app/pages/routers/ROUTING.md) | `/router/basics` |
 | ↳ Sub-routing and named outlets | [SUB-ROUTING.md](src/app/pages/routers/SUB-ROUTING.md) | `/router/sub-outlet` |
 | **Bootstrap** (install + use, how the pages are styled) | [BOOTSTRAP.md](BOOTSTRAP.md) | every page |
-| **Fake API** (json-server): people CRUD to practise services and `HttpClient` | [FAKE-API.md](fake-api/FAKE-API.md) | `http://localhost:3000/people` (start with `npm run dev`) |
+| **Fake API** (json-server): people CRUD to practise services and `HttpClient` | [FAKE-API.md](fake-api/FAKE-API.md) | `/fake-api` (simple version), `http://localhost:3000/people` (start with `npm run dev`) |
+| **Application** | | |
+| ↳ Auth: `AuthService`, route guard, auth toggle | [AUTH_SERVICE.md](src/app/pages/auth/auth-service/AUTH_SERVICE.md) | `/auth/auth-service` |
+| ↳ Register, login / logout (signal forms + `AuthController`) | [AUTH_SERVICE.md](src/app/pages/auth/auth-service/AUTH_SERVICE.md) | `/auth/register`, `/auth/login` |
+| ↳ Same auth, password stored as a **bcrypt** hash | [BCRYPT.md](src/app/pages/auth/bcrypt/BCRYPT.md) | `/auth/bcrypt/explain`, `/auth/bcrypt/register`, `/auth/bcrypt/login` |
+| ↳ Same auth with a **JWT**: auth server, interceptor, protected route, survives a refresh | [TOKEN.md](src/app/pages/auth/token/TOKEN.md) | `/auth/token/explain`, `/auth/token/register`, `/auth/token/login` |
+| ↳ Controllers: permissions (admin / yourself), Observable → Promise | [CONTROLLER.md](src/app/core/controllers/CONTROLLER.md) | |
+| ↳ CRUD pages: get all / one / me, update fully (PUT), update (PATCH), delete | [CONTROLLER.md](src/app/core/controllers/CONTROLLER.md) | `/service/get-all`, `/service/get-one`, `/service/get-me`, `/service/update-fully`, `/service/update`, `/service/delete` |
+| ↳ Dark mode: theme service + toggle | [THEME.md](src/app/pages/theme/THEME.md) | `/theme` |
 | **Input / Output** | | |
 | ↳ Signal inputs: `input()`, `input.required()`, alias, transform | [INPUT.md](src/app/pages/input-output/input/INPUT.md) | `/input-output/input` |
 | ↳ Signal outputs: `output()`, `emit()`, alias, RxJS interop, `model()` | [OUTPUT.md](src/app/pages/input-output/output/OUTPUT.md) | `/input-output/output` |
 | **Tests** | [TESTS.md](src/app/pages/tests/TESTS.md) | |
-| ↳ Unit tests (Vitest): components, inputs/outputs, services, forms, mocks | [UNIT_TEST.md](src/app/pages/tests/unit-test/UNIT_TEST.md) | `/tests/unit-test` |
-| ↳ E2E tests (Playwright): install, config, locators, run | [E2E_TEST.md](src/app/pages/tests/e2e-test/E2E_TEST.md) | `/tests/e2e-test` |
+| ↳ Unit tests (Vitest): step by step, components, inputs/outputs, services, forms, mocks | [UNIT_TEST.md](src/app/pages/tests/unit-test/UNIT_TEST.md) | `/tests/unit-test` |
+| ↳ E2E tests (Playwright): install, config, step by step, locators, run | [E2E_TEST.md](src/app/pages/tests/e2e-test/E2E_TEST.md) | `/tests/e2e-test` |
 
-The home page (`/`) links to every demo page.
+The home page (`/`) links to every demo page: tabs by topic (`/?tab=forms`) and a search box.
 
 ## Run it
 
@@ -48,7 +56,7 @@ The pages that call a backend need the fake API too. Use this instead of `ng ser
 npm run dev
 ```
 
-It starts the fake API (`http://localhost:3000`) **and** `ng serve` in one terminal. The first time, it installs `json-server@0.17.4` and `concurrently` if they're missing. **Ctrl+C** stops both. Details: [FAKE-API.md](fake-api/FAKE-API.md).
+It starts the fake API (`http://localhost:3000`), the auth server for the token pages (`http://localhost:3001`) **and** `ng serve` in one terminal. The first time, it installs `json-server@0.17.4` and `concurrently` if they're missing. **Ctrl+C** stops both. Details: [FAKE-API.md](fake-api/FAKE-API.md).
 
 ## How the project is organised
 
@@ -56,13 +64,15 @@ It starts the fake API (`http://localhost:3000`) **and** `ng serve` in one termi
 src/app/
 ├── app.routes.ts            one lazy-loaded entry per topic
 ├── pages/
-│   ├── @index/              the home page with all the links
+│   ├── @index/              the home page: tabs + one list per tab + search (index-link.directive.ts hides the links that don't match)
 │   ├── template/            template.routes.ts + binding/ + syntax/
 │   ├── forms/               form.routes.ts + one folder per kind of form
 │   ├── routers/             app.routes.example.ts, sub-outlet.routes.example.ts + the routing demos
 │   ├── input-output/        input-output.routes.ts + input/ + output/
 │   ├── theme/               the dark mode page (THEME.md)
-│   ├── services/            service.routes.ts (protected by the guard) + auth-service/ + get-all/
+│   ├── auth/                auth.routes.ts (public) + auth-service/ + register/ + login/ + bcrypt/ + token/
+│   ├── services/            service.routes.ts (protected by the guard) + the CRUD pages (get-all, get-one, get-me, update-fully, update, delete)
+│   ├── fake-api/            the fake API page (how json-server works + how to set one up)
 │   └── tests/               tests.routes.ts + unit-test/ + e2e-test/
 ├── shared/
 │   ├── code-snippet/        the code box (tabs + Copy button) shown on the demo pages
@@ -75,8 +85,9 @@ src/app/
     ├── validators/          custom form validators: reactive-form/, template-form/, signal-form/
     ├── entities/            what json-server stores, password included (user.entity.ts → UserEntity)
     ├── mapper/              UserEntity → UserResponse (user.mapper.ts), removes the password
-    ├── guards/              route guards (auth.guard.ts: not logged in → /service/auth-service)
-    ├── services/            HTTP calls, return Observables (auth.service.ts, user.service.ts), see fake-api/FAKE-API.md
+    ├── interceptors/        token.interceptor.ts: adds the JWT to the requests to the auth server
+    ├── guards/              route guards (auth.guard.ts: not logged in → /auth/auth-service)
+    ├── services/            HTTP calls, return Observables (auth, bcrypt-auth, token-auth, user), see fake-api/FAKE-API.md
     └── controllers/         check the permission (role), then call the service, return Promises (auth.controller.ts, user.controller.ts), see CONTROLLER.md
 ```
 

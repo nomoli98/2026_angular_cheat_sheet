@@ -19,15 +19,14 @@ export class AuthService {
   readonly currentUser = this._currentUser.asReadonly();
 
   register(request: RegisterRequest): Observable<UserResponse> {
-    return this._userService
-      .emailExists(request.email)
-      .pipe(
-        switchMap((taken) =>
-          taken
-            ? throwError(() => new Error('email already taken'))
-            : this._userService.create(request),
-        ),
-      );
+    return this._userService.emailExists(request.email).pipe(
+      switchMap((taken) =>
+        taken
+          ? throwError(() => new Error('email already taken'))
+          : this._userService.create(request),
+      ),
+      tap((user) => this._currentUser.set(user)), // the new user is logged in right away
+    );
   }
 
   login(request: LoginRequest): Observable<UserResponse> {

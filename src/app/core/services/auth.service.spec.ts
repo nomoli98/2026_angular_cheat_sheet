@@ -103,6 +103,7 @@ describe('AuthService', () => {
       req.flush(bob);
 
       expect((await result).name).toBe('Bob Martin');
+      expect(service.currentUser()?.name).toBe('Bob Martin'); // logged in right away
     });
 
     it('refuses an email that is already taken', async () => {
@@ -112,6 +113,7 @@ describe('AuthService', () => {
       httpTesting.expectNone((r) => r.method === 'POST'); // nothing created
 
       await expect(result).rejects.toThrow('email already taken');
+      expect(service.currentUser()).toBeNull(); // nobody logged in
     });
   });
 });

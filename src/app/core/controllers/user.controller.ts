@@ -28,6 +28,13 @@ export class UserController {
     return await firstValueFrom(this._userService.getOne(id));
   }
 
+  // anybody logged in: reads their OWN account (no id needed, we know who is asking)
+  async getMe(): Promise<UserResponse> {
+    const user = this._authService.currentUser();
+    if (!user) deny(user);
+    return firstValueFrom(this._userService.getOne(user.id));
+  }
+
   // admin only (people create their own account with AuthController.register)
   async create(request: RegisterRequest): Promise<UserResponse> {
     const user = this._authService.currentUser();

@@ -2,7 +2,7 @@
 
 > 📖 **Official docs:** [Testing overview](https://angular.dev/guide/testing) · [Playwright](https://playwright.dev/docs/intro)
 
-Two kinds of tests, two tools:
+Two kinds of tests, two tools. **New to tests?** Start with the step by step of each doc: [unit test](./unit-test/UNIT_TEST.md#1-step-by-step-write-a-test) · [e2e test](./e2e-test/E2E_TEST.md#4-step-by-step-write-a-test).
 
 | Folder | Kind | Tool | Command | Doc |
 |---|---|---|---|---|
@@ -24,11 +24,18 @@ All lazy-loaded from `tests.routes.ts` under `/tests/...`:
 ├── playwright.config.ts                     Playwright settings
 ├── e2e/                                     e2e tests (outside src/!)
 │   ├── navigation.spec.ts
-│   └── login.spec.ts
+│   ├── login.spec.ts
+│   ├── register.spec.ts                     the E2E step-by-step example
+│   └── token.spec.ts                        token login + refresh + protected route
 └── src/app/
-    ├── core/services/
-    │   ├── auth.service.ts                  basic fake login / register service
-    │   └── auth.service.spec.ts
+    ├── core/
+    │   ├── services/*.spec.ts               services + HttpTestingController (auth, bcrypt-auth, token-auth, user)
+    │   ├── controllers/*.spec.ts            controllers with fake services (auth, user)
+    │   ├── interceptors/*.spec.ts           an interceptor (withInterceptors + HttpTestingController)
+    │   └── guards/auth.guard.spec.ts        a guard (TestBed.runInInjectionContext)
+    ├── shared/*/*.service.spec.ts           the theme + auth toggle services
+    ├── pages/services/get-me/
+    │   └── get-me.component.spec.ts         the unit step-by-step example
     └── pages/tests/
         ├── tests.routes.ts
         ├── unit-test/

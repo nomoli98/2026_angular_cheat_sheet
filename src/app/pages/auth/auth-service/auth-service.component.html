@@ -1,0 +1,58 @@
+<h2>Auth service</h2>
+
+@if (returnUrl() && !auth.currentUser()) {
+  <div class="alert alert-warning">
+    You were sent here from <code>{{ returnUrl() }}</code> because nobody is logged in. Turn the
+    <strong>toggle</strong> (top right) back on to go back there.
+  </div>
+}
+
+@if (toggle.error(); as error) {
+  <div class="alert alert-danger">Login failed: {{ error }}</div>
+}
+
+<section class="card card-body mb-3">
+  <h3>Right now</h3>
+  @if (auth.currentUser(); as user) {
+    <p class="mb-0">
+      <code>auth.currentUser()</code> = <strong>{{ user.name }}</strong> ({{ user.role }}). The
+      <code>/service</code> pages are open.
+    </p>
+  } @else {
+    <p class="mb-0">
+      <code>auth.currentUser()</code> = <code>null</code>. The <code>/service</code> pages send you
+      here.
+    </p>
+  }
+</section>
+
+<section class="card card-body mb-3">
+  <h3>1. AuthService</h3>
+  <p>
+    Remembers <strong>who is logged in</strong> in a signal, <code>currentUser</code>.
+    <code>login()</code> checks the email + password against the API and fills it,
+    <code>logout()</code> empties it. Everything else (controllers, guard, toggle) just reads
+    <code>currentUser()</code>.
+  </p>
+  <app-code-snippet [code]="snippets.authService" />
+</section>
+
+<section class="card card-body mb-3">
+  <h3>2. The guard</h3>
+  <p>
+    A function the router calls <strong>before</strong> opening a page. Logged in →
+    <code>true</code>, the page opens. Not logged in → it returns another URL (this page), with
+    <code>?returnUrl=</code> to come back later.
+  </p>
+  <app-code-snippet [code]="snippets.guard" />
+</section>
+
+<section class="card card-body mb-3">
+  <h3>3. The toggle</h3>
+  <p>
+    A demo helper, like a theme switch: <strong>on</strong> = real login as Bob (admin) through the
+    API, <strong>off</strong> = logout. Saved in <code>localStorage</code>, and the app logs in
+    again on start if it was on.
+  </p>
+  <app-code-snippet [code]="snippets.toggle" />
+</section>

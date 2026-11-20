@@ -1,3 +1,46 @@
-<button (click)="onClick()">Get One Random User</button>
+<h2>Get one user</h2>
 
-{{user().name}}
+<section class="card card-body mb-3">
+  <p>
+    Calls <code>UserController.getOne(id)</code>: an <strong>admin</strong> can read anybody, a
+    simple user can only read <strong>their own</strong> account (any other id →
+    <code>forbidden</code>). An id that does not exist → <code>Not found</code>.
+  </p>
+
+  <form class="d-flex gap-2 align-items-start" (submit)="onSubmit($event)">
+    <div>
+      <label for="id" class="visually-hidden">User id</label>
+      <input id="id" type="number" class="form-control" placeholder="User id"
+             [formField]="_idForm.id"
+             [class.is-invalid]="_idForm.id().touched() && _idForm.id().invalid()" />
+      @if (_idForm.id().touched()) {
+        @for (error of _idForm.id().errors(); track error.kind) {
+          <div class="invalid-feedback">{{ error.message }}</div>
+        }
+      }
+    </div>
+    <button type="submit" class="btn btn-primary" [disabled]="_idForm().invalid()">Get One User</button>
+  </form>
+
+  @if (_error(); as error) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+  }
+
+  @if (_user(); as u) {
+    <dl class="row mt-3 mb-0">
+      <dt class="col-sm-3">Id</dt><dd class="col-sm-9">{{ u.id }}</dd>
+      <dt class="col-sm-3">Name</dt><dd class="col-sm-9">{{ u.name }}</dd>
+      <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{{ u.email }}</dd>
+      <dt class="col-sm-3">Birthdate</dt><dd class="col-sm-9">{{ u.birthdate }}</dd>
+      <dt class="col-sm-3">Height</dt><dd class="col-sm-9">{{ u.height }} cm</dd>
+      <dt class="col-sm-3">Gender</dt><dd class="col-sm-9">{{ u.gender }}</dd>
+      <dt class="col-sm-3">Subscription</dt><dd class="col-sm-9">{{ u.subscription }}</dd>
+      <dt class="col-sm-3">Role</dt><dd class="col-sm-9 mb-0">{{ u.role }}</dd>
+    </dl>
+  }
+</section>
+
+<section class="card card-body mt-3">
+  <h3>Code</h3>
+  <app-code-snippet [code]="snippets.getOne" />
+</section>

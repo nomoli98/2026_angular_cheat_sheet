@@ -1,0 +1,93 @@
+<h2>Tokens (JWT): how it works</h2>
+
+<section class="card card-body mb-3">
+  <p>
+    With the plain and bcrypt versions, "logged in" is a signal in the browser: the server never
+    knows who you are, and a refresh forgets you. With a <strong>token</strong>, the server gives
+    you a signed proof after login. You send it back with every request, the server checks it.
+  </p>
+  <pre class="mb-3"><code>1. POST /token/login  {{ '{' }} email, password {{ '}' }}   → server: bcrypt.compare → signs a JWT
+2. Angular keeps it          localStorage  (still logged in after a refresh)
+3. GET /token/me             Authorization: Bearer &lt;token&gt;   (added by tokenInterceptor)
+4. server: jwt.verify()      signature OK + not expired → 200, otherwise 401</code></pre>
+  <p class="text-body-secondary small mb-0">
+    Built on <a routerLink="/auth/bcrypt/explain">bcrypt</a>, but the hashing is now on the
+    <strong>server</strong> (<code>fake-api/auth-server.js</code>, port 3001), like a real API.
+    Pages: <a routerLink="/auth/token/register">Register (token)</a> ·
+    <a routerLink="/auth/token/login">Login (token)</a>. Needs <code>npm run dev</code>.
+  </p>
+</section>
+
+<section class="card card-body mb-3">
+  <h3>1. Your token</h3>
+
+  @if (_auth.token(); as token) {
+    <p class="mb-2">
+      Logged in as <strong>{{ _auth.currentUser()?.name }}</strong> ({{ _auth.currentUser()?.role }}).
+      Expires in <strong>{{ _secondsLeft() }} s</strong>.
+      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="onLogout()">Log out</button>
+    </p>
+    <p class="font-monospace small text-break mb-1">
+      <span class="text-danger">{{ _parts().header }}</span>.<span class="text-primary">{{ _parts().payload }}</span>.<span class="text-success">{{ _parts().signature }}</span>
+    </p>
+    <p class="small mb-3">
+      <span class="text-danger">header</span> (algorithm) ·
+      <span class="text-primary">payload</span> (the data, only base64: <strong>anyone can read it</strong>) ·
+      <span class="text-success">signature</span> (made with the server's secret: nobody else can make it)
+    </p>
+    <p class="small mb-1">The payload, decoded (no secret needed):</p>
+    <pre class="mb-0"><code>{{ _auth.payload() | json }}</code></pre>
+  } @else {
+    <p>Not logged in (token version). Log in as Bob:</p>
+    <div class="d-flex flex-wrap gap-2">
+      <button type="button" class="btn btn-primary" (click)="onLogin()">Log in (1 hour token)</button>
+      <button type="button" class="btn btn-outline-primary" (click)="onLogin(10)">Log in (10-second token)</button>
+    </div>
+  }
+
+  @if (_error(); as error) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+  }
+</section>
+
+<section class="card card-body mb-3">
+  <h3>2. Call the protected route: <code>GET /token/me</code></h3>
+  <p>
+    The server only answers if the token is there, signed with its secret, and not expired. Try
+    the 10-second token: wait, call again → <code>401</code>, and the interceptor logs you out.
+  </p>
+  <div class="d-flex flex-wrap gap-2">
+    <button type="button" class="btn btn-primary" (click)="callWithToken()">With my token</button>
+    <button type="button" class="btn btn-outline-secondary" (click)="callWithoutToken()">Without a token</button>
+    <button type="button" class="btn btn-outline-danger" (click)="callWithTamperedToken()" [disabled]="!_auth.token()">
+      With a modified token (role: admin)
+    </button>
+  </div>
+  @if (_calls().length) {
+    <ul class="list-unstyled mt-3 mb-0">
+      @for (c of _calls(); track $index) {
+        <li [class.text-success]="c.ok" [class.text-danger]="!c.ok">
+          <strong>{{ c.ok ? '✔' : '✘' }} {{ c.label }}</strong>: {{ c.text }}
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+<section class="card card-body mb-3">
+  <h3>3. The server side</h3>
+  <p>
+    <code>jsonwebtoken</code> in Node: <code>sign()</code> after a good password,
+    <code>verify()</code> on every protected request.
+  </p>
+  <app-code-snippet [code]="snippets.server" />
+</section>
+
+<section class="card card-body">
+  <h3>4. The Angular side</h3>
+  <p>
+    The service keeps the token, the interceptor sends it, <code>app.config.ts</code> plugs the
+    interceptor in.
+  </p>
+  <app-code-snippet [code]="snippets.angular" />
+</section>

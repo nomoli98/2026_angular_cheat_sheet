@@ -31,6 +31,15 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/theme/theme.component').then((m) => m.ThemeComponent),
   },
   {
+    path: 'auth',
+    loadChildren: () => import('./pages/auth/auth.routes').then((r) => r.routes),
+  },
+  {
+    path: 'fake-api',
+    loadComponent: () =>
+      import('./pages/fake-api/fake-api.component').then((m) => m.FakeApiComponent),
+  },
+  {
     path: 'service',
     loadChildren: () => import('./pages/services/service.routes').then((r) => r.routes),
   },

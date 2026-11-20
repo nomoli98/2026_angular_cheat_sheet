@@ -1,0 +1,122 @@
+<h2>Register (bcrypt)</h2>
+
+<section class="card card-body mb-3">
+  <p>
+    Same page as <a routerLink="/auth/register">Register</a>, but calls
+    <code>BcryptAuthController.register(request)</code>: the service checks the email is free
+    (<code>GET /securePeople?email=...</code>), <strong>hashes the password with bcrypt</strong>,
+    then stores the <strong>hash</strong> (<code>POST /securePeople</code>). The new user is
+    logged in to the bcrypt version only (the navbar shows the normal one).
+  </p>
+  <p class="text-body-secondary small mb-0">
+    Open <code>fake-api/db.json</code> after you register: in <code>securePeople</code> your
+    password looks like <code>$2b$10$...</code>. Remove test accounts with
+    <code>npm run api:reset</code>.
+  </p>
+</section>
+
+<form class="card card-body" (submit)="onSubmit($event)">
+  <div class="mb-3">
+    <label for="name" class="form-label">Name</label>
+    <input id="name" type="text" class="form-control" [formField]="_form.name"
+           [class.is-invalid]="_form.name().touched() && _form.name().invalid()" />
+    @if (_form.name().touched()) {
+      @for (error of _form.name().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="email" class="form-label">Email</label>
+    <input id="email" type="email" class="form-control" [formField]="_form.email"
+           [class.is-invalid]="_form.email().touched() && _form.email().invalid()" />
+    @if (_form.email().touched()) {
+      @for (error of _form.email().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="password" class="form-label">Password</label>
+    <input id="password" type="password" class="form-control" [formField]="_form.password"
+           [class.is-invalid]="_form.password().touched() && _form.password().invalid()" />
+    @if (_form.password().touched()) {
+      @for (error of _form.password().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="birthdate" class="form-label">Birthdate</label>
+    <input id="birthdate" type="date" class="form-control" [formField]="_form.birthdate"
+           [class.is-invalid]="_form.birthdate().touched() && _form.birthdate().invalid()" />
+    @if (_form.birthdate().touched()) {
+      @for (error of _form.birthdate().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="height" class="form-label">Height (cm)</label>
+    <input id="height" type="number" class="form-control" [formField]="_form.height"
+           [class.is-invalid]="_form.height().touched() && _form.height().invalid()" />
+    @if (_form.height().touched()) {
+      @for (error of _form.height().errors(); track error.kind) {
+        <div class="invalid-feedback">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div class="mb-3">
+    <label for="gender" class="form-label">Gender</label>
+    <select id="gender" class="form-select" [formField]="_form.gender">
+      <option [value]="GenderEnum.FEMALE">{{ GenderEnum.FEMALE }}</option>
+      <option [value]="GenderEnum.MALE">{{ GenderEnum.MALE }}</option>
+      <option [value]="GenderEnum.OTHER">{{ GenderEnum.OTHER }}</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="subscription" class="form-label">Subscription</label>
+    <select id="subscription" class="form-select" [formField]="_form.subscription">
+      <option value="free">free</option>
+      <option value="premium">premium</option>
+    </select>
+  </div>
+
+  <div class="mb-3 form-check">
+    <input type="checkbox" id="agreeToTerms" class="form-check-input" [formField]="_form.agreeToTerms" />
+    <label for="agreeToTerms" class="form-check-label">I agree to the terms</label>
+    @if (_form.agreeToTerms().touched()) {
+      @for (error of _form.agreeToTerms().errors(); track error.kind) {
+        <div class="invalid-feedback d-block">{{ error.message }}</div>
+      }
+    }
+  </div>
+
+  <div>
+    <button type="submit" class="btn btn-primary" [disabled]="_form().invalid() || _busy()">
+      {{ _busy() ? 'Creating...' : 'Register' }}
+    </button>
+  </div>
+
+  @if (_error(); as error) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+  }
+
+  @if (_created(); as u) {
+    <div class="alert alert-success mt-3 mb-0">
+      Welcome, <strong>{{ u.name }}</strong>! Account #{{ u.id }} created ({{ u.role }}), you are
+      logged in (bcrypt version). Try <a routerLink="/auth/bcrypt/login">Login (bcrypt)</a>.
+    </div>
+  }
+</form>
+
+<section class="card card-body mt-3">
+  <h3>Code</h3>
+  <app-code-snippet [code]="snippets.register" />
+</section>

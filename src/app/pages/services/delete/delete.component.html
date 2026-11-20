@@ -1,0 +1,51 @@
+<h2>Delete a user</h2>
+
+<section class="card card-body mb-3">
+  <p>
+    Calls <code>UserController.delete(id)</code> → <code>DELETE /people/:id</code>. Admin →
+    anybody, simple user → only themselves. An id that does not exist →
+    <code>This user does not exist</code>.
+  </p>
+  <p class="text-body-secondary small">
+    This really deletes the user in <code>fake-api/db.json</code>. Get everybody back with
+    <code>npm run api:reset</code>.
+  </p>
+
+  <form class="d-flex gap-2 align-items-start" (submit)="onSubmit($event)">
+    <div>
+      <label for="id" class="visually-hidden">User id</label>
+      <input id="id" type="number" class="form-control" placeholder="User id"
+             [formField]="_idForm.id"
+             [class.is-invalid]="_idForm.id().touched() && _idForm.id().invalid()" />
+      @if (_idForm.id().touched()) {
+        @for (error of _idForm.id().errors(); track error.kind) {
+          <div class="invalid-feedback">{{ error.message }}</div>
+        }
+      }
+    </div>
+    <button type="submit" class="btn btn-danger" [disabled]="_idForm().invalid() || _confirming()">
+      Delete User
+    </button>
+  </form>
+
+  @if (_confirming()) {
+    <div class="alert alert-warning mt-3 mb-0 d-flex align-items-center gap-2">
+      <span class="me-auto">Really delete user #{{ _idForm.id().value() }}?</span>
+      <button type="button" class="btn btn-sm btn-danger" (click)="onConfirm()">Yes, delete</button>
+      <button type="button" class="btn btn-sm btn-secondary" (click)="_confirming.set(false)">Cancel</button>
+    </div>
+  }
+
+  @if (_error(); as error) {
+    <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+  }
+
+  @if (_deletedId(); as id) {
+    <div class="alert alert-success mt-3 mb-0">User #{{ id }} deleted</div>
+  }
+</section>
+
+<section class="card card-body mt-3">
+  <h3>Code</h3>
+  <app-code-snippet [code]="snippets.delete" />
+</section>

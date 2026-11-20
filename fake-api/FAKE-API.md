@@ -19,8 +19,9 @@ Component ─▶ UserController ─▶ UserService ─▶ json-server (localhost
 ```
 my-angular-app/
 ├── fake-api/
-│   ├── db.seed.json        ← the ORIGINAL 10 people. Never edited by the API.
+│   ├── db.seed.json        ← the ORIGINAL 10 people (people + securePeople). Never edited by the API.
 │   ├── db.json             ← the LIVE data. Changed on every POST/PUT/PATCH/DELETE.
+│   ├── auth-server.js      ← the auth server (port 3001): bcrypt + JWT, for the token pages (section 10)
 │   └── FAKE-API.md         ← this file
 ├── scripts/
 │   └── ensure-fake-api.js  ← installs json-server + concurrently if missing
@@ -87,8 +88,9 @@ if (!fs.existsSync(db) && fs.existsSync(seed)) {
 "scripts": {
   "start": "ng serve",
   "predev": "node scripts/ensure-fake-api.js",
-  "dev": "concurrently -k -n api,ng -c cyan,magenta \"npm:api\" \"npm:start\"",
+  "dev": "concurrently -k -n api,auth,ng -c cyan,yellow,magenta \"npm:api\" \"npm:api:auth\" \"npm:start\"",
   "api": "json-server --watch fake-api/db.json --port 3000",
+  "api:auth": "node fake-api/auth-server.js",
   "api:slow": "json-server --watch fake-api/db.json --port 3000 --delay 1000",
   "api:reset": "node -e \"require('fs').copyFileSync('fake-api/db.seed.json','fake-api/db.json')\""
 }
@@ -96,12 +98,13 @@ if (!fs.existsSync(db) && fs.existsSync(seed)) {
 
 | Script | What it does |
 | ------ | ------------ |
-| `npm run dev` | ⭐ **Use this.** Checks/installs, then starts the API **and** `ng serve` in one terminal |
+| `npm run dev` | ⭐ **Use this.** Checks/installs, then starts the API, the auth server **and** `ng serve` in one terminal |
 | `predev` | Runs **by itself** before `dev` (npm runs `preXxx` before `xxx`). Never call it directly. |
 | `npm start` | Angular only (as before) |
 | `npm run api` | API only, on port 3000 |
+| `npm run api:auth` | Auth server only, on port 3001 (needs the API running: it reads the users from it) |
 | `npm run api:slow` | API only, every answer waits 1 s → to test loading spinners |
-| `npm run api:reset` | Puts the 10 original people back in `db.json` |
+| `npm run api:reset` | Puts the 10 original people back in `db.json` (`people` and `securePeople`) |
 
 What the `concurrently` flags mean:
 
@@ -259,6 +262,8 @@ export interface RegisterRequest {
 
 > 💡 **Roles:** Bob is `"admin"`, everybody else is `"user"`. New accounts are always `"user"`: `UserService.create` adds `role: RoleEnum.USER` to the request (`RegisterRequest` has no role, a user can't choose to be admin).
 
+> 💡 **Two lists, same 10 people:** `people` stores the passwords as plain text (`AuthService`), `securePeople` stores **bcrypt hashes** (`BcryptAuthService` and the auth server, see `src/app/pages/auth/bcrypt/BCRYPT.md`). New accounts go to the list of the service that created them.
+
 > ⚠️ `"gender"` in `db.json` must be the **values** of `GenderEnum` (`'male'`, `'female'`, `'other'`), not the keys (`MALE`...). If you edit the JSON by hand, keep them lowercase.
 
 ---
@@ -387,7 +392,7 @@ Import it from the file that is always there, `environment.ts`. Angular swaps it
 | File | What it does |
 | ---- | ------------ |
 | `core/services/user.service.ts` | CRUD on `/people`: `create`, `getAll`, `getOne`, `updateFully` (PUT), `updatePartial` (PATCH), `delete`, plus the booleans `exists(id)` and `emailExists(email)` |
-| `core/services/auth.service.ts` | `register` (refuses a taken email, then `UserService.create`), `login`, `logout`, `currentUser` signal |
+| `core/services/auth.service.ts` | `register` (refuses a taken email, then `UserService.create`, then logs the new user in), `login`, `logout`, `currentUser` signal |
 | `core/validators/reactive-form/email-taken.validator.ts` | async validator: `emailExists` while the user types (see `REACTIVE_FORM.md`) |
 | `core/mapper/user.mapper.ts` | `UserMapper(entity)` → `UserResponse` (removes the password). A plain function: call it, don't `inject()` it |
 | `core/controllers/*.controller.ts` | what **components** call: check the logged-in user's role, then call the service and return a **Promise** (`firstValueFrom`), or throw `unauthorized` / `forbidden` (see `core/controllers/CONTROLLER.md`) |
@@ -437,6 +442,29 @@ curl -X DELETE http://localhost:3000/people/1
 
 ---
 
+## 10. The auth server (bcrypt + JWT)
+
+json-server can't hash a password or sign a token: it has no code of its own. So the token pages use a second, tiny server, `fake-api/auth-server.js` (plain Node, ~150 lines):
+
+```
+Angular ──▶ auth-server.js (localhost:3001) ──▶ json-server (localhost:3000) ──▶ db.json
+            bcrypt.compare + jwt.sign/verify      /securePeople
+```
+
+| Request | Body / header | Answer |
+| ------- | ------------- | ------ |
+| `POST /token/register` | `RegisterRequest` | `201 { token, user }`, `409` if the email is taken |
+| `POST /token/login` | `{ email, password }` | `200 { token, user }`, `401 bad credentials` |
+| `GET /token/me` | `Authorization: Bearer <token>` | `200` the user, `401 no token` / `invalid token` / `token expired` |
+| `GET /health` | – | `200`: Playwright waits for it before the tests |
+
+- It never writes `db.json` itself: it asks json-server over HTTP. Two programs writing the same file would overwrite each other.
+- `npm run dev` starts it with the others. Alone: `npm run api:auth` (json-server must run too).
+- Its URL is `environment.authUrl` (`http://localhost:3001`) in both `src/environments/` files.
+- Everything about tokens: `src/app/pages/auth/token/TOKEN.md`.
+
+---
+
 ## 🐛 Troubleshooting
 
 ### `ERR_CONNECTION_REFUSED` / `Http failure response ... 0 Unknown Error`
@@ -462,9 +490,9 @@ Your `package.json` has `"type": "module"`. Rename the script to `scripts/ensure
 
 Run them in two terminals instead: `npm run api` + `npm start`. Or hide the API's logs: `concurrently -k --raw ...` removes prefixes, `concurrently -k --hide api ...` hides the API's output.
 
-### `EADDRINUSE: address already in use :::3000`
+### `EADDRINUSE: address already in use :::3000` (or `:::3001`)
 
-Something already uses port 3000 (often an old json-server that didn't stop, or the one Playwright started). Close the other terminal, or stop it:
+Something already uses port 3000 (3001 for the auth server) (often an old json-server that didn't stop, or the one Playwright started). Close the other terminal, or stop it:
 
 ```powershell
 # PowerShell: see who it is (usually "node")

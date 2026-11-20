@@ -30,7 +30,7 @@ src/app/core/
 └── controllers/
     ├── permissions.ts            ← isLoggedIn(), isAdmin(), isAdminOrSelf(), deny()
     ├── auth.controller.ts        ← login, register (public), logout (logged in)
-    ├── user.controller.ts        ← getAll, getOne, create, updateFully, updatePartial, delete
+    ├── user.controller.ts        ← getAll, getOne, getMe, create, updateFully, updatePartial, delete
     ├── auth.controller.spec.ts
     ├── user.controller.spec.ts
     └── CONTROLLER.md             ← this file
@@ -156,6 +156,7 @@ async getAll() {
 | ------ | ------- | ------- |
 | `getAll()` | admin | `Promise<UserResponse[]>` |
 | `getOne(id)` | admin, or yourself | `Promise<UserResponse>` |
+| `getMe()` | anybody logged in (reads their own account) | `Promise<UserResponse>` |
 | `create(request)` | admin (people make their own account with `AuthController.register`) | `Promise<UserResponse>` |
 | `updateFully(id, request)` | admin, or yourself | `Promise<UserResponse>` |
 | `updatePartial(id, changes)` | admin, or yourself | `Promise<UserResponse>` |
@@ -166,7 +167,7 @@ async getAll() {
 | Method | Allowed | Returns |
 | ------ | ------- | ------- |
 | `login(request)` | everybody (public) | `Promise<UserResponse>` |
-| `register(request)` | everybody (public) | `Promise<UserResponse>` |
+| `register(request)` | everybody (public), logs the new user in | `Promise<UserResponse>` |
 | `logout()` | logged in | `Promise<void>` |
 
 Change a rule? Change the `if` in that method. Need a new rule (e.g. "premium only")? Add a helper in `permissions.ts`:
@@ -317,7 +318,7 @@ Nobody caught the rejected Promise. Put the `await` in a `try { } catch { }`.
 
 ### `unauthorized` right after a page refresh
 
-`currentUser` lives in memory: a refresh empties it. In this repo the **auth toggle** (navbar) logs Bob in again on start when it's on (see `pages/services/auth-service/AUTH_SERVICE.md`). Keeping a real login (token) is for the tokens cheat sheet.
+`currentUser` lives in memory: a refresh empties it. In this repo the **auth toggle** (navbar) logs Bob in again on start when it's on (see `pages/auth/auth-service/AUTH_SERVICE.md`). Keeping a real login (token) is for the tokens cheat sheet.
 
 ### A new user registered from the app is not admin
 

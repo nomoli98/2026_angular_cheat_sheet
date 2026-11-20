@@ -120,5 +120,127 @@
       "agreeToTerms": true,
       "role": "user"
     }
+  ],
+  "securePeople": [
+    {
+      "id": 1,
+      "name": "Bob Martin",
+      "email": "bob@email.bob",
+      "password": "$2b$10$xScyLRoTzCndQZvGgrzwquFPmyRK0V9fja7/TukOT1j7IXedYJMRS",
+      "birthdate": "2000-09-22",
+      "height": 195,
+      "gender": "male",
+      "subscription": "premium",
+      "agreeToTerms": true,
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "name": "Alice Dupont",
+      "email": "alice.dupont@mail.com",
+      "password": "$2b$10$LvsaozPGlRSC0BJj36p6ket2QQ732FWPHYHiQcs1.ExNnIWX0R2Ku",
+      "birthdate": "1995-03-14",
+      "height": 168,
+      "gender": "female",
+      "subscription": "free",
+      "agreeToTerms": true,
+      "role": "user"
+    },
+    {
+      "id": 3,
+      "name": "Charlie Nguyen",
+      "email": "charlie.n@mail.com",
+      "password": "$2b$10$TzolI7t9nXykol0yLT0R3eGoVVmbxbfXNcttpEhcF22/F6A2gjQr2",
+      "birthdate": "1988-11-02",
+      "height": 175,
+      "gender": "male",
+      "subscription": "premium",
+      "agreeToTerms": true,
+      "role": "user"
+    },
+    {
+      "id": 4,
+      "name": "Dana Kowalski",
+      "email": "dana.k@mail.com",
+      "password": "$2b$10$f.KFy7v6r2K7XtTVzglcyumJPGSe6q2suAel4E6Y1WD5ZAbh2nROK",
+      "birthdate": "2002-07-30",
+      "height": 160,
+      "gender": "female",
+      "subscription": "free",
+      "agreeToTerms": true,
+      "role": "user"
+    },
+    {
+      "id": 5,
+      "name": "Sam Rivera",
+      "email": "sam.rivera@mail.com",
+      "password": "$2b$10$ni1Wrrt2jATF7JbFnBYTB.yYh85MN0uvv96B6Wty4H59xf9090l.O",
+      "birthdate": "1999-01-19",
+      "height": 172,
+      "gender": "other",
+      "subscription": "free",
+      "agreeToTerms": true,
+      "role": "user"
+    },
+    {
+      "id": 6,
+      "name": "Emma Leroy",
+      "email": "emma.leroy@mail.com",
+      "password": "$2b$10$MA5J3uHz11hqX11mEtxcr.aoUNRXfqN0S8QlwEaqMpBISMfiFWvAi",
+      "birthdate": "1992-05-08",
+      "height": 165,
+      "gender": "female",
+      "subscription": "premium",
+      "agreeToTerms": true,
+      "role": "user"
+    },
+    {
+      "id": 7,
+      "name": "Farid Benali",
+      "email": "farid.b@mail.com",
+      "password": "$2b$10$DreHTMh87aamOeGZwSFGTOIDkBaFYRKf5dAudMDrkQtw/leqYJct.",
+      "birthdate": "1985-12-25",
+      "height": 181,
+      "gender": "male",
+      "subscription": "free",
+      "agreeToTerms": true,
+      "role": "user"
+    },
+    {
+      "id": 8,
+      "name": "Grace Okafor",
+      "email": "grace.okafor@mail.com",
+      "password": "$2b$10$nnmOJwedYEu9Jd9.PqlOmOA81mCZ2qPU45oFfH9SU6qW0HF0lBVfG",
+      "birthdate": "2001-04-03",
+      "height": 170,
+      "gender": "female",
+      "subscription": "premium",
+      "agreeToTerms": true,
+      "role": "user"
+    },
+    {
+      "id": 9,
+      "name": "Hugo Schmidt",
+      "email": "hugo.schmidt@mail.com",
+      "password": "$2b$10$0BdrvGLLWgJqsN4FxlbPquJpu7RufRzLBKRF5/82Km8Sl8egF4bzC",
+      "birthdate": "1997-08-17",
+      "height": 188,
+      "gender": "male",
+      "subscription": "free",
+      "agreeToTerms": true,
+      "role": "user"
+    },
+    {
+      "id": 10,
+      "name": "Ines Costa",
+      "email": "ines.costa@mail.com",
+      "password": "$2b$10$nWjvbuWh0.8lXELSvqyxQO4irwqhyYQsVFZpmiBvYPLWST0CiryGC",
+      "birthdate": "1990-10-10",
+      "height": 158,
+      "gender": "female",
+      "subscription": "premium",
+      "agreeToTerms": true,
+      "role": "user"
+    }
   ]
 }

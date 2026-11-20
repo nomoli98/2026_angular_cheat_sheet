@@ -112,6 +112,20 @@ describe('UserController', () => {
     });
   });
 
+  describe('getMe (anybody logged in)', () => {
+    it('reads the account of the logged in user', async () => {
+      currentUser.set(alice);
+
+      expect(await controller.getMe()).toEqual(alice);
+      expect(fakeUserService.getOne).toHaveBeenCalledWith(2);
+    });
+
+    it('is unauthorized when nobody is logged in', async () => {
+      await expect(controller.getMe()).rejects.toThrow('unauthorized');
+      expect(fakeUserService.getOne).not.toHaveBeenCalled();
+    });
+  });
+
   describe('create (admin only)', () => {
     it('is forbidden for a simple user', async () => {
       currentUser.set(alice);

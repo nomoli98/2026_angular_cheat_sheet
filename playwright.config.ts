@@ -24,6 +24,11 @@ export default defineConfig({
       reuseExistingServer: true,
     },
     {
+      command: 'npm run api:auth', // the auth server (token pages): bcrypt + JWT
+      url: 'http://localhost:3001/health',
+      reuseExistingServer: true,
+    },
+    {
       command: 'npm start',
       url: 'http://localhost:4200',
       reuseExistingServer: true,

@@ -178,7 +178,7 @@ You read an `input.required()` in the **constructor**. Read it in the template, 
 
 ### Birthdate format: always `'YYYY-MM-DD'`
 
-`birthdate` is a **string** in `RegisterRequest` (`core/requests/register.request.ts`), in the same format `<input type="date">` uses. (`UserInterface` in `core/interfaces/` uses a real `Date`.)
+`birthdate` is a **string** in `RegisterRequest` (`core/requests/register.request.ts`), in the same format `<input type="date">` uses.
 
 ```ts
 birthdate: '2000-09-22';   // ✅

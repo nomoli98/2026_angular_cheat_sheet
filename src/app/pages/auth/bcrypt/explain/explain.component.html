@@ -1,0 +1,113 @@
+<h2>bcrypt: how it works</h2>
+
+<section class="card card-body mb-3">
+  <p>
+    Storing passwords as plain text means anybody who reads the database (a leak, a backup, a
+    curious admin) gets every password. <strong>bcrypt</strong> stores a <strong>hash</strong>
+    instead: a one-way fingerprint. You can't turn it back into the password, you can only check
+    if a password gives the same hash.
+  </p>
+  <ul class="mb-0">
+    <li><strong>Salt:</strong> random characters mixed in, saved inside the hash. Same password →
+      a different hash every time, so two users with the same password don't look the same.</li>
+    <li><strong>Cost:</strong> bcrypt is slow <strong>on purpose</strong>. 100 ms is nothing for
+      a login, but it makes guessing billions of passwords impossible.</li>
+  </ul>
+  <p class="text-body-secondary small mt-3 mb-0">
+    Pages: <a routerLink="/auth/bcrypt/register">Register (bcrypt)</a> ·
+    <a routerLink="/auth/bcrypt/login">Login (bcrypt)</a>. Here the hashing runs in Angular
+    (<code>bcryptjs</code>) so you can see it. A real API does it <strong>on the server</strong>:
+    the <a routerLink="/auth/token/explain">token version</a> shows that.
+  </p>
+</section>
+
+<section class="card card-body mb-3">
+  <h3>1. Hash a password</h3>
+  <div class="d-flex flex-wrap gap-2 align-items-end">
+    <div>
+      <label for="password" class="form-label">Password</label>
+      <input id="password" class="form-control" [value]="_password()"
+             (input)="_password.set(value($event))" />
+    </div>
+    <div>
+      <label for="rounds" class="form-label">Cost</label>
+      <!-- [selected] on the option: a [value] on the <select> is set before the @for options exist -->
+      <select id="rounds" class="form-select" (change)="_rounds.set(+value($event))">
+        @for (r of ROUNDS; track r) {
+          <option [value]="r" [selected]="r === _rounds()">{{ r }} (2^{{ r }} rounds)</option>
+        }
+      </select>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="onHash()" [disabled]="_busy()">
+      {{ _busy() ? 'Hashing...' : 'Hash it' }}
+    </button>
+  </div>
+
+  @if (_hashes().length) {
+    <p class="small text-body-secondary mt-3 mb-1">Click it again: same password, new hash (new salt).</p>
+    <ul class="list-unstyled mb-0">
+      @for (h of _hashes(); track h.value) {
+        @let p = parts(h.value);
+        <li class="font-monospace small text-break mb-1">
+          <span class="text-danger" title="algorithm">{{ p.algo }}</span><span class="text-warning-emphasis" title="cost">{{ p.cost }}</span><span class="text-primary" title="salt">{{ p.salt }}</span><span class="text-success" title="hash">{{ p.hash }}</span>
+          <span class="text-body-secondary">· {{ h.ms }} ms</span>
+        </li>
+      }
+    </ul>
+    <p class="small mt-2 mb-0">
+      <span class="text-danger">$2b$</span> algorithm ·
+      <span class="text-warning-emphasis">10$</span> cost ·
+      <span class="text-primary">22 chars</span> salt ·
+      <span class="text-success">31 chars</span> hash
+    </p>
+  }
+
+  <app-code-snippet class="mt-3" [code]="snippets.hash" />
+</section>
+
+<section class="card card-body mb-3">
+  <h3>2. Check a password against a hash</h3>
+  <p>
+    That's what login does: <code>compare()</code> takes the salt and cost <strong>from the
+    hash</strong>, hashes the typed password with them, and compares. (Prefilled with Bob's hash
+    from <code>db.seed.json</code>, or the last one you made.)
+  </p>
+  <div class="mb-2">
+    <label for="check-password" class="form-label">Password typed at login</label>
+    <input id="check-password" class="form-control" [value]="_checkPassword()"
+           (input)="_checkPassword.set(value($event)); _match.set(null)" />
+  </div>
+  <div class="mb-2">
+    <label for="check-hash" class="form-label">Hash stored in db.json</label>
+    <input id="check-hash" class="form-control font-monospace" [value]="_checkHash()"
+           (input)="_checkHash.set(value($event)); _match.set(null)" />
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <button type="button" class="btn btn-primary" (click)="onCompare()">Compare</button>
+    @if (_match(); as m) {
+      @if (m.ok) {
+        <span class="text-success fw-semibold">✔ Match: the password is right ({{ m.ms }} ms)</span>
+      } @else {
+        <span class="text-danger fw-semibold">✘ No match: wrong password</span>
+      }
+    }
+  </div>
+
+  <app-code-snippet class="mt-3" [code]="snippets.compare" />
+</section>
+
+<section class="card card-body">
+  <h3>3. What db.json stores for Bob</h3>
+  <p>Same person in both lists. Which one would you rather see leak?</p>
+  <div>
+    <button type="button" class="btn btn-outline-primary" (click)="onShowStored()">Show Bob's stored password</button>
+  </div>
+  @if (_stored(); as s) {
+    <table class="table table-sm mt-3 mb-0">
+      <tbody>
+        <tr><td><code>people</code> (AuthService)</td><td class="font-monospace text-break">{{ s.plain }}</td></tr>
+        <tr><td><code>securePeople</code> (BcryptAuthService)</td><td class="font-monospace text-break">{{ s.hashed }}</td></tr>
+      </tbody>
+    </table>
+  }
+</section>

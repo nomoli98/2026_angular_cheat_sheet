@@ -10,7 +10,7 @@ export const authGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthService);
   if (auth.currentUser()) return true;
 
-  return inject(Router).createUrlTree(['/service/auth-service'], {
+  return inject(Router).createUrlTree(['/auth/auth-service'], {
     queryParams: { returnUrl: state.url },
   });
 };

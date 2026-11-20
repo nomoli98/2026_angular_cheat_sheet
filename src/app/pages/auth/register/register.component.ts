@@ -1,0 +1,76 @@
+import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { email, form, FormField, max, min, required, validate } from '@angular/forms/signals';
+import { UserResponse } from '@core/responses/user.response';
+import { RegisterRequest } from '@core/requests/register.request';
+import { AuthController } from '@core/controllers/auth.controller';
+import { errorMessage } from '@core/controllers/error-message';
+import { GenderEnum } from '@core/enums/gender.enum';
+import { strongPassword } from '@core/validators/signal-form/strong-password.validator';
+import { birthdate } from '@core/validators/signal-form/birthdate.validator';
+import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
+import register from './snippets/register.md';
+
+const EMPTY: RegisterRequest = {
+  name: '',
+  email: '',
+  password: '',
+  birthdate: '',
+  height: 170,
+  gender: GenderEnum.OTHER,
+  subscription: 'free',
+  agreeToTerms: false,
+};
+
+@Component({
+  imports: [CodeSnippetComponent, FormField, RouterLink],
+  selector: 'app-register',
+  templateUrl: './register.component.html',
+})
+export class RegisterComponent {
+  // The code shown on the page (see the snippets/ folder)
+  protected readonly snippets = { register };
+
+  protected readonly GenderEnum = GenderEnum;
+  protected readonly _authController = inject(AuthController);
+  protected readonly _created = signal<UserResponse | null>(null);
+  protected readonly _error = signal<string | null>(null);
+  protected readonly _busy = signal(false); // true while waiting for the API
+
+  protected readonly _model = signal<RegisterRequest>({ ...EMPTY });
+
+  protected readonly _form = form(this._model, (field) => {
+    required(field.name, { message: 'Name is required' });
+    required(field.email, { message: 'Email is required' });
+    email(field.email, { message: 'Email must be a valid email' });
+    required(field.password, { message: 'Password is required' });
+    strongPassword(field.password);
+    required(field.birthdate, { message: 'Birthdate is required' });
+    birthdate(field.birthdate, { minAge: 18, maxAge: 120 });
+    min(field.height, 50, { message: 'Height must be above 50cm' });
+    max(field.height, 275, { message: 'Height must be below 275cm' });
+    validate(field.agreeToTerms, ({ value }) =>
+      value() ? undefined : { kind: 'agreeToTerms', message: 'You must agree to the terms' },
+    );
+  });
+
+  async onSubmit(event: Event) {
+    event.preventDefault();
+    if (this._form().invalid()) return;
+
+    this._error.set(null);
+    this._created.set(null);
+    this._busy.set(true);
+    try {
+      // creates the account (role: user) AND logs it in
+      this._created.set(await this._authController.register(this._form().value()));
+      this._model.set({ ...EMPTY });
+      this._form().reset(); // back to "untouched": no red fields on the empty form
+    } catch (err) {
+      // 'email already taken' → 'This email is already taken', or an HTTP error
+      this._error.set(errorMessage(err));
+    } finally {
+      this._busy.set(false);
+    }
+  }
+}

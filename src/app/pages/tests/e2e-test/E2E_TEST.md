@@ -13,6 +13,8 @@ Files:
 | `playwright.config.ts` (project root) | The settings |
 | `e2e/navigation.spec.ts` | Open the home page, click a link |
 | `e2e/login.spec.ts` | Fill the login form, check the result |
+| `e2e/register.spec.ts` | The step-by-step example (section 4): register, happy path + error |
+| `e2e/token.spec.ts` | The token version: still logged in after a refresh, protected route |
 
 ---
 
@@ -84,6 +86,11 @@ export default defineConfig({
       reuseExistingServer: true,            // if it's already running, use it
     },
     {
+      command: 'npm run api:auth',          // the auth server (token pages)
+      url: 'http://localhost:3001/health',
+      reuseExistingServer: true,
+    },
+    {
       command: 'npm start',                 // the Angular app
       url: 'http://localhost:4200',
       reuseExistingServer: true,            // if ng serve is already running, use it
@@ -92,7 +99,7 @@ export default defineConfig({
 });
 ```
 
-`webServer` can be **one object** (one server) or an **array** (several servers, all started before the tests). This app needs both: the pages call the fake API.
+`webServer` can be **one object** (one server) or an **array** (several servers, all started before the tests). This app needs all three: the pages call the fake API, the token pages call the auth server.
 
 > ⚠️ Keep the tests **out of `src/`**. `ng test` runs every `src/**/*.spec.ts`, and it would try to run Playwright tests with Vitest.
 
@@ -128,7 +135,132 @@ You **don't** need `whenStable()` here: `expect(...)` **waits** (up to 5 s) unti
 
 ---
 
-## 4. Cheat table: find things (locators)
+## 4. Step by step: write a test
+
+### The recipe
+
+1. **Write the story** as a user would do it, in plain sentences: "I open Register, fill the form, click Register, I see Welcome and I'm logged in".
+2. **Create the file** in `e2e/` (not in `src/`): `e2e/register.spec.ts`.
+3. **Set the start state** in `test.beforeEach`: logged in or out, which page.
+4. **Do the steps** with locators the user can see (label, role, text). Not sure how? `npx playwright codegen http://localhost:4200`, click, copy.
+5. **Check what the user sees** with `await expect(...)`.
+6. **Run it in UI mode** (`--ui`) and watch it. Then break it once on purpose.
+7. **Make it repeatable**: the test really changes `db.json`, so it must still pass on the 2nd run.
+8. Add the **error case** (one story = one `test`).
+
+### Worked example: the Register page
+
+The page: `/auth/register` (`pages/auth/register/`). It's public, it creates the account and logs the new user in.
+
+#### Step 1. The story
+
+- **Happy path:** I'm logged out → I open Register → I fill name, email, password, birthdate, tick the terms → I click Register → I see "Welcome, Zoe Test!" and the navbar says "Logged in as Zoe Test".
+- **Error:** same, with an email that already exists → I see "This email is already taken" and I'm still logged out.
+
+#### Step 2. Create the file
+
+`e2e/register.spec.ts`, at the project root, next to `login.spec.ts`.
+
+#### Step 3. The start state
+
+```ts
+import { test, expect } from '@playwright/test';
+
+test.beforeEach(async ({ page }) => {
+  // start logged OUT: the auth toggle in the navbar logs Bob in by default
+  await page.addInitScript(() => localStorage.setItem('auth-toggle', 'off'));
+  await page.goto('/auth/register');
+});
+```
+
+Every test gets a **new, empty** browser tab: whatever the test needs (page, login, localStorage) goes here.
+
+#### Step 4. Do the steps
+
+Read the page like a user: each field has a `<label>`, so `getByLabel('Name')` finds the input.
+
+```ts
+test('a new user can register and is logged in', async ({ page }) => {
+  await page.getByLabel('Name').fill('Zoe Test');
+  await page.getByLabel('Email').fill('zoe@test.com');
+  await page.getByLabel('Password').fill('ZoeIsTheBest99#');
+  await page.getByLabel('Birthdate').fill('1990-05-05');      // <input type="date"> takes 'YYYY-MM-DD'
+  await page.getByLabel('I agree to the terms').check();
+  await page.getByRole('button', { name: 'Register' }).click();
+});
+```
+
+#### Step 5. Check what the user sees
+
+```ts
+  await expect(page.getByText('Welcome, Zoe Test!')).toBeVisible();
+  await expect(page.getByText('Logged in as Zoe Test')).toBeVisible();   // the navbar
+```
+
+No waiting code: `expect` retries for up to 5 s, while the API answers.
+
+#### Step 6. Run it (and fix the first error)
+
+```bash
+npx playwright test e2e/register.spec.ts --ui
+```
+
+Click ▶ and watch each step. On this page the first run **fails**:
+
+```
+Error: strict mode violation: getByRole('button', { name: 'Register' }) resolved to 3 elements:
+    1) <button type="submit" class="btn btn-primary"> Register </button>
+    2) <button type="button" class="snippet-tab active"> register.component.html </button>
+    3) <button type="button" class="snippet-tab"> register.component.ts </button>
+```
+
+`name: 'Register'` matches **part** of the name, and the code tabs at the bottom contain "register". Fix: `{ name: 'Register', exact: true }`. Run again: green.
+
+Then break it once: change `'Welcome, Zoe Test!'` to `'Welcome, Nobody!'`. It must fail after 5 s (`npx playwright show-report` → the trace shows the page at that moment). Put it back.
+
+#### Step 7. Make it repeatable
+
+Run it a **second** time: it fails with "This email is already taken". The first run really created `zoe@test.com` in `db.json`!
+
+Fix: a new email on every run.
+
+```ts
+const email = `zoe.${Date.now()}@test.com`;   // zoe.1763630000000@test.com
+await page.getByLabel('Email').fill(email);
+```
+
+Run it 2–3 times: always green. (The test users pile up in `db.json`: `npm run api:reset` cleans them.)
+
+#### Step 8. The error case
+
+```ts
+test('an email that is already taken shows an error', async ({ page }) => {
+  await page.getByLabel('Name').fill('Bob Again');
+  await page.getByLabel('Email').fill('bob@email.bob');        // Bob is in db.seed.json
+  await page.getByLabel('Password').fill('BobIsTheBest99#');
+  await page.getByLabel('Birthdate').fill('1990-05-05');
+  await page.getByLabel('I agree to the terms').check();
+  await page.getByRole('button', { name: 'Register', exact: true }).click();
+
+  await expect(page.getByText('This email is already taken', { exact: true })).toBeVisible();
+  await expect(page.getByText('Logged out')).toBeVisible();    // nobody got logged in
+});
+```
+
+Full file: `e2e/register.spec.ts`.
+
+### Checklist before you're done
+
+- [ ] `await` in front of **every** Playwright line
+- [ ] Locators a user can see (`getByLabel`, `getByRole`, `getByText`), with `exact: true` when the code snippets also contain the text
+- [ ] Each test sets up its own start state (`beforeEach`), never counts on another test
+- [ ] Green twice in a row (data that the test creates doesn't break the next run)
+- [ ] You saw it go red once
+- [ ] `npm run e2e` passes for the whole project
+
+---
+
+## 5. Cheat table: find things (locators)
 
 Find elements **the way a user sees them** (text, label, role), not with CSS classes.
 
@@ -147,7 +279,7 @@ Add `{ exact: true }` to match the **whole** text only (by default, `'Log'` also
 
 ---
 
-## 5. Cheat table: actions
+## 6. Cheat table: actions
 
 | Do | Write |
 |---|---|
@@ -161,7 +293,7 @@ Add `{ exact: true }` to match the **whole** text only (by default, `'Log'` also
 
 ---
 
-## 6. Cheat table: checks (`expect`)
+## 7. Cheat table: checks (`expect`)
 
 | Check | Write |
 |---|---|
@@ -178,7 +310,7 @@ Add `{ exact: true }` to match the **whole** text only (by default, `'Log'` also
 
 ---
 
-## 7. Run the tests
+## 8. Run the tests
 
 | Command | What it does |
 |---|---|
