@@ -14,35 +14,35 @@ import { GenderEnum } from '@core/enums/gender.enum';
 import { RegisterRequest } from '@core/requests/register.request';
 
 @Component({
-  selector: 'app-child-component',
-  standalone: true,
-  templateUrl: './child-component.component.html',
+    selector: 'app-child-component',
+    standalone: true,
+    templateUrl: './child-component.component.html',
 })
 export class ChildComponentComponent {
-  // REQUIRED: the parent MUST pass it, or the build fails.
-  inputString = input.required<string>();
+    // REQUIRED: the parent MUST pass it, or the build fails.
+    inputString = input.required<string>();
 
-  // OPTIONAL: if the parent passes nothing, the default value is used.
-  inputUser = input<RegisterRequest>({
-    name: 'Default',
-    email: 'default@email.fake',
-    password: '',
-    birthdate: '',            // empty string = no date yet
-    height: 50,
-    gender: GenderEnum.OTHER,
-    subscription: 'free',
-    agreeToTerms: false,
-  });
+    // OPTIONAL: if the parent passes nothing, the default value is used.
+    inputUser = input<RegisterRequest>({
+        name: 'Default',
+        email: 'default@email.fake',
+        password: '',
+        birthdate: '', // empty string = no date yet
+        height: 50,
+        gender: GenderEnum.OTHER,
+        subscription: 'free',
+        agreeToTerms: false,
+    });
 }
 ```
 
 ### Which one should I use?
 
-| Syntax                         | Parent must pass it? | Value if nothing passed |
-| ------------------------------ | -------------------- | ----------------------- |
-| `input.required<T>()`          | ✅ Yes                | build error             |
-| `input<T>(defaultValue)`       | ❌ No                 | `defaultValue`          |
-| `input<T>()`                   | ❌ No                 | `undefined` (type `T \| undefined`) |
+| Syntax                   | Parent must pass it? | Value if nothing passed             |
+| ------------------------ | -------------------- | ----------------------------------- |
+| `input.required<T>()`    | ✅ Yes               | build error                         |
+| `input<T>(defaultValue)` | ❌ No                | `defaultValue`                      |
+| `input<T>()`             | ❌ No                | `undefined` (type `T \| undefined`) |
 
 Rule of thumb: use `required` if the component can't work without the value. Otherwise give a default value.
 
@@ -59,9 +59,9 @@ Inputs are **signals**, so you **call them with `()`**:
 
 <p>And this is the user:</p>
 <ul>
-  <li>{{ inputUser().name }}</li>
-  <li>{{ inputUser().email }}</li>
-  <li>{{ inputUser().subscription }}</li>
+    <li>{{ inputUser().name }}</li>
+    <li>{{ inputUser().email }}</li>
+    <li>{{ inputUser().subscription }}</li>
 </ul>
 ```
 
@@ -79,24 +79,24 @@ import { RegisterRequest } from '@core/requests/register.request';
 import { ChildComponentComponent } from './child-component/child-component.component';
 
 @Component({
-  selector: 'app-input',
-  standalone: true,
-  imports: [ChildComponentComponent],   // 👈 DON'T FORGET THIS
-  templateUrl: './input.component.html',
+    selector: 'app-input',
+    standalone: true,
+    imports: [ChildComponentComponent], // 👈 DON'T FORGET THIS
+    templateUrl: './input.component.html',
 })
 export class InputComponent {
-  String = signal<string>('Parent given value');
+    String = signal<string>('Parent given value');
 
-  User = signal<RegisterRequest>({
-    name: 'Bob',
-    email: 'bob@email.bob',
-    password: 'BobIsTheBest99#',
-    birthdate: '2000-09-22',   // ⚠️ 'YYYY-MM-DD' string, see gotchas
-    height: 195,
-    gender: GenderEnum.MALE,
-    subscription: 'premium',
-    agreeToTerms: true,
-  });
+    User = signal<RegisterRequest>({
+        name: 'Bob',
+        email: 'bob@email.bob',
+        password: 'BobIsTheBest99#',
+        birthdate: '2000-09-22', // ⚠️ 'YYYY-MM-DD' string, see gotchas
+        height: 195,
+        gender: GenderEnum.MALE,
+        subscription: 'premium',
+        agreeToTerms: true,
+    });
 }
 ```
 
@@ -128,6 +128,7 @@ Use `[inputName]="value"` (square brackets = property binding):
 ```ts
 inputUser = input<RegisterRequest>(defaultUser, { alias: 'user' });
 ```
+
 ```html
 <app-child-component [user]="User()" />
 ```
@@ -138,7 +139,7 @@ inputUser = input<RegisterRequest>(defaultUser, { alias: 'user' });
 import { booleanAttribute, numberAttribute } from '@angular/core';
 
 disabled = input(false, { transform: booleanAttribute }); // <x disabled /> → true
-size     = input(0,     { transform: numberAttribute });  // size="12" → 12
+size = input(0, { transform: numberAttribute }); // size="12" → 12
 ```
 
 ### Derive a value from an input
@@ -159,15 +160,15 @@ Check in this order:
 
 1. **Is the child in the parent's `imports: []`?** (most common cause)
 2. **Is the input name spelled the same** in the child `.ts` and in the parent `.html`? (case-sensitive)
-3. **Is the child file saved?** (dot on the VS Code tab = unsaved → *File → Save All*)
+3. **Is the child file saved?** (dot on the VS Code tab = unsaved → _File → Save All_)
 4. **Restart `ng serve`** (Ctrl+C, then run it again). The watcher sometimes misses changes.
 5. **Clear the Angular cache:**
-   ```bash
-   # PowerShell
-   Remove-Item -Recurse -Force .angular\cache
-   # bash
-   rm -rf .angular/cache
-   ```
+    ```bash
+    # PowerShell
+    Remove-Item -Recurse -Force .angular\cache
+    # bash
+    rm -rf .angular/cache
+    ```
 6. **Duplicate component?** Ctrl+click the class name in the parent's import to make sure it opens the right file.
 
 > 💡 Hint: if only ONE input fails and the others work, the compiler is reading an old version of the child (go to steps 3 → 5).
@@ -181,15 +182,15 @@ You read an `input.required()` in the **constructor**. Read it in the template, 
 `birthdate` is a **string** in `RegisterRequest` (`core/requests/register.request.ts`), in the same format `<input type="date">` uses.
 
 ```ts
-birthdate: '2000-09-22';   // ✅
-birthdate: '22/09/2000';   // ❌ the date input shows it empty, the validators reject it
+birthdate: '2000-09-22'; // ✅
+birthdate: '22/09/2000'; // ❌ the date input shows it empty, the validators reject it
 ```
 
 Need a real `Date` (to compute an age, for example)? Split the string. Don't use `new Date('2000-09-22')`: it reads the date as UTC midnight, which can be the day before in your timezone.
 
 ```ts
 const [y, m, d] = user.birthdate.split('-').map(Number);
-const date = new Date(y, m - 1, d);   // month starts at 0
+const date = new Date(y, m - 1, d); // month starts at 0
 ```
 
 ### `Type 'null' is not assignable to type 'string'`

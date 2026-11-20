@@ -1,22 +1,22 @@
 @if (auth.currentUser(); as user) {
-  <p>Welcome, {{ user.name }}!</p>
-  <button type="button" (click)="logout()">Log out</button>
+    <p>Welcome, {{ user.name }}!</p>
+    <button type="button" (click)="logout()">Log out</button>
 } @else {
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-    <div>
-      <label for="email">Email</label>
-      <input id="email" type="email" formControlName="email" />
-    </div>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div>
+            <label for="email">Email</label>
+            <input id="email" type="email" formControlName="email" />
+        </div>
 
-    <div>
-      <label for="password">Password</label>
-      <input id="password" type="password" formControlName="password" />
-    </div>
+        <div>
+            <label for="password">Password</label>
+            <input id="password" type="password" formControlName="password" />
+        </div>
 
-    @if (error()) {
-      <p>Wrong email or password</p>
-    }
+        @if (error()) {
+            <p>Wrong email or password</p>
+        }
 
-    <button type="submit" [disabled]="loginForm.invalid">Log in</button>
-  </form>
+        <button type="submit" [disabled]="loginForm.invalid">Log in</button>
+    </form>
 }

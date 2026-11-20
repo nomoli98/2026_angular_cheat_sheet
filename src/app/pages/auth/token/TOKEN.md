@@ -6,12 +6,12 @@ Demo pages: `/auth/token/explain` (your token, decoded, + calls to a protected r
 
 `TokenAuthService` does **the same job** as `BcryptAuthService` (see `../bcrypt/BCRYPT.md`): register, login, logout, who is logged in. Three things change:
 
-| | `BcryptAuthService` | `TokenAuthService` |
-| - | - | - |
-| Who checks the password | Angular (`bcryptjs` in the browser) | the **server** (`fake-api/auth-server.js`) |
-| What login gives back | the user | the user **+ a signed token (JWT)** |
-| After a refresh | logged out (a signal in memory) | **still logged in** (token in `localStorage`) |
-| Can the server protect a route? | no, it doesn't know who asks | yes: `GET /token/me` needs a valid token, `GET /token/users` needs an **admin** token (`403` otherwise, see `../authorization/AUTHORIZATION.md`) |
+|                                 | `BcryptAuthService`                 | `TokenAuthService`                                                                                                                               |
+| ------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Who checks the password         | Angular (`bcryptjs` in the browser) | the **server** (`fake-api/auth-server.js`)                                                                                                       |
+| What login gives back           | the user                            | the user **+ a signed token (JWT)**                                                                                                              |
+| After a refresh                 | logged out (a signal in memory)     | **still logged in** (token in `localStorage`)                                                                                                    |
+| Can the server protect a route? | no, it doesn't know who asks        | yes: `GET /token/me` needs a valid token, `GET /token/users` needs an **admin** token (`403` otherwise, see `../authorization/AUTHORIZATION.md`) |
 
 ```
 Angular ──▶ auth-server.js (localhost:3001) ──▶ json-server (localhost:3000) ──▶ db.json
@@ -30,11 +30,11 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9 . eyJzdWIiOiIxIiwibmFtZSI6IkJvYi... . ICoAh
                                           "role": "admin", "iat": ..., "exp": ... }
 ```
 
-| Part | What it is | Who can read it | Who can make it |
-| ---- | ---------- | --------------- | --------------- |
-| header | the algorithm | anybody | anybody |
-| payload | the data (`sub` = user id, `exp` = expiry in **seconds**) | **anybody**: it's only base64, not encrypted | anybody |
-| signature | proof that the server made it | – | **only who has the secret** (the server) |
+| Part      | What it is                                                | Who can read it                              | Who can make it                          |
+| --------- | --------------------------------------------------------- | -------------------------------------------- | ---------------------------------------- |
+| header    | the algorithm                                             | anybody                                      | anybody                                  |
+| payload   | the data (`sub` = user id, `exp` = expiry in **seconds**) | **anybody**: it's only base64, not encrypted | anybody                                  |
+| signature | proof that the server made it                             | –                                            | **only who has the secret** (the server) |
 
 So: **never put a password or a secret in the payload**. And changing the payload (`"role": "admin"`) breaks the signature: the server refuses it (try it on the explain page).
 
@@ -55,12 +55,15 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET ?? 'demo-secret-change-me';
 
 async function login(body) {
-  const [user] = await data(`?email=${encodeURIComponent(body.email ?? '')}`);   // GET json-server
-  const ok = user && (await bcrypt.compare(String(body.password ?? ''), user.password));
-  if (!ok) return [401, { message: 'bad credentials' }];
+    const [user] = await data(`?email=${encodeURIComponent(body.email ?? '')}`); // GET json-server
+    const ok = user && (await bcrypt.compare(String(body.password ?? ''), user.password));
+    if (!ok) return [401, { message: 'bad credentials' }];
 
-  const payload = { sub: String(user.id), name: user.name, email: user.email, role: user.role };
-  return [200, { token: jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }), user: withoutPassword(user) }];
+    const payload = { sub: String(user.id), name: user.name, email: user.email, role: user.role };
+    return [
+        200,
+        { token: jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }), user: withoutPassword(user) },
+    ];
 }
 ```
 
@@ -70,14 +73,17 @@ async function login(body) {
 
 ```js
 async function me(headers) {
-  const auth = headers['authorization'] ?? '';
-  if (!auth.startsWith('Bearer ')) return [401, { message: 'no token' }];
-  try {
-    const payload = jwt.verify(auth.slice(7), JWT_SECRET);   // signature + expiry
-    return [200, withoutPassword(await data(`/${payload.sub}`))];
-  } catch (err) {
-    return [401, { message: err.name === 'TokenExpiredError' ? 'token expired' : 'invalid token' }];
-  }
+    const auth = headers['authorization'] ?? '';
+    if (!auth.startsWith('Bearer ')) return [401, { message: 'no token' }];
+    try {
+        const payload = jwt.verify(auth.slice(7), JWT_SECRET); // signature + expiry
+        return [200, withoutPassword(await data(`/${payload.sub}`))];
+    } catch (err) {
+        return [
+            401,
+            { message: err.name === 'TokenExpiredError' ? 'token expired' : 'invalid token' },
+        ];
+    }
 }
 ```
 
@@ -112,8 +118,8 @@ if (req.method === 'OPTIONS') return res.writeHead(204).end();
 ```ts
 // src/environments/environment.development.ts (and environment.ts)
 export const environment = {
-  apiUrl: 'http://localhost:3000',
-  authUrl: 'http://localhost:3001',
+    apiUrl: 'http://localhost:3000',
+    authUrl: 'http://localhost:3001',
 };
 ```
 
@@ -122,25 +128,25 @@ export const environment = {
 ```ts
 @Service()
 export class TokenAuthService {
-  private readonly _token = signal<string | null>(readValidToken());   // from localStorage, on page load
-  readonly token = this._token.asReadonly();
+    private readonly _token = signal<string | null>(readValidToken()); // from localStorage, on page load
+    readonly token = this._token.asReadonly();
 
-  readonly payload = computed(() => decodeToken(this._token()));       // read the middle part
-  readonly currentUser = computed(() => {
-    const p = this.payload();
-    return p ? { id: Number(p.sub), name: p.name, email: p.email, role: p.role } : null;
-  });
+    readonly payload = computed(() => decodeToken(this._token())); // read the middle part
+    readonly currentUser = computed(() => {
+        const p = this.payload();
+        return p ? { id: Number(p.sub), name: p.name, email: p.email, role: p.role } : null;
+    });
 
-  login(request: LoginRequest): Observable<UserResponse> {
-    return this._http.post<AuthResponse>(`${this._url}/login`, request).pipe(
-      tap((res) => this._setToken(res.token)),    // signal + localStorage
-      map((res) => res.user),
-    );
-  }
+    login(request: LoginRequest): Observable<UserResponse> {
+        return this._http.post<AuthResponse>(`${this._url}/login`, request).pipe(
+            tap((res) => this._setToken(res.token)), // signal + localStorage
+            map((res) => res.user),
+        );
+    }
 
-  logout(): void {
-    this._setToken(null);   // the server keeps nothing: forgetting the token IS the logout
-  }
+    logout(): void {
+        this._setToken(null); // the server keeps nothing: forgetting the token IS the logout
+    }
 }
 ```
 
@@ -153,32 +159,36 @@ An interceptor is a function that runs for **every** `HttpClient` request. The s
 ```ts
 // core/interceptors/token.interceptor.ts
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth = inject(TokenAuthService);
-  const token = auth.token();
+    const auth = inject(TokenAuthService);
+    const token = auth.token();
 
-  if (!token || !req.url.startsWith(environment.authUrl) || req.context.get(SKIP_TOKEN)) {
-    return next(req);                       // not for us: send it as it is
-  }
+    if (!token || !req.url.startsWith(environment.authUrl) || req.context.get(SKIP_TOKEN)) {
+        return next(req); // not for us: send it as it is
+    }
 
-  const withToken = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });   // requests are immutable
+    const withToken = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }); // requests are immutable
 
-  return next(withToken).pipe(
-    catchError((err) => {
-      if (err instanceof HttpErrorResponse && err.status === 401 && !req.url.endsWith('/login')) {
-        auth.logout();                      // the server refused our token → we're logged out
-      }
-      return throwError(() => err);         // the caller still gets the error
-    }),
-  );
+    return next(withToken).pipe(
+        catchError((err) => {
+            if (
+                err instanceof HttpErrorResponse &&
+                err.status === 401 &&
+                !req.url.endsWith('/login')
+            ) {
+                auth.logout(); // the server refused our token → we're logged out
+            }
+            return throwError(() => err); // the caller still gets the error
+        }),
+    );
 };
 ```
 
-| Line | Why |
-| ---- | --- |
+| Line                                      | Why                                                                                 |
+| ----------------------------------------- | ----------------------------------------------------------------------------------- |
 | `req.url.startsWith(environment.authUrl)` | **Never** send the token to another server (json-server, a CDN, someone else's API) |
-| `req.clone({ setHeaders })` | A request can't be changed, only copied with changes |
-| `SKIP_TOKEN` (an `HttpContextToken`) | Lets one request opt out: `{ context: new HttpContext().set(SKIP_TOKEN, true) }` |
-| `!req.url.endsWith('/login')` | A 401 on login means "wrong password", not "your token died" |
+| `req.clone({ setHeaders })`               | A request can't be changed, only copied with changes                                |
+| `SKIP_TOKEN` (an `HttpContextToken`)      | Lets one request opt out: `{ context: new HttpContext().set(SKIP_TOKEN, true) }`    |
+| `!req.url.endsWith('/login')`             | A 401 on login means "wrong password", not "your token died"                        |
 
 ### Step 4. Plug it in
 
@@ -198,13 +208,13 @@ Forget this and nothing errors: the header is just never sent, and every protect
 
 ## 4. In a real app
 
-| Topic | This demo | Real life |
-| ----- | --------- | --------- |
-| Secret | in the file | long random value from an environment variable, never in git |
-| Where the token lives | `localStorage` | `localStorage` is readable by any script on the page (XSS). Many apps use an **httpOnly cookie** instead: JavaScript can't read it at all |
-| Lifetime | 1 hour | short (5–15 min) + a **refresh token** to get a new one without logging in again |
-| Logout | forget the token | same, but the token stays valid until `exp`: to kill it earlier the server needs a block list |
-| Checking the role | the payload says `admin` | fine to show/hide buttons, but the **server** must check the role on every request |
+| Topic                 | This demo                | Real life                                                                                                                                 |
+| --------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Secret                | in the file              | long random value from an environment variable, never in git                                                                              |
+| Where the token lives | `localStorage`           | `localStorage` is readable by any script on the page (XSS). Many apps use an **httpOnly cookie** instead: JavaScript can't read it at all |
+| Lifetime              | 1 hour                   | short (5–15 min) + a **refresh token** to get a new one without logging in again                                                          |
+| Logout                | forget the token         | same, but the token stays valid until `exp`: to kill it earlier the server needs a block list                                             |
+| Checking the role     | the payload says `admin` | fine to show/hide buttons, but the **server** must check the role on every request                                                        |
 
 ---
 

@@ -5,24 +5,24 @@ import conditionalBinding from './snippets/conditional-binding.md';
 import signals from './snippets/signals.md';
 
 @Component({
-  selector: 'app-responsive-binding',
-  standalone: true,
-  imports: [CodeSnippetComponent, CommonModule],
-  templateUrl: './responsive-binding.component.html',
-  styles: `
-    .underlined {
-      text-decoration: underline;
-    }
-  `,
+    selector: 'app-responsive-binding',
+    standalone: true,
+    imports: [CodeSnippetComponent, CommonModule],
+    templateUrl: './responsive-binding.component.html',
+    styles: `
+        .underlined {
+            text-decoration: underline;
+        }
+    `,
 })
 export class ResponsiveBindingComponent {
-  // page snippets
-  protected readonly snippets = { conditionalBinding, signals };
+    // page snippets
+    protected readonly snippets = { conditionalBinding, signals };
 
-  protected clicked = false;
+    protected clicked = false;
 
-  value = signal('Initial value');
-  protected inputPlaceholder = signal('On a native property');
-  protected isDisabled = signal(false);
-  protected isUnderlined = signal(true);
+    value = signal('Initial value');
+    protected inputPlaceholder = signal('On a native property');
+    protected isDisabled = signal(false);
+    protected isUnderlined = signal(true);
 }

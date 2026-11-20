@@ -1,36 +1,44 @@
 <h2>Get me</h2>
 
 <section class="card card-body mb-3">
-  <p>
-    Calls <code>UserController.getMe()</code>: <strong>anybody logged in</strong> can read their
-    own account. No id to give: the controller already knows who is asking
-    (<code>AuthService.currentUser()</code>). Switch between admin (Bob) and simple user (Alice) with the <em>Admin</em> toggle in the navbar:
-    the answer changes.
-  </p>
+    <p>
+        Calls <code>UserController.getMe()</code>: <strong>anybody logged in</strong> can read their
+        own account. No id to give: the controller already knows who is asking
+        (<code>AuthService.currentUser()</code>). Switch between admin (Bob) and simple user (Alice)
+        with the <em>Admin</em> toggle in the navbar: the answer changes.
+    </p>
 
-  <div>
-    <button type="button" class="btn btn-primary" (click)="onClick()">Get Me</button>
-  </div>
+    <div>
+        <button type="button" class="btn btn-primary" (click)="onClick()">Get Me</button>
+    </div>
 
-  @if (_error(); as error) {
-    <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
-  }
+    @if (_error(); as error) {
+        <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+    }
 
-  @if (_me(); as u) {
-    <dl class="row mt-3 mb-0">
-      <dt class="col-sm-3">Id</dt><dd class="col-sm-9">{{ u.id }}</dd>
-      <dt class="col-sm-3">Name</dt><dd class="col-sm-9">{{ u.name }}</dd>
-      <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{{ u.email }}</dd>
-      <dt class="col-sm-3">Birthdate</dt><dd class="col-sm-9">{{ u.birthdate }}</dd>
-      <dt class="col-sm-3">Height</dt><dd class="col-sm-9">{{ u.height }} cm</dd>
-      <dt class="col-sm-3">Gender</dt><dd class="col-sm-9">{{ u.gender }}</dd>
-      <dt class="col-sm-3">Subscription</dt><dd class="col-sm-9">{{ u.subscription }}</dd>
-      <dt class="col-sm-3">Role</dt><dd class="col-sm-9 mb-0">{{ u.role }}</dd>
-    </dl>
-  }
+    @if (_me(); as u) {
+        <dl class="row mt-3 mb-0">
+            <dt class="col-sm-3">Id</dt>
+            <dd class="col-sm-9">{{ u.id }}</dd>
+            <dt class="col-sm-3">Name</dt>
+            <dd class="col-sm-9">{{ u.name }}</dd>
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">{{ u.email }}</dd>
+            <dt class="col-sm-3">Birthdate</dt>
+            <dd class="col-sm-9">{{ u.birthdate }}</dd>
+            <dt class="col-sm-3">Height</dt>
+            <dd class="col-sm-9">{{ u.height }} cm</dd>
+            <dt class="col-sm-3">Gender</dt>
+            <dd class="col-sm-9">{{ u.gender }}</dd>
+            <dt class="col-sm-3">Subscription</dt>
+            <dd class="col-sm-9">{{ u.subscription }}</dd>
+            <dt class="col-sm-3">Role</dt>
+            <dd class="col-sm-9 mb-0">{{ u.role }}</dd>
+        </dl>
+    }
 </section>
 
 <section class="card card-body mt-3">
-  <h3>Code</h3>
-  <app-code-snippet [code]="snippets.getMe" />
+    <h3>Code</h3>
+    <app-code-snippet [code]="snippets.getMe" />
 </section>

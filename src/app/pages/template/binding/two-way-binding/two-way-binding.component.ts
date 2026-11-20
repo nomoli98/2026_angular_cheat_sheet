@@ -5,22 +5,22 @@ import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.componen
 import twoWayBinding from './snippets/two-way-binding.md';
 
 @Component({
-  selector: 'app-two-way-binding',
-  standalone: true,
-  imports: [CodeSnippetComponent, CommonModule, FormsModule],
-  templateUrl: './two-way-binding.component.html',
+    selector: 'app-two-way-binding',
+    standalone: true,
+    imports: [CodeSnippetComponent, CommonModule, FormsModule],
+    templateUrl: './two-way-binding.component.html',
 })
 export class TwoWayBindingComponent {
-  // page snippets
-  protected readonly snippets = { twoWayBinding };
+    // page snippets
+    protected readonly snippets = { twoWayBinding };
 
-  inputValue = '';
+    inputValue = '';
 
-  modelCount = model<number>(0);
-  // model(): two-way input
-  updateCount(amount: number): void {
-    this.modelCount.update((currentCount) => currentCount + amount);
-  }
+    modelCount = model<number>(0);
+    // model(): two-way input
+    updateCount(amount: number): void {
+        this.modelCount.update((currentCount) => currentCount + amount);
+    }
 
-  signalCount = signal(0);
+    signalCount = signal(0);
 }

@@ -22,15 +22,15 @@ logout(): void {
 ```js auth-server.js
 // fake-api/auth-server.js (Node)
 async function login(body) {
-  const [user] = await data(`?email=${encodeURIComponent(body.email ?? '')}`);
-  const ok = user && (await bcrypt.compare(String(body.password ?? ''), user.password));
-  if (!ok) return [401, { message: 'bad credentials' }];
-  return [200, { token: sign(user), user: withoutPassword(user) }];
+    const [user] = await data(`?email=${encodeURIComponent(body.email ?? '')}`);
+    const ok = user && (await bcrypt.compare(String(body.password ?? ''), user.password));
+    if (!ok) return [401, { message: 'bad credentials' }];
+    return [200, { token: sign(user), user: withoutPassword(user) }];
 }
 
 function sign(user, expiresIn = 3600) {
-  const payload = { sub: String(user.id), name: user.name, email: user.email, role: user.role };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn });
+    const payload = { sub: String(user.id), name: user.name, email: user.email, role: user.role };
+    return jwt.sign(payload, JWT_SECRET, { expiresIn });
 }
 ```
 

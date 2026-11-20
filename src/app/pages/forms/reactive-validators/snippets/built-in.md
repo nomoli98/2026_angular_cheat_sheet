@@ -25,22 +25,25 @@ export class ReactiveValidatorsComponent {
 
 ```html reactive-validators.component.html
 <form [formGroup]="builtInForm">
-  @let name = builtInForm.controls.name;
-  <input class="form-control" formControlName="name"
-         [class.is-invalid]="name.invalid && name.touched" />
+    @let name = builtInForm.controls.name;
+    <input
+        class="form-control"
+        formControlName="name"
+        [class.is-invalid]="name.invalid && name.touched"
+    />
 
-  @if (name.touched) {
-    @if (name.hasError('required')) { <div class="invalid-feedback">Name is required</div> }
+    @if (name.touched) { @if (name.hasError('required')) {
+    <div class="invalid-feedback">Name is required</div>
+    }
     <!-- lowercase key! -->
     @if (name.hasError('minlength')) {
-      <div class="invalid-feedback">At least {{ name.getError('minlength').requiredLength }} characters</div>
-    }
-  }
-
-  @let height = builtInForm.controls.height;
-  <input type="number" class="form-control" formControlName="height" />
-  @if (height.touched && height.hasError('min')) {
+    <div class="invalid-feedback">
+        At least {{ name.getError('minlength').requiredLength }} characters
+    </div>
+    } } @let height = builtInForm.controls.height;
+    <input type="number" class="form-control" formControlName="height" />
+    @if (height.touched && height.hasError('min')) {
     <div class="invalid-feedback">Minimum {{ height.getError('min').min }} cm</div>
-  }
+    }
 </form>
 ```

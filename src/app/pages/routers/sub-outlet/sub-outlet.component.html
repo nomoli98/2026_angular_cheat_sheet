@@ -1,23 +1,23 @@
 <h2>SubOutlet</h2>
 
 <section class="card card-body mb-3">
-  <h3>unnamed routerOutlet:</h3>
-  <router-outlet />
-  <div>
-    <button routerLink="/router/sub-outlet/1">show child one</button>
-    <button routerLink="/router/sub-outlet/2">show child two</button>
-  </div>
+    <h3>unnamed routerOutlet:</h3>
+    <router-outlet />
+    <div>
+        <button routerLink="/router/sub-outlet/1">show child one</button>
+        <button routerLink="/router/sub-outlet/2">show child two</button>
+    </div>
 
-  <app-code-snippet [code]="snippets.unnamedOutlet" />
+    <app-code-snippet [code]="snippets.unnamedOutlet" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>named router-outlet</h3>
-  <router-outlet name="panel" />
-  <div>
-    <button (click)="openPanel()">Open child 3 (TS)</button>
-    <button (click)="closePanel()">Close panel (TS)</button>
-  </div>
+    <h3>named router-outlet</h3>
+    <router-outlet name="panel" />
+    <div>
+        <button (click)="openPanel()">Open child 3 (TS)</button>
+        <button (click)="closePanel()">Close panel (TS)</button>
+    </div>
 
-  <app-code-snippet [code]="snippets.namedOutlet" />
+    <app-code-snippet [code]="snippets.namedOutlet" />
 </section>

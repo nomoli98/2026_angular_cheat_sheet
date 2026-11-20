@@ -1,40 +1,42 @@
 <h2>Get all users</h2>
 
 <section class="card card-body mb-3">
-  <p>
-    Calls <code>UserController.getAll()</code>: only an <strong>admin</strong> can see the list
-    (logged in as a simple user → <code>forbidden</code>). Nobody logged in? The guard sends you to
-    the auth page before this page even opens: turn the toggle off to try it.
-  </p>
+    <p>
+        Calls <code>UserController.getAll()</code>: only an <strong>admin</strong> can see the list
+        (logged in as a simple user → <code>forbidden</code>). Nobody logged in? The guard sends you
+        to the auth page before this page even opens: turn the toggle off to try it.
+    </p>
 
-  @if (!_isAdmin()) {
-    <div class="alert alert-warning">
-      You are logged in as a <strong>simple user</strong>: only an admin can do this. Switch the
-      <em>Admin</em> toggle in the navbar back on.
+    @if (!_isAdmin()) {
+        <div class="alert alert-warning">
+            You are logged in as a <strong>simple user</strong>: only an admin can do this. Switch
+            the <em>Admin</em> toggle in the navbar back on.
+        </div>
+    }
+
+    <div>
+        <button type="button" class="btn btn-primary" (click)="onClick()" [disabled]="!_isAdmin()">
+            Get All Users
+        </button>
     </div>
-  }
 
-  <div>
-    <button type="button" class="btn btn-primary" (click)="onClick()" [disabled]="!_isAdmin()">
-      Get All Users
-    </button>
-  </div>
+    @if (_error(); as error) {
+        <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+    }
 
-  @if (_error(); as error) {
-    <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
-  }
-
-  <!-- hide once not admin anymore -->
-  @if (_isAdmin()) {
-    <ul class="mt-3 mb-0">
-      @for (u of _users(); track u.id) {
-        <li>{{ u.name }} <span class="text-body-secondary">({{ u.role }})</span></li>
-      }
-    </ul>
-  }
+    <!-- hide once not admin anymore -->
+    @if (_isAdmin()) {
+        <ul class="mt-3 mb-0">
+            @for (u of _users(); track u.id) {
+                <li>
+                    {{ u.name }} <span class="text-body-secondary">({{ u.role }})</span>
+                </li>
+            }
+        </ul>
+    }
 </section>
 
 <section class="card card-body mt-3">
-  <h3>Code</h3>
-  <app-code-snippet [code]="snippets.getAll" />
+    <h3>Code</h3>
+    <app-code-snippet [code]="snippets.getAll" />
 </section>

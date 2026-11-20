@@ -15,18 +15,18 @@
 import { Component, signal } from '@angular/core';
 
 @Component({
-  selector: 'app-responsive-binding',
-  templateUrl: './responsive-binding.component.html',
-  styles: `
-    .underlined {
-      text-decoration: underline;
-    }
-  `,
+    selector: 'app-responsive-binding',
+    templateUrl: './responsive-binding.component.html',
+    styles: `
+        .underlined {
+            text-decoration: underline;
+        }
+    `,
 })
 export class ResponsiveBindingComponent {
-  value = signal('Initial value');
-  protected inputPlaceholder = signal('On a native property');
-  protected isDisabled = signal(false);
-  protected isUnderlined = signal(true);
+    value = signal('Initial value');
+    protected inputPlaceholder = signal('On a native property');
+    protected isDisabled = signal(false);
+    protected isUnderlined = signal(true);
 }
 ```

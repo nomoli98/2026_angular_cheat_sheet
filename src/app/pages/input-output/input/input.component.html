@@ -1,16 +1,16 @@
 <h2>Parent component</h2>
 
 <section class="card card-body mb-3">
-  <p>If I give both inputs:</p>
-  <app-child-component [inputString]="String()" [inputUser]="User()"/>
+    <p>If I give both inputs:</p>
+    <app-child-component [inputString]="String()" [inputUser]="User()" />
 </section>
 
 <section class="card card-body mb-3">
-  <p>If you only give the required inputs</p>
-  <app-child-component [inputString]="String()"/>
+    <p>If you only give the required inputs</p>
+    <app-child-component [inputString]="String()" />
 </section>
 
 <section class="card card-body mt-3">
-  <h3>Code</h3>
-  <app-code-snippet [code]="snippets.inputCode" />
+    <h3>Code</h3>
+    <app-code-snippet [code]="snippets.inputCode" />
 </section>

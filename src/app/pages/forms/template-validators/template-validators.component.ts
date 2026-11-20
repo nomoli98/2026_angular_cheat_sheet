@@ -12,25 +12,25 @@ import crossField from './snippets/cross-field.md';
 import async from './snippets/async.md';
 
 @Component({
-  imports: [
-    CodeSnippetComponent,
-    FormsModule,
-    JsonPipe,
-    StrongPasswordDirective,
-    BirthdateDirective,
-    MatchFieldsDirective,
-    EmailTakenDirective,
-  ],
-  selector: 'app-template-validators',
-  templateUrl: './template-validators.component.html',
+    imports: [
+        CodeSnippetComponent,
+        FormsModule,
+        JsonPipe,
+        StrongPasswordDirective,
+        BirthdateDirective,
+        MatchFieldsDirective,
+        EmailTakenDirective,
+    ],
+    selector: 'app-template-validators',
+    templateUrl: './template-validators.component.html',
 })
 export class TemplateValidatorsComponent {
-  // The code shown on the page
-  protected readonly snippets = { builtIn, custom, crossField, async };
+    // The code shown on the page
+    protected readonly snippets = { builtIn, custom, crossField, async };
 
-  // One plain object per demo
-  protected builtIn = { name: '', height: 50, agreeToTerms: false };
-  protected custom = { password: '', birthdate: '' };
-  protected cross = { password: '', confirmPassword: '' };
-  protected async = { email: '' };
+    // One plain object per demo
+    protected builtIn = { name: '', height: 50, agreeToTerms: false };
+    protected custom = { password: '', birthdate: '' };
+    protected cross = { password: '', confirmPassword: '' };
+    protected async = { email: '' };
 }

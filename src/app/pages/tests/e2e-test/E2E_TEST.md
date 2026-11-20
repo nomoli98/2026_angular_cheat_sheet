@@ -8,26 +8,26 @@ Demo page: `/tests/e2e-test` (the login form Playwright tests)
 
 Files:
 
-| File | What it is |
-|---|---|
-| `playwright.config.ts` (project root) | The settings |
-| `e2e/navigation.spec.ts` | Open the home page, click a link |
-| `e2e/login.spec.ts` | Fill the login form, check the result |
-| `e2e/register.spec.ts` | The step-by-step example (section 4): register, happy path + error |
-| `e2e/token.spec.ts` | The token version: still logged in after a refresh, protected route |
+| File                                  | What it is                                                          |
+| ------------------------------------- | ------------------------------------------------------------------- |
+| `playwright.config.ts` (project root) | The settings                                                        |
+| `e2e/navigation.spec.ts`              | Open the home page, click a link                                    |
+| `e2e/login.spec.ts`                   | Fill the login form, check the result                               |
+| `e2e/register.spec.ts`                | The step-by-step example (section 4): register, happy path + error  |
+| `e2e/token.spec.ts`                   | The token version: still logged in after a refresh, protected route |
 
 ---
 
 ## Unit test or e2e test?
 
-| | Unit test (Vitest) | E2E test (Playwright) |
-|---|---|---|
-| Tests | One component / service **alone** | The **whole app**, like a user |
-| Runs in | A fake browser (jsdom) | A real browser (Chrome, Firefox, Safari) |
-| Needs `ng serve`? | No | Yes, + the fake API (Playwright starts both for you) |
-| Speed | Very fast (ms) | Slower (~1 s per test) |
-| Files | `src/**/*.spec.ts` | `e2e/*.spec.ts` |
-| Command | `ng test` | `npm run e2e` |
+|                   | Unit test (Vitest)                | E2E test (Playwright)                                |
+| ----------------- | --------------------------------- | ---------------------------------------------------- |
+| Tests             | One component / service **alone** | The **whole app**, like a user                       |
+| Runs in           | A fake browser (jsdom)            | A real browser (Chrome, Firefox, Safari)             |
+| Needs `ng serve`? | No                                | Yes, + the fake API (Playwright starts both for you) |
+| Speed             | Very fast (ms)                    | Slower (~1 s per test)                               |
+| Files             | `src/**/*.spec.ts`                | `e2e/*.spec.ts`                                      |
+| Command           | `ng test`                         | `npm run e2e`                                        |
 
 Rule of thumb: **lots** of unit tests for the details, **a few** e2e tests for the important paths (login, buy, register...).
 
@@ -70,32 +70,33 @@ At the **root** of the project (next to `package.json`):
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './e2e',                         // where the tests are (NOT in src/)
+    testDir: './e2e', // where the tests are (NOT in src/)
 
-  use: {
-    baseURL: 'http://localhost:4200',       // page.goto('/x') → http://localhost:4200/x
-    trace: 'retain-on-failure',             // keep a recording when a test fails
-  },
+    use: {
+        baseURL: 'http://localhost:4200', // page.goto('/x') → http://localhost:4200/x
+        trace: 'retain-on-failure', // keep a recording when a test fails
+    },
 
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+    projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 
-  webServer: [                              // start the servers before the tests
-    {
-      command: 'npm run api',               // the fake API (the login calls it)
-      url: 'http://localhost:3000/people',  // Playwright waits until this URL answers
-      reuseExistingServer: true,            // if it's already running, use it
-    },
-    {
-      command: 'npm run api:auth',          // the auth server (token pages)
-      url: 'http://localhost:3001/health',
-      reuseExistingServer: true,
-    },
-    {
-      command: 'npm start',                 // the Angular app
-      url: 'http://localhost:4200',
-      reuseExistingServer: true,            // if ng serve is already running, use it
-    },
-  ],
+    webServer: [
+        // start the servers before the tests
+        {
+            command: 'npm run api', // the fake API (the login calls it)
+            url: 'http://localhost:3000/people', // Playwright waits until this URL answers
+            reuseExistingServer: true, // if it's already running, use it
+        },
+        {
+            command: 'npm run api:auth', // the auth server (token pages)
+            url: 'http://localhost:3001/health',
+            reuseExistingServer: true,
+        },
+        {
+            command: 'npm start', // the Angular app
+            url: 'http://localhost:4200',
+            reuseExistingServer: true, // if ng serve is already running, use it
+        },
+    ],
 });
 ```
 
@@ -108,22 +109,24 @@ export default defineConfig({
 ## 3. The shape of a test
 
 ```ts
-import { test, expect } from '@playwright/test';    // ⚠️ import them (not global like in Vitest)
+import { test, expect } from '@playwright/test'; // ⚠️ import them (not global like in Vitest)
 
-test.beforeEach(async ({ page }) => {               // runs before each test
-  // start logged OUT: the auth toggle in the navbar logs Bob in by default
-  await page.addInitScript(() => localStorage.setItem('auth-toggle', 'off'));
-  await page.goto('/tests/e2e-test');
+test.beforeEach(async ({ page }) => {
+    // runs before each test
+    // start logged OUT: the auth toggle in the navbar logs Bob in by default
+    await page.addInitScript(() => localStorage.setItem('auth-toggle', 'off'));
+    await page.goto('/tests/e2e-test');
 });
 
-test('Bob can log in', async ({ page }) => {        // `page` = a browser tab
-  // 1. find + act
-  await page.getByLabel('Email').fill('bob@email.bob');
-  await page.getByLabel('Password').fill('BobIsTheBest99#');
-  await page.getByRole('button', { name: 'Log in' }).click();
+test('Bob can log in', async ({ page }) => {
+    // `page` = a browser tab
+    // 1. find + act
+    await page.getByLabel('Email').fill('bob@email.bob');
+    await page.getByLabel('Password').fill('BobIsTheBest99#');
+    await page.getByRole('button', { name: 'Log in' }).click();
 
-  // 2. check
-  await expect(page.getByText('Welcome, Bob Martin!', { exact: true })).toBeVisible();
+    // 2. check
+    await expect(page.getByText('Welcome, Bob Martin!', { exact: true })).toBeVisible();
 });
 ```
 
@@ -167,9 +170,9 @@ The page: `/auth/register` (`pages/auth/register/`). It's public, it creates the
 import { test, expect } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
-  // start logged OUT: the auth toggle in the navbar logs Bob in by default
-  await page.addInitScript(() => localStorage.setItem('auth-toggle', 'off'));
-  await page.goto('/auth/register');
+    // start logged OUT: the auth toggle in the navbar logs Bob in by default
+    await page.addInitScript(() => localStorage.setItem('auth-toggle', 'off'));
+    await page.goto('/auth/register');
 });
 ```
 
@@ -181,20 +184,20 @@ Read the page like a user: each field has a `<label>`, so `getByLabel('Name')` f
 
 ```ts
 test('a new user can register and is logged in', async ({ page }) => {
-  await page.getByLabel('Name').fill('Zoe Test');
-  await page.getByLabel('Email').fill('zoe@test.com');
-  await page.getByLabel('Password').fill('ZoeIsTheBest99#');
-  await page.getByLabel('Birthdate').fill('1990-05-05');      // <input type="date"> takes 'YYYY-MM-DD'
-  await page.getByLabel('I agree to the terms').check();
-  await page.getByRole('button', { name: 'Register' }).click();
+    await page.getByLabel('Name').fill('Zoe Test');
+    await page.getByLabel('Email').fill('zoe@test.com');
+    await page.getByLabel('Password').fill('ZoeIsTheBest99#');
+    await page.getByLabel('Birthdate').fill('1990-05-05'); // <input type="date"> takes 'YYYY-MM-DD'
+    await page.getByLabel('I agree to the terms').check();
+    await page.getByRole('button', { name: 'Register' }).click();
 });
 ```
 
 #### Step 5. Check what the user sees
 
 ```ts
-  await expect(page.getByText('Welcome, Zoe Test!')).toBeVisible();
-  await expect(page.getByText('Logged in as Zoe Test')).toBeVisible();   // the navbar
+await expect(page.getByText('Welcome, Zoe Test!')).toBeVisible();
+await expect(page.getByText('Logged in as Zoe Test')).toBeVisible(); // the navbar
 ```
 
 No waiting code: `expect` retries for up to 5 s, while the API answers.
@@ -225,7 +228,7 @@ Run it a **second** time: it fails with "This email is already taken". The first
 Fix: a new email on every run.
 
 ```ts
-const email = `zoe.${Date.now()}@test.com`;   // zoe.1763630000000@test.com
+const email = `zoe.${Date.now()}@test.com`; // zoe.1763630000000@test.com
 await page.getByLabel('Email').fill(email);
 ```
 
@@ -235,15 +238,15 @@ Run it 2–3 times: always green. (The test users pile up in `db.json`: `npm run
 
 ```ts
 test('an email that is already taken shows an error', async ({ page }) => {
-  await page.getByLabel('Name').fill('Bob Again');
-  await page.getByLabel('Email').fill('bob@email.bob');        // Bob is in db.seed.json
-  await page.getByLabel('Password').fill('BobIsTheBest99#');
-  await page.getByLabel('Birthdate').fill('1990-05-05');
-  await page.getByLabel('I agree to the terms').check();
-  await page.getByRole('button', { name: 'Register', exact: true }).click();
+    await page.getByLabel('Name').fill('Bob Again');
+    await page.getByLabel('Email').fill('bob@email.bob'); // Bob is in db.seed.json
+    await page.getByLabel('Password').fill('BobIsTheBest99#');
+    await page.getByLabel('Birthdate').fill('1990-05-05');
+    await page.getByLabel('I agree to the terms').check();
+    await page.getByRole('button', { name: 'Register', exact: true }).click();
 
-  await expect(page.getByText('This email is already taken', { exact: true })).toBeVisible();
-  await expect(page.getByText('Logged out')).toBeVisible();    // nobody got logged in
+    await expect(page.getByText('This email is already taken', { exact: true })).toBeVisible();
+    await expect(page.getByText('Logged out')).toBeVisible(); // nobody got logged in
 });
 ```
 
@@ -264,16 +267,16 @@ Full file: `e2e/register.spec.ts`.
 
 Find elements **the way a user sees them** (text, label, role), not with CSS classes.
 
-| Find... | Write | Matches |
-|---|---|---|
-| A button | `page.getByRole('button', { name: 'Log in' })` | `<button>Log in</button>` |
-| A link | `page.getByRole('link', { name: 'Home' })` | `<a>Home</a>` |
-| A title | `page.getByRole('heading', { name: 'Index' })` | `<h1>`...`<h6>` |
-| A field by its label | `page.getByLabel('Email')` | `<label for="email">Email</label><input id="email">` |
-| A field by its placeholder | `page.getByPlaceholder('name123')` | `<input placeholder="name123">` |
-| Some text | `page.getByText('Welcome, Bob Martin!')` | any element with that text |
-| A test id | `page.getByTestId('cart')` | `<div data-testid="cart">` |
-| CSS (last resort) | `page.locator('#email')` | |
+| Find...                    | Write                                          | Matches                                              |
+| -------------------------- | ---------------------------------------------- | ---------------------------------------------------- |
+| A button                   | `page.getByRole('button', { name: 'Log in' })` | `<button>Log in</button>`                            |
+| A link                     | `page.getByRole('link', { name: 'Home' })`     | `<a>Home</a>`                                        |
+| A title                    | `page.getByRole('heading', { name: 'Index' })` | `<h1>`...`<h6>`                                      |
+| A field by its label       | `page.getByLabel('Email')`                     | `<label for="email">Email</label><input id="email">` |
+| A field by its placeholder | `page.getByPlaceholder('name123')`             | `<input placeholder="name123">`                      |
+| Some text                  | `page.getByText('Welcome, Bob Martin!')`       | any element with that text                           |
+| A test id                  | `page.getByTestId('cart')`                     | `<div data-testid="cart">`                           |
+| CSS (last resort)          | `page.locator('#email')`                       |                                                      |
 
 Add `{ exact: true }` to match the **whole** text only (by default, `'Log'` also matches `'Log in'`).
 
@@ -281,46 +284,46 @@ Add `{ exact: true }` to match the **whole** text only (by default, `'Log'` also
 
 ## 6. Cheat table: actions
 
-| Do | Write |
-|---|---|
-| Open a page | `await page.goto('/form/reactive-form')` |
-| Click | `await locator.click()` |
-| Type (replaces the value) | `await locator.fill('Bob')` |
-| Tick a checkbox / radio | `await locator.check()` |
-| Pick in a `<select>` | `await locator.selectOption('male')` |
-| Press a key | `await locator.press('Enter')` |
-| Go back | `await page.goBack()` |
+| Do                        | Write                                    |
+| ------------------------- | ---------------------------------------- |
+| Open a page               | `await page.goto('/form/reactive-form')` |
+| Click                     | `await locator.click()`                  |
+| Type (replaces the value) | `await locator.fill('Bob')`              |
+| Tick a checkbox / radio   | `await locator.check()`                  |
+| Pick in a `<select>`      | `await locator.selectOption('male')`     |
+| Press a key               | `await locator.press('Enter')`           |
+| Go back                   | `await page.goBack()`                    |
 
 ---
 
 ## 7. Cheat table: checks (`expect`)
 
-| Check | Write |
-|---|---|
-| Is on screen | `await expect(locator).toBeVisible()` |
-| Is not on screen | `await expect(locator).toBeHidden()` |
-| Has this text | `await expect(locator).toHaveText('Count: 1')` |
-| Contains this text | `await expect(locator).toContainText('Bob')` |
-| Field value | `await expect(locator).toHaveValue('bob@email.bob')` |
+| Check              | Write                                                    |
+| ------------------ | -------------------------------------------------------- |
+| Is on screen       | `await expect(locator).toBeVisible()`                    |
+| Is not on screen   | `await expect(locator).toBeHidden()`                     |
+| Has this text      | `await expect(locator).toHaveText('Count: 1')`           |
+| Contains this text | `await expect(locator).toContainText('Bob')`             |
+| Field value        | `await expect(locator).toHaveValue('bob@email.bob')`     |
 | Disabled / enabled | `await expect(locator).toBeDisabled()` · `toBeEnabled()` |
-| Checked | `await expect(locator).toBeChecked()` |
-| How many | `await expect(locator).toHaveCount(3)` |
-| The URL | `await expect(page).toHaveURL('/tests/e2e-test')` |
-| The tab title | `await expect(page).toHaveTitle('My app')` |
+| Checked            | `await expect(locator).toBeChecked()`                    |
+| How many           | `await expect(locator).toHaveCount(3)`                   |
+| The URL            | `await expect(page).toHaveURL('/tests/e2e-test')`        |
+| The tab title      | `await expect(page).toHaveTitle('My app')`               |
 
 ---
 
 ## 8. Run the tests
 
-| Command | What it does |
-|---|---|
-| `npm run e2e` | Run all e2e tests (headless: no window) |
-| `npx playwright test --ui` | **UI mode**: see every step, re-run, time-travel. Best to learn and debug. |
-| `npx playwright test --headed` | Watch the browser do it |
-| `npx playwright test e2e/login.spec.ts` | Only one file |
-| `npx playwright test -g "wrong password"` | Only tests whose name contains this |
-| `npx playwright show-report` | Open the HTML report of the last run |
-| `npx playwright codegen http://localhost:4200` | Click around in your app → Playwright **writes the test for you** |
+| Command                                        | What it does                                                               |
+| ---------------------------------------------- | -------------------------------------------------------------------------- |
+| `npm run e2e`                                  | Run all e2e tests (headless: no window)                                    |
+| `npx playwright test --ui`                     | **UI mode**: see every step, re-run, time-travel. Best to learn and debug. |
+| `npx playwright test --headed`                 | Watch the browser do it                                                    |
+| `npx playwright test e2e/login.spec.ts`        | Only one file                                                              |
+| `npx playwright test -g "wrong password"`      | Only tests whose name contains this                                        |
+| `npx playwright show-report`                   | Open the HTML report of the last run                                       |
+| `npx playwright codegen http://localhost:4200` | Click around in your app → Playwright **writes the test for you**          |
 
 > 💡 Don't know how to find an element? Run `codegen`, click it, copy the line it writes.
 
@@ -337,9 +340,9 @@ The browsers aren't downloaded (or Playwright was updated). Run `npx playwright 
 Your locator matches more than one thing. It happened on this demo page: the code snippet **also** contains the text "Wrong email or password". Fixes:
 
 ```ts
-page.getByText('Wrong email or password', { exact: true })   // whole text only
-page.getByRole('button', { name: 'Log in' })                  // more precise
-page.getByTestId('login-error')                               // add data-testid="login-error" in the HTML
+page.getByText('Wrong email or password', { exact: true }); // whole text only
+page.getByRole('button', { name: 'Log in' }); // more precise
+page.getByTestId('login-error'); // add data-testid="login-error" in the HTML
 ```
 
 ### `Timed out 5000ms waiting for expect(locator).toBeVisible()`

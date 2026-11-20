@@ -26,15 +26,16 @@ export class SignalValidatorsComponent {
 
 ```html signal-validators.component.html
 @let name = builtInForm.name();
-<input class="form-control" [formField]="builtInForm.name"
-       [class.is-invalid]="name.touched() && name.invalid()" />
+<input
+    class="form-control"
+    [formField]="builtInForm.name"
+    [class.is-invalid]="name.touched() && name.invalid()"
+/>
 
 <!-- same block everywhere -->
-@if (name.touched()) {
-  @for (error of name.errors(); track error.kind) {
-    <div class="invalid-feedback">{{ error.message }}</div>
-  }
-}
+@if (name.touched()) { @for (error of name.errors(); track error.kind) {
+<div class="invalid-feedback">{{ error.message }}</div>
+} }
 
 <input type="number" class="form-control" [formField]="builtInForm.height" />
 <input type="checkbox" class="form-check-input" [formField]="builtInForm.agreeToTerms" />

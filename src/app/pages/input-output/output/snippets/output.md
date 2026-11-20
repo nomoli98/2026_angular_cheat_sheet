@@ -7,18 +7,18 @@ import { Component, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-child-component',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './child-component.component.html',
-  styleUrl: '../output.component.css',
+    selector: 'app-child-component',
+    standalone: true,
+    imports: [CommonModule],
+    templateUrl: './child-component.component.html',
+    styleUrl: '../output.component.css',
 })
 export class ChildComponentComponent {
-  outputValue = output<string>();
+    outputValue = output<string>();
 
-  onClick() {
-    this.outputValue.emit('Boom!🧨💥💥');
-  }
+    onClick() {
+        this.outputValue.emit('Boom!🧨💥💥');
+    }
 }
 ```
 
@@ -33,34 +33,34 @@ import { Component, signal } from '@angular/core';
 import { ChildComponentComponent } from './child-component/child-component.component';
 
 @Component({
-  selector: 'app-output',
-  imports: [ChildComponentComponent],
-  templateUrl: './output.component.html',
-  styleUrl: './output.component.css'
+    selector: 'app-output',
+    imports: [ChildComponentComponent],
+    templateUrl: './output.component.html',
+    styleUrl: './output.component.css',
 })
 export class OutputComponent {
-  output = signal<string>('');
+    output = signal<string>('');
 
-  onClick(value: string) {
-    this.output.set(value);
-  }
+    onClick(value: string) {
+        this.output.set(value);
+    }
 }
 ```
 
 ```css output.component.css
 .big-red-button {
-  margin           : 10px;
-  padding          : 10px;
-  background-color : darkred;
-  color            : white;
-  border           : white;
-  border-radius    : 5px;
-  font-size        : 20px;
+    margin: 10px;
+    padding: 10px;
+    background-color: darkred;
+    color: white;
+    border: white;
+    border-radius: 5px;
+    font-size: 20px;
 }
 
-.boom{
-  margin: 10px;
-  font-size: 40px;
-  text-transform: uppercase;
+.boom {
+    margin: 10px;
+    font-size: 40px;
+    text-transform: uppercase;
 }
 ```

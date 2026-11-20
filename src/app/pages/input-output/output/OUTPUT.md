@@ -17,17 +17,17 @@ Parent ◀──(output)── Child     (this file)
 import { Component, output } from '@angular/core';
 
 @Component({
-  selector: 'app-child-component',
-  templateUrl: './child-component.component.html',
+    selector: 'app-child-component',
+    templateUrl: './child-component.component.html',
 })
 export class ChildComponentComponent {
-  // Declares an event called "outputValue" that carries a string.
-  outputValue = output<string>();
+    // Declares an event called "outputValue" that carries a string.
+    outputValue = output<string>();
 
-  onClick() {
-    // Sends the value to whoever is listening.
-    this.outputValue.emit('Boom!🧨💥💥');
-  }
+    onClick() {
+        // Sends the value to whoever is listening.
+        this.outputValue.emit('Boom!🧨💥💥');
+    }
 }
 ```
 
@@ -54,17 +54,17 @@ import { Component, signal } from '@angular/core';
 import { ChildComponentComponent } from './child-component/child-component.component';
 
 @Component({
-  selector: 'app-output',
-  imports: [ChildComponentComponent],   // 👈 DON'T FORGET THIS
-  templateUrl: './output.component.html',
+    selector: 'app-output',
+    imports: [ChildComponentComponent], // 👈 DON'T FORGET THIS
+    templateUrl: './output.component.html',
 })
 export class OutputComponent {
-  output = signal<string>('');
+    output = signal<string>('');
 
-  // Receives the emitted value.
-  onClick(value: string) {
-    this.output.set(value);
-  }
+    // Receives the emitted value.
+    onClick(value: string) {
+        this.output.set(value);
+    }
 }
 ```
 
@@ -106,6 +106,7 @@ close() {
   this.closed.emit();
 }
 ```
+
 ```html
 <app-dialog (closed)="isOpen.set(false)" />
 ```
@@ -119,9 +120,11 @@ save() {
   this.saved.emit({ id: 1, name: 'Bob' });
 }
 ```
+
 ```html
 <app-child-component (saved)="onSaved($event)" />
 ```
+
 ```ts
 onSaved(user: { id: number; name: string }) {
   console.log(user.name);
@@ -133,6 +136,7 @@ onSaved(user: { id: number; name: string }) {
 ```ts
 outputValue = output<string>({ alias: 'boom' });
 ```
+
 ```html
 <app-child-component (boom)="onClick($event)" />
 ```
@@ -179,15 +183,15 @@ When the parent gives a value **and** the child can change it, use `model()` ins
 import { Component, model } from '@angular/core';
 
 @Component({
-  selector: 'app-counter',
-  template: `
-    <button (click)="count.update((c) => c - 1)">-</button>
-    {{ count() }}
-    <button (click)="count.update((c) => c + 1)">+</button>
-  `,
+    selector: 'app-counter',
+    template: `
+        <button (click)="count.update((c) => c - 1)">-</button>
+        {{ count() }}
+        <button (click)="count.update((c) => c + 1)">+</button>
+    `,
 })
 export class CounterComponent {
-  count = model(0);            // or model.required<number>()
+    count = model(0); // or model.required<number>()
 }
 ```
 
@@ -198,6 +202,7 @@ export class CounterComponent {
 <app-counter [(count)]="total" />
 <p>Total: {{ total() }}</p>
 ```
+
 ```ts
 total = signal(5);
 ```
@@ -217,11 +222,11 @@ When the child calls `count.set()` / `count.update()`, the parent's `total` sign
 
 ### Which one should I use?
 
-| Need | Use |
-| ---- | --- |
-| Parent → child only | `input()` |
-| Child → parent only (an event: click, save, close...) | `output()` |
-| Same value goes both ways (counter, toggle, custom form field) | `model()` |
+| Need                                                           | Use        |
+| -------------------------------------------------------------- | ---------- |
+| Parent → child only                                            | `input()`  |
+| Child → parent only (an event: click, save, close...)          | `output()` |
+| Same value goes both ways (counter, toggle, custom form field) | `model()`  |
 
 More on two-way binding: [BINDING.md](../../template/binding/BINDING.md).
 

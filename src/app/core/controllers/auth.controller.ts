@@ -8,22 +8,22 @@ import { deny, isLoggedIn } from '@core/controllers/permissions';
 
 @Service()
 export class AuthController {
-  private readonly _authService = inject(AuthService);
+    private readonly _authService = inject(AuthService);
 
-  // public
-  async login(request: LoginRequest): Promise<UserResponse> {
-    return firstValueFrom(this._authService.login(request));
-  }
+    // public
+    async login(request: LoginRequest): Promise<UserResponse> {
+        return firstValueFrom(this._authService.login(request));
+    }
 
-  // public
-  async register(request: RegisterRequest): Promise<UserResponse> {
-    return firstValueFrom(this._authService.register(request));
-  }
+    // public
+    async register(request: RegisterRequest): Promise<UserResponse> {
+        return firstValueFrom(this._authService.register(request));
+    }
 
-  // logged in only
-  async logout(): Promise<void> {
-    const user = this._authService.currentUser();
-    if (!isLoggedIn(user)) deny(user);
-    this._authService.logout();
-  }
+    // logged in only
+    async logout(): Promise<void> {
+        const user = this._authService.currentUser();
+        if (!isLoggedIn(user)) deny(user);
+        this._authService.logout();
+    }
 }

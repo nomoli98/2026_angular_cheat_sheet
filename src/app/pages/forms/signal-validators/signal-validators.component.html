@@ -1,162 +1,260 @@
 <h2>Signal Forms · Validators</h2>
 
 <p>
-  Every rule is one line in the <strong>schema function</strong>, and each error carries its
-  <code>message</code>. Type in the fields: the <code>kinds</code> line shows what Angular sees.
-  Full guide: <code>SIGNAL_VALIDATORS.md</code>.
+    Every rule is one line in the <strong>schema function</strong>, and each error carries its
+    <code>message</code>. Type in the fields: the <code>kinds</code> line shows what Angular sees.
+    Full guide: <code>SIGNAL_VALIDATORS.md</code>.
 </p>
 
 <!-- 1. BUILT-IN -->
 <section class="card card-body mb-3">
-  <h3>1. Built-in rules</h3>
-  <p>
-    <code>required</code>, <code>minLength</code>, <code>maxLength</code>, <code>min</code>,
-    <code>max</code>, <code>email</code>, <code>pattern</code>. Path first, then
-    <code>{{ '{' }} message {{ '}' }}</code>. On a boolean, <code>required</code> means "must be
-    <code>true</code>".
-  </p>
+    <h3>1. Built-in rules</h3>
+    <p>
+        <code>required</code>, <code>minLength</code>, <code>maxLength</code>, <code>min</code>,
+        <code>max</code>, <code>email</code>, <code>pattern</code>. Path first, then
+        <code>{{ '{' }} message {{ '}' }}</code
+        >. On a boolean, <code>required</code> means "must be <code>true</code>".
+    </p>
 
-  <div class="mb-3">
-    @let name = builtInForm.name();
     <div class="mb-3">
-      <label for="sv-name" class="form-label">Name (2 to 50 characters)</label>
-      <input id="sv-name" class="form-control" [formField]="builtInForm.name"
-             [class.is-invalid]="name.touched() && name.invalid()" />
-      @if (name.touched()) {
-        @for (error of name.errors(); track error.kind) {
-          <div class="invalid-feedback">{{ error.message }}</div>
-        }
-      }
-      <div class="form-text"><code>kinds: [@for (e of name.errors(); track e.kind) { {{ e.kind }} }]</code></div>
+        @let name = builtInForm.name();
+        <div class="mb-3">
+            <label for="sv-name" class="form-label">Name (2 to 50 characters)</label>
+            <input
+                id="sv-name"
+                class="form-control"
+                [formField]="builtInForm.name"
+                [class.is-invalid]="name.touched() && name.invalid()"
+            />
+            @if (name.touched()) {
+                @for (error of name.errors(); track error.kind) {
+                    <div class="invalid-feedback">{{ error.message }}</div>
+                }
+            }
+            <div class="form-text">
+                <code
+                    >kinds: [
+                    @for (e of name.errors(); track e.kind) {
+                        {{ e.kind }}
+                    }
+                    ]</code
+                >
+            </div>
+        </div>
+
+        @let height = builtInForm.height();
+        <div class="mb-3">
+            <label for="sv-height" class="form-label">Height (50 to 275 cm)</label>
+            <input
+                id="sv-height"
+                type="number"
+                class="form-control"
+                [formField]="builtInForm.height"
+                [class.is-invalid]="height.touched() && height.invalid()"
+            />
+            @if (height.touched()) {
+                @for (error of height.errors(); track error.kind) {
+                    <div class="invalid-feedback">{{ error.message }}</div>
+                }
+            }
+            <div class="form-text">
+                <code
+                    >kinds: [
+                    @for (e of height.errors(); track e.kind) {
+                        {{ e.kind }}
+                    }
+                    ]</code
+                >
+            </div>
+        </div>
+
+        @let terms = builtInForm.agreeToTerms();
+        <div class="form-check">
+            <input
+                id="sv-terms"
+                type="checkbox"
+                class="form-check-input"
+                [formField]="builtInForm.agreeToTerms"
+                [class.is-invalid]="terms.touched() && terms.invalid()"
+            />
+            <label for="sv-terms" class="form-check-label">I agree to the terms</label>
+            @if (terms.touched()) {
+                @for (error of terms.errors(); track error.kind) {
+                    <div class="invalid-feedback">{{ error.message }}</div>
+                }
+            }
+            <div class="form-text">
+                <code
+                    >kinds: [
+                    @for (e of terms.errors(); track e.kind) {
+                        {{ e.kind }}
+                    }
+                    ]</code
+                >
+            </div>
+        </div>
     </div>
 
-    @let height = builtInForm.height();
-    <div class="mb-3">
-      <label for="sv-height" class="form-label">Height (50 to 275 cm)</label>
-      <input id="sv-height" type="number" class="form-control" [formField]="builtInForm.height"
-             [class.is-invalid]="height.touched() && height.invalid()" />
-      @if (height.touched()) {
-        @for (error of height.errors(); track error.kind) {
-          <div class="invalid-feedback">{{ error.message }}</div>
-        }
-      }
-      <div class="form-text"><code>kinds: [@for (e of height.errors(); track e.kind) { {{ e.kind }} }]</code></div>
-    </div>
-
-    @let terms = builtInForm.agreeToTerms();
-    <div class="form-check">
-      <input id="sv-terms" type="checkbox" class="form-check-input" [formField]="builtInForm.agreeToTerms"
-             [class.is-invalid]="terms.touched() && terms.invalid()" />
-      <label for="sv-terms" class="form-check-label">I agree to the terms</label>
-      @if (terms.touched()) {
-        @for (error of terms.errors(); track error.kind) {
-          <div class="invalid-feedback">{{ error.message }}</div>
-        }
-      }
-      <div class="form-text"><code>kinds: [@for (e of terms.errors(); track e.kind) { {{ e.kind }} }]</code></div>
-    </div>
-  </div>
-
-  <app-code-snippet [code]="snippets.builtIn" />
+    <app-code-snippet [code]="snippets.builtIn" />
 </section>
 
 <!-- 2. CUSTOM -->
 <section class="card card-body mb-3">
-  <h3>2. Custom rule</h3>
-  <p>
-    A function that calls <code>validate(path, ctx =&gt; ...)</code>. Return
-    <code>undefined</code> = valid, or one / several <code>{{ '{' }} kind, message {{ '}' }}</code>.
-    Add a second argument for parameters: <code>birthdate(field.birthdate, {{ '{' }} minAge: 18 {{ '}' }})</code>.
-  </p>
+    <h3>2. Custom rule</h3>
+    <p>
+        A function that calls <code>validate(path, ctx =&gt; ...)</code>. Return
+        <code>undefined</code> = valid, or one / several
+        <code>{{ '{' }} kind, message {{ '}' }}</code
+        >. Add a second argument for parameters:
+        <code>birthdate(field.birthdate, {{ '{' }} minAge: 18 {{ '}' }})</code>.
+    </p>
 
-  <div class="mb-3">
-    @let password = customForm.password();
     <div class="mb-3">
-      <label for="sv-password" class="form-label">Password</label>
-      <input id="sv-password" type="password" class="form-control" [formField]="customForm.password"
-             [class.is-invalid]="password.touched() && password.invalid()" />
-      @if (password.touched()) {
-        @for (error of password.errors(); track error.kind) {
-          <div class="invalid-feedback">{{ error.message }}</div>
-        }
-      }
-      <div class="form-text"><code>kinds: [@for (e of password.errors(); track e.kind) { {{ e.kind }} }]</code></div>
+        @let password = customForm.password();
+        <div class="mb-3">
+            <label for="sv-password" class="form-label">Password</label>
+            <input
+                id="sv-password"
+                type="password"
+                class="form-control"
+                [formField]="customForm.password"
+                [class.is-invalid]="password.touched() && password.invalid()"
+            />
+            @if (password.touched()) {
+                @for (error of password.errors(); track error.kind) {
+                    <div class="invalid-feedback">{{ error.message }}</div>
+                }
+            }
+            <div class="form-text">
+                <code
+                    >kinds: [
+                    @for (e of password.errors(); track e.kind) {
+                        {{ e.kind }}
+                    }
+                    ]</code
+                >
+            </div>
+        </div>
+
+        @let birth = customForm.birthdate();
+        <div>
+            <label for="sv-birthdate" class="form-label">Birthdate (18 to 120 years old)</label>
+            <input
+                id="sv-birthdate"
+                type="date"
+                class="form-control"
+                [formField]="customForm.birthdate"
+                [class.is-invalid]="birth.touched() && birth.invalid()"
+            />
+            @if (birth.touched()) {
+                @for (error of birth.errors(); track error.kind) {
+                    <div class="invalid-feedback">{{ error.message }}</div>
+                }
+            }
+            <div class="form-text">
+                <code
+                    >kinds: [
+                    @for (e of birth.errors(); track e.kind) {
+                        {{ e.kind }}
+                    }
+                    ]</code
+                >
+            </div>
+        </div>
     </div>
 
-    @let birth = customForm.birthdate();
-    <div>
-      <label for="sv-birthdate" class="form-label">Birthdate (18 to 120 years old)</label>
-      <input id="sv-birthdate" type="date" class="form-control" [formField]="customForm.birthdate"
-             [class.is-invalid]="birth.touched() && birth.invalid()" />
-      @if (birth.touched()) {
-        @for (error of birth.errors(); track error.kind) {
-          <div class="invalid-feedback">{{ error.message }}</div>
-        }
-      }
-      <div class="form-text"><code>kinds: [@for (e of birth.errors(); track e.kind) { {{ e.kind }} }]</code></div>
-    </div>
-  </div>
-
-  <app-code-snippet [code]="snippets.custom" />
+    <app-code-snippet [code]="snippets.custom" />
 </section>
 
 <!-- 3. CROSS-FIELD -->
 <section class="card card-body mb-3">
-  <h3>3. Cross-field rule</h3>
-  <p>
-    Read the other field with <code>valueOf(otherPath)</code>. The rule re-runs when
-    <strong>either</strong> field changes, and the error lands on <code>confirmPassword</code>
-    itself (no group like in reactive forms).
-  </p>
+    <h3>3. Cross-field rule</h3>
+    <p>
+        Read the other field with <code>valueOf(otherPath)</code>. The rule re-runs when
+        <strong>either</strong> field changes, and the error lands on <code>confirmPassword</code>
+        itself (no group like in reactive forms).
+    </p>
 
-  <div class="mb-3">
     <div class="mb-3">
-      <label for="sv-pw" class="form-label">Password</label>
-      <input id="sv-pw" type="password" class="form-control" [formField]="crossForm.password" />
+        <div class="mb-3">
+            <label for="sv-pw" class="form-label">Password</label>
+            <input
+                id="sv-pw"
+                type="password"
+                class="form-control"
+                [formField]="crossForm.password"
+            />
+        </div>
+
+        @let confirm = crossForm.confirmPassword();
+        <div>
+            <label for="sv-confirm" class="form-label">Confirm password</label>
+            <input
+                id="sv-confirm"
+                type="password"
+                class="form-control"
+                [formField]="crossForm.confirmPassword"
+                [class.is-invalid]="confirm.touched() && confirm.invalid()"
+            />
+            @if (confirm.touched()) {
+                @for (error of confirm.errors(); track error.kind) {
+                    <div class="invalid-feedback">{{ error.message }}</div>
+                }
+            }
+            <div class="form-text">
+                <code
+                    >kinds: [
+                    @for (e of confirm.errors(); track e.kind) {
+                        {{ e.kind }}
+                    }
+                    ]</code
+                >
+            </div>
+        </div>
     </div>
 
-    @let confirm = crossForm.confirmPassword();
-    <div>
-      <label for="sv-confirm" class="form-label">Confirm password</label>
-      <input id="sv-confirm" type="password" class="form-control" [formField]="crossForm.confirmPassword"
-             [class.is-invalid]="confirm.touched() && confirm.invalid()" />
-      @if (confirm.touched()) {
-        @for (error of confirm.errors(); track error.kind) {
-          <div class="invalid-feedback">{{ error.message }}</div>
-        }
-      }
-      <div class="form-text"><code>kinds: [@for (e of confirm.errors(); track e.kind) { {{ e.kind }} }]</code></div>
-    </div>
-  </div>
-
-  <app-code-snippet [code]="snippets.crossField" />
+    <app-code-snippet [code]="snippets.crossField" />
 </section>
 
 <!-- 4. ASYNC -->
 <section class="card card-body mb-3">
-  <h3>4. Async rule</h3>
-  <p>
-    <code>validateHttp()</code> takes a <strong>request</strong> (URL + params), not an Observable.
-    It only runs when the sync rules pass, and <code>pending()</code> is <code>true</code> while
-    it waits. Needs the fake API (<code>npm run dev</code>). Try <code>bob&#64;email.bob</code>.
-  </p>
+    <h3>4. Async rule</h3>
+    <p>
+        <code>validateHttp()</code> takes a <strong>request</strong> (URL + params), not an
+        Observable. It only runs when the sync rules pass, and <code>pending()</code> is
+        <code>true</code> while it waits. Needs the fake API (<code>npm run dev</code>). Try
+        <code>bob&#64;email.bob</code>.
+    </p>
 
-  <div class="mb-3">
-    @let mail = asyncForm.email();
-    <label for="sv-email" class="form-label">Email</label>
-    <input id="sv-email" type="email" class="form-control" [formField]="asyncForm.email"
-           [class.is-invalid]="mail.touched() && mail.invalid()"
-           [class.is-valid]="mail.touched() && mail.valid()" />
-    @if (mail.pending()) { <div class="form-text">Checking the email...</div> }
-    @if (mail.touched()) {
-      @for (error of mail.errors(); track error.kind) {
-        <div class="invalid-feedback">{{ error.message }}</div>
-      }
-    }
-    <div class="form-text">
-      <code>pending: {{ mail.pending() }} · kinds: [@for (e of mail.errors(); track e.kind) { {{ e.kind }} }]</code>
+    <div class="mb-3">
+        @let mail = asyncForm.email();
+        <label for="sv-email" class="form-label">Email</label>
+        <input
+            id="sv-email"
+            type="email"
+            class="form-control"
+            [formField]="asyncForm.email"
+            [class.is-invalid]="mail.touched() && mail.invalid()"
+            [class.is-valid]="mail.touched() && mail.valid()"
+        />
+        @if (mail.pending()) {
+            <div class="form-text">Checking the email...</div>
+        }
+        @if (mail.touched()) {
+            @for (error of mail.errors(); track error.kind) {
+                <div class="invalid-feedback">{{ error.message }}</div>
+            }
+        }
+        <div class="form-text">
+            <code
+                >pending: {{ mail.pending() }} · kinds: [
+                @for (e of mail.errors(); track e.kind) {
+                    {{ e.kind }}
+                }
+                ]</code
+            >
+        </div>
     </div>
-  </div>
 
-  <app-code-snippet [code]="snippets.async" />
+    <app-code-snippet [code]="snippets.async" />
 </section>

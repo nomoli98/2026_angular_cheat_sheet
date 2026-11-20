@@ -15,96 +15,96 @@ import update from './snippets/update.md';
 
 // empty ('' or null) = don't change it
 interface UpdateModel {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  birthdate: string;
-  height: number | null; // empty number input = null
-  gender: GenderEnum | '';
-  subscription: 'free' | 'premium' | '';
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+    birthdate: string;
+    height: number | null; // empty number input = null
+    gender: GenderEnum | '';
+    subscription: 'free' | 'premium' | '';
 }
 
 const EMPTY: UpdateModel = {
-  id: 2,
-  name: '',
-  email: '',
-  password: '',
-  birthdate: '',
-  height: null,
-  gender: '',
-  subscription: '',
+    id: 2,
+    name: '',
+    email: '',
+    password: '',
+    birthdate: '',
+    height: null,
+    gender: '',
+    subscription: '',
 };
 
 @Component({
-  imports: [CodeSnippetComponent, FormField, JsonPipe],
-  selector: 'app-update',
-  templateUrl: './update.component.html',
+    imports: [CodeSnippetComponent, FormField, JsonPipe],
+    selector: 'app-update',
+    templateUrl: './update.component.html',
 })
 export class UpdateComponent {
-  // page snippets
-  protected readonly snippets = { update };
+    // page snippets
+    protected readonly snippets = { update };
 
-  protected readonly GenderEnum = GenderEnum;
-  protected readonly _userController = inject(UserController);
-  protected readonly _sent = signal<Partial<RegisterRequest> | null>(null); // PATCH body
-  protected readonly _updated = signal<UserResponse | null>(null);
-  protected readonly _error = signal<string | null>(null);
+    protected readonly GenderEnum = GenderEnum;
+    protected readonly _userController = inject(UserController);
+    protected readonly _sent = signal<Partial<RegisterRequest> | null>(null); // PATCH body
+    protected readonly _updated = signal<UserResponse | null>(null);
+    protected readonly _error = signal<string | null>(null);
 
-  // re-computed when the toggle changes the user
-  private readonly _authService = inject(AuthService);
-  protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
+    // re-computed when the toggle changes the user
+    private readonly _authService = inject(AuthService);
+    protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
 
-  protected readonly _model = signal<UpdateModel>({ ...EMPTY });
+    protected readonly _model = signal<UpdateModel>({ ...EMPTY });
 
-  // only id required, other rules apply when filled
-  protected readonly _form = form(this._model, (field) => {
-    required(field.id, { message: 'Id is required' });
-    min(field.id, 1, { message: 'Id starts at 1' });
+    // only id required, other rules apply when filled
+    protected readonly _form = form(this._model, (field) => {
+        required(field.id, { message: 'Id is required' });
+        min(field.id, 1, { message: 'Id starts at 1' });
 
-    email(field.email, { message: 'Email must be a valid email' }); // '' is OK
-    // strongPassword() only when something is typed
-    applyWhen(
-      field.password,
-      ({ value }) => value() !== '',
-      (password) => strongPassword(password),
-    );
-    birthdate(field.birthdate, { minAge: 18, maxAge: 120 }); // skips ''
-    min(field.height, 50, { message: 'Height must be above 50cm' }); // skips null
-    max(field.height, 275, { message: 'Height must be below 275cm' });
-  });
+        email(field.email, { message: 'Email must be a valid email' }); // '' is OK
+        // strongPassword() only when something is typed
+        applyWhen(
+            field.password,
+            ({ value }) => value() !== '',
+            (password) => strongPassword(password),
+        );
+        birthdate(field.birthdate, { minAge: 18, maxAge: 120 }); // skips ''
+        min(field.height, 50, { message: 'Height must be above 50cm' }); // skips null
+        max(field.height, 275, { message: 'Height must be below 275cm' });
+    });
 
-  async onSubmit(event: Event) {
-    event.preventDefault();
-    if (this._form().invalid()) return;
+    async onSubmit(event: Event) {
+        event.preventDefault();
+        if (this._form().invalid()) return;
 
-    this._error.set(null);
-    this._updated.set(null);
-    // 1. not admin → skip the controller
-    if (!this._isAdmin()) {
-      this._error.set('forbidden: only an admin can update a user');
-      return;
+        this._error.set(null);
+        this._updated.set(null);
+        // 1. not admin → skip the controller
+        if (!this._isAdmin()) {
+            this._error.set('forbidden: only an admin can update a user');
+            return;
+        }
+
+        const { id, ...fields } = this._form().value();
+        // keep the filled fields
+        const changes = Object.fromEntries(
+            Object.entries(fields).filter(([, value]) => value !== '' && value !== null),
+        ) as Partial<RegisterRequest>;
+
+        if (Object.keys(changes).length === 0) {
+            this._error.set('Fill in at least one field to change');
+            return;
+        }
+
+        this._sent.set(changes);
+        try {
+            // 2. the controller checks again
+            this._updated.set(await this._userController.updatePartial(id, changes));
+            this._model.set({ ...EMPTY, id }); // clear, keep the id
+        } catch (err) {
+            // 'unauthorized', 'forbidden', 'user not found' or HTTP error
+            this._error.set(errorMessage(err));
+        }
     }
-
-    const { id, ...fields } = this._form().value();
-    // keep the filled fields
-    const changes = Object.fromEntries(
-      Object.entries(fields).filter(([, value]) => value !== '' && value !== null),
-    ) as Partial<RegisterRequest>;
-
-    if (Object.keys(changes).length === 0) {
-      this._error.set('Fill in at least one field to change');
-      return;
-    }
-
-    this._sent.set(changes);
-    try {
-      // 2. the controller checks again
-      this._updated.set(await this._userController.updatePartial(id, changes));
-      this._model.set({ ...EMPTY, id }); // clear, keep the id
-    } catch (err) {
-      // 'unauthorized', 'forbidden', 'user not found' or HTTP error
-      this._error.set(errorMessage(err));
-    }
-  }
 }

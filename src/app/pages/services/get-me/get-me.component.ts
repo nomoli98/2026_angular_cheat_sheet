@@ -6,25 +6,25 @@ import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.componen
 import getMe from './snippets/get-me.md';
 
 @Component({
-  imports: [CodeSnippetComponent],
-  selector: 'app-get-me',
-  templateUrl: './get-me.component.html',
+    imports: [CodeSnippetComponent],
+    selector: 'app-get-me',
+    templateUrl: './get-me.component.html',
 })
 export class GetMeComponent {
-  // page snippets
-  protected readonly snippets = { getMe };
+    // page snippets
+    protected readonly snippets = { getMe };
 
-  protected readonly _userController = inject(UserController);
-  protected readonly _me = signal<UserResponse | null>(null);
-  protected readonly _error = signal<string | null>(null);
+    protected readonly _userController = inject(UserController);
+    protected readonly _me = signal<UserResponse | null>(null);
+    protected readonly _error = signal<string | null>(null);
 
-  async onClick() {
-    this._error.set(null);
-    try {
-      this._me.set(await this._userController.getMe());
-    } catch (err) {
-      // 'unauthorized' or HTTP error (anyone can read themselves)
-      this._error.set(errorMessage(err));
+    async onClick() {
+        this._error.set(null);
+        try {
+            this._me.set(await this._userController.getMe());
+        } catch (err) {
+            // 'unauthorized' or HTTP error (anyone can read themselves)
+            this._error.set(errorMessage(err));
+        }
     }
-  }
 }

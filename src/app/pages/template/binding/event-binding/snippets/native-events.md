@@ -12,15 +12,15 @@
 import { Component, signal } from '@angular/core';
 
 @Component({
-  selector: 'app-event-binding',
-  templateUrl: './event-binding.component.html',
+    selector: 'app-event-binding',
+    templateUrl: './event-binding.component.html',
 })
 export class EventBindingComponent {
-  value = signal('initial value');
-  pressedKey = signal('');
+    value = signal('initial value');
+    pressedKey = signal('');
 
-  protected showPressedKey(event: KeyboardEvent) {
-    this.pressedKey.set(event.key);
-  }
+    protected showPressedKey(event: KeyboardEvent) {
+        this.pressedKey.set(event.key);
+    }
 }
 ```

@@ -1,53 +1,72 @@
 <h2>Get one user</h2>
 
 <section class="card card-body mb-3">
-  <p>
-    Calls <code>UserController.getOne(id)</code>: <strong>admin only</strong> (a simple user →
-    <code>forbidden</code>, even for their own id: they use <em>Get Me</em> for that). An id that
-    does not exist → <code>Not found</code>.
-  </p>
+    <p>
+        Calls <code>UserController.getOne(id)</code>: <strong>admin only</strong> (a simple user →
+        <code>forbidden</code>, even for their own id: they use <em>Get Me</em> for that). An id
+        that does not exist → <code>Not found</code>.
+    </p>
 
-  @if (!_isAdmin()) {
-    <div class="alert alert-warning">
-      You are logged in as a <strong>simple user</strong>: only an admin can do this. Switch the
-      <em>Admin</em> toggle in the navbar back on.
-    </div>
-  }
+    @if (!_isAdmin()) {
+        <div class="alert alert-warning">
+            You are logged in as a <strong>simple user</strong>: only an admin can do this. Switch
+            the <em>Admin</em> toggle in the navbar back on.
+        </div>
+    }
 
-  <form class="d-flex gap-2 align-items-start" (submit)="onSubmit($event)">
-    <div>
-      <label for="id" class="visually-hidden">User id</label>
-      <input id="id" type="number" class="form-control" placeholder="User id"
-             [formField]="_idForm.id"
-             [class.is-invalid]="_idForm.id().touched() && _idForm.id().invalid()" />
-      @if (_idForm.id().touched()) {
-        @for (error of _idForm.id().errors(); track error.kind) {
-          <div class="invalid-feedback">{{ error.message }}</div>
-        }
-      }
-    </div>
-    <button type="submit" class="btn btn-primary" [disabled]="_idForm().invalid() || !_isAdmin()">Get One User</button>
-  </form>
+    <form class="d-flex gap-2 align-items-start" (submit)="onSubmit($event)">
+        <div>
+            <label for="id" class="visually-hidden">User id</label>
+            <input
+                id="id"
+                type="number"
+                class="form-control"
+                placeholder="User id"
+                [formField]="_idForm.id"
+                [class.is-invalid]="_idForm.id().touched() && _idForm.id().invalid()"
+            />
+            @if (_idForm.id().touched()) {
+                @for (error of _idForm.id().errors(); track error.kind) {
+                    <div class="invalid-feedback">{{ error.message }}</div>
+                }
+            }
+        </div>
+        <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="_idForm().invalid() || !_isAdmin()"
+        >
+            Get One User
+        </button>
+    </form>
 
-  @if (_error(); as error) {
-    <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
-  }
+    @if (_error(); as error) {
+        <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+    }
 
-  @if (_isAdmin() && _user(); as u) {
-    <dl class="row mt-3 mb-0">
-      <dt class="col-sm-3">Id</dt><dd class="col-sm-9">{{ u.id }}</dd>
-      <dt class="col-sm-3">Name</dt><dd class="col-sm-9">{{ u.name }}</dd>
-      <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{{ u.email }}</dd>
-      <dt class="col-sm-3">Birthdate</dt><dd class="col-sm-9">{{ u.birthdate }}</dd>
-      <dt class="col-sm-3">Height</dt><dd class="col-sm-9">{{ u.height }} cm</dd>
-      <dt class="col-sm-3">Gender</dt><dd class="col-sm-9">{{ u.gender }}</dd>
-      <dt class="col-sm-3">Subscription</dt><dd class="col-sm-9">{{ u.subscription }}</dd>
-      <dt class="col-sm-3">Role</dt><dd class="col-sm-9 mb-0">{{ u.role }}</dd>
-    </dl>
-  }
+    @if (_isAdmin() && _user(); as u) {
+        <dl class="row mt-3 mb-0">
+            <dt class="col-sm-3">Id</dt>
+            <dd class="col-sm-9">{{ u.id }}</dd>
+            <dt class="col-sm-3">Name</dt>
+            <dd class="col-sm-9">{{ u.name }}</dd>
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">{{ u.email }}</dd>
+            <dt class="col-sm-3">Birthdate</dt>
+            <dd class="col-sm-9">{{ u.birthdate }}</dd>
+            <dt class="col-sm-3">Height</dt>
+            <dd class="col-sm-9">{{ u.height }} cm</dd>
+            <dt class="col-sm-3">Gender</dt>
+            <dd class="col-sm-9">{{ u.gender }}</dd>
+            <dt class="col-sm-3">Subscription</dt>
+            <dd class="col-sm-9">{{ u.subscription }}</dd>
+            <dt class="col-sm-3">Role</dt>
+            <dd class="col-sm-9 mb-0">{{ u.role }}</dd>
+        </dl>
+    }
 </section>
 
 <section class="card card-body mt-3">
-  <h3>Code</h3>
-  <app-code-snippet [code]="snippets.getOne" />
+    <h3>Code</h3>
+    <app-code-snippet [code]="snippets.getOne" />
 </section>

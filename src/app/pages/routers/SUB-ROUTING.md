@@ -20,13 +20,13 @@ app.html
         └── <router-outlet name="panel" />       ← child 3 (or empty)
 ```
 
-| URL | Unnamed outlet | `panel` outlet |
-|---|---|---|
-| `/router/sub-outlet` | redirects to `/router/sub-outlet/1` | empty |
-| `/router/sub-outlet/1` | ChildOneComponent | empty |
-| `/router/sub-outlet/2` | ChildTwoComponent | empty |
-| `/router/sub-outlet/(2//panel:3)` | ChildTwoComponent | ChildThreeComponent |
-| `/router/sub-outlet/(panel:3)` | redirects to `/router/sub-outlet/(1//panel:3)` (the `redirectTo: '1'` still applies) | ChildThreeComponent |
+| URL                               | Unnamed outlet                                                                       | `panel` outlet      |
+| --------------------------------- | ------------------------------------------------------------------------------------ | ------------------- |
+| `/router/sub-outlet`              | redirects to `/router/sub-outlet/1`                                                  | empty               |
+| `/router/sub-outlet/1`            | ChildOneComponent                                                                    | empty               |
+| `/router/sub-outlet/2`            | ChildTwoComponent                                                                    | empty               |
+| `/router/sub-outlet/(2//panel:3)` | ChildTwoComponent                                                                    | ChildThreeComponent |
+| `/router/sub-outlet/(panel:3)`    | redirects to `/router/sub-outlet/(1//panel:3)` (the `redirectTo: '1'` still applies) | ChildThreeComponent |
 
 ---
 
@@ -51,33 +51,39 @@ app.html
 ```ts
 // pages/routers/sub-outlet.routes.example.ts
 export const routes: Routes = [
-  {
-    path: '',                                  // = /router/sub-outlet
-    loadComponent: () =>
-      import('./sub-outlet/sub-outlet.component').then((m) => m.SubOutletComponent),
-    children: [
-      // A. into the unnamed <router-outlet />
-      { path: '', redirectTo: '1', pathMatch: 'full' },
-      {
-        path: '1',
+    {
+        path: '', // = /router/sub-outlet
         loadComponent: () =>
-          import('./children/child-one/child-one.component').then((m) => m.ChildOneComponent),
-      },
-      {
-        path: '2',
-        loadComponent: () =>
-          import('./children/child-two/child-two.component').then((m) => m.ChildTwoComponent),
-      },
+            import('./sub-outlet/sub-outlet.component').then((m) => m.SubOutletComponent),
+        children: [
+            // A. into the unnamed <router-outlet />
+            { path: '', redirectTo: '1', pathMatch: 'full' },
+            {
+                path: '1',
+                loadComponent: () =>
+                    import('./children/child-one/child-one.component').then(
+                        (m) => m.ChildOneComponent,
+                    ),
+            },
+            {
+                path: '2',
+                loadComponent: () =>
+                    import('./children/child-two/child-two.component').then(
+                        (m) => m.ChildTwoComponent,
+                    ),
+            },
 
-      // B. into <router-outlet name="panel" />
-      {
-        path: '3',
-        outlet: 'panel',
-        loadComponent: () =>
-          import('./children/child-three/child-three.component').then((m) => m.ChildThreeComponent),
-      },
-    ],
-  },
+            // B. into <router-outlet name="panel" />
+            {
+                path: '3',
+                outlet: 'panel',
+                loadComponent: () =>
+                    import('./children/child-three/child-three.component').then(
+                        (m) => m.ChildThreeComponent,
+                    ),
+            },
+        ],
+    },
 ];
 ```
 
@@ -94,21 +100,21 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
-  selector: 'app-sub-outlet',
-  imports: [RouterOutlet, RouterLink],            // both are needed
-  templateUrl: './sub-outlet.component.html',
+    selector: 'app-sub-outlet',
+    imports: [RouterOutlet, RouterLink], // both are needed
+    templateUrl: './sub-outlet.component.html',
 })
 export class SubOutletComponent {
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);        // = the /router/sub-outlet route
+    private router = inject(Router);
+    private route = inject(ActivatedRoute); // = the /router/sub-outlet route
 
-  openPanel() {
-    this.router.navigate([{ outlets: { panel: ['3'] } }], { relativeTo: this.route });
-  }
+    openPanel() {
+        this.router.navigate([{ outlets: { panel: ['3'] } }], { relativeTo: this.route });
+    }
 
-  closePanel() {
-    this.router.navigate([{ outlets: { panel: null } }], { relativeTo: this.route });
-  }
+    closePanel() {
+        this.router.navigate([{ outlets: { panel: null } }], { relativeTo: this.route });
+    }
 }
 ```
 
@@ -138,15 +144,19 @@ export class SubOutletComponent {
 ### Unnamed outlet: a normal link
 
 ```html
-<button routerLink="/router/sub-outlet/2">show child two</button>   <!-- absolute -->
-<button routerLink="2">show child two</button>                      <!-- relative to /router/sub-outlet -->
+<button routerLink="/router/sub-outlet/2">show child two</button>
+<!-- absolute -->
+<button routerLink="2">show child two</button>
+<!-- relative to /router/sub-outlet -->
 ```
 
 ### Named outlet: the `outlets` object
 
 ```html
-<a [routerLink]="[{ outlets: { panel: ['3'] } }]">Open</a>       <!-- put '3' in panel -->
-<a [routerLink]="[{ outlets: { panel: null } }]">Close</a>       <!-- empty panel -->
+<a [routerLink]="[{ outlets: { panel: ['3'] } }]">Open</a>
+<!-- put '3' in panel -->
+<a [routerLink]="[{ outlets: { panel: null } }]">Close</a>
+<!-- empty panel -->
 ```
 
 - **Brackets are required** (`[routerLink]`), because it's an array with an object, not a string.
@@ -161,7 +171,7 @@ export class SubOutletComponent {
 
 <!-- open the sub-outlet with child 2 AND the panel -->
 <a [routerLink]="['/router/sub-outlet', { outlets: { primary: ['2'], panel: ['3'] } }]">
-  child 2 + panel
+    child 2 + panel
 </a>
 ```
 
@@ -200,9 +210,7 @@ Without `relativeTo`, `navigate` starts from the root `/`. From inside a child c
 `<router-outlet>` emits events when a component is put in or removed:
 
 ```html
-<router-outlet name="panel"
-  (activate)="panelOpen.set(true)"
-  (deactivate)="panelOpen.set(false)" />
+<router-outlet name="panel" (activate)="panelOpen.set(true)" (deactivate)="panelOpen.set(false)" />
 ```
 
 ```ts
@@ -228,11 +236,11 @@ Useful to show or hide the panel's container (`[class.open]="panelOpen()"`).
 
 ## Checklist when it doesn't work
 
-| Symptom | Check |
-|---|---|
-| `NG04002 ... 'router/sub-outlet/3'` | You used a named-outlet path as a normal path. Use `(panel:3)` / `{ outlets: { panel: ['3'] } }` |
-| `NG04002` on `/router/sub-outlet` | `redirectTo` points to a child that doesn't exist |
-| Children don't appear, no error | The parent has no `<router-outlet />`, or `RouterOutlet` isn't in its `imports` |
-| Panel never fills | `outlet: '...'` and `name="..."` don't match, or the route isn't in the parent's `children` |
-| The link goes to a weird URL like `/%5B%7B%20outlets...` | `routerLink` without brackets: the array was read as a string. Use `[routerLink]` |
-| Panel opens at the wrong level | The link is relative to the component it's in. Use an absolute array (`['/router/sub-outlet', { outlets: ... }]`) or `relativeTo` |
+| Symptom                                                  | Check                                                                                                                             |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `NG04002 ... 'router/sub-outlet/3'`                      | You used a named-outlet path as a normal path. Use `(panel:3)` / `{ outlets: { panel: ['3'] } }`                                  |
+| `NG04002` on `/router/sub-outlet`                        | `redirectTo` points to a child that doesn't exist                                                                                 |
+| Children don't appear, no error                          | The parent has no `<router-outlet />`, or `RouterOutlet` isn't in its `imports`                                                   |
+| Panel never fills                                        | `outlet: '...'` and `name="..."` don't match, or the route isn't in the parent's `children`                                       |
+| The link goes to a weird URL like `/%5B%7B%20outlets...` | `routerLink` without brackets: the array was read as a string. Use `[routerLink]`                                                 |
+| Panel opens at the wrong level                           | The link is relative to the component it's in. Use an absolute array (`['/router/sub-outlet', { outlets: ... }]`) or `relativeTo` |

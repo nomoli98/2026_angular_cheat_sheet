@@ -4,11 +4,11 @@
 
 This folder builds the **same register form three times**, once with each way Angular offers:
 
-| Folder | Kind | Import from | Where the form lives |
-|---|---|---|---|
-| [`template-form/`](./template-form/TEMPLATE_FORM.md) | Template-driven | `@angular/forms` (`FormsModule`) | In the HTML (`ngModel`, attributes) |
-| [`reactive-form/`](./reactive-form/REACTIVE_FORM.md) | Reactive | `@angular/forms` (`ReactiveFormsModule`) | In the TS (`FormGroup` / `FormControl`) |
-| [`signal-form/`](./signal-form/SIGNAL_FORM.md) | Signal forms | `@angular/forms/signals` (`FormField`) | In the TS (a `signal` model + a schema function) |
+| Folder                                               | Kind            | Import from                              | Where the form lives                             |
+| ---------------------------------------------------- | --------------- | ---------------------------------------- | ------------------------------------------------ |
+| [`template-form/`](./template-form/TEMPLATE_FORM.md) | Template-driven | `@angular/forms` (`FormsModule`)         | In the HTML (`ngModel`, attributes)              |
+| [`reactive-form/`](./reactive-form/REACTIVE_FORM.md) | Reactive        | `@angular/forms` (`ReactiveFormsModule`) | In the TS (`FormGroup` / `FormControl`)          |
+| [`signal-form/`](./signal-form/SIGNAL_FORM.md)       | Signal forms    | `@angular/forms/signals` (`FormField`)   | In the TS (a `signal` model + a schema function) |
 
 Each folder has its own step-by-step README.
 
@@ -20,30 +20,30 @@ Each folder has its own step-by-step README.
 
 ## Same task, three ways
 
-| Task | Template-driven | Reactive | Signal forms |
-|---|---|---|---|
-| Import in the component | `FormsModule` | `ReactiveFormsModule` | `FormField` |
-| Define the data | plain object `user = {...}` | `fb.group({ name: new FormControl('') })` | `model = signal<T>({...})` |
-| Create the form | automatic (`<form #form="ngForm">`) | the `FormGroup` itself | `form(model, schema)` |
-| Bind an input | `[(ngModel)]="user.name" name="name"` | `formControlName="name"` | `[formField]="registerForm.name"` |
-| Built-in validator | HTML attribute: `required email min="50"` | `Validators.required`, `Validators.email` | `required(field.name)`, `email(field.email)` |
-| Custom validator | Directive + `NG_VALIDATORS` | Function returning a `ValidatorFn` | Function calling `validate(path, ...)` |
-| Get a field's state | `#name="ngModel"` → `name.invalid` | `form.get('name')?.invalid` | `registerForm.name().invalid()` |
-| Error message | written in the HTML | written in the HTML | comes from the validator (`error.message`) |
-| Read the values | `this.user` | `this.form.value` | `this.registerForm().value()` / `this.model()` |
-| Submit | `(ngSubmit)="onSubmit(form)"` | `(ngSubmit)="onSubmit()"` | `(submit)="onSubmit($event)"` + `preventDefault()` |
-| Show all errors | `form.control.markAllAsTouched()` | `form.markAllAsTouched()` | `field().markAsTouched()` |
-| Reset | `form.resetForm()` | `form.reset()` | `model.set(initial)` + `registerForm().reset()` |
+| Task                    | Template-driven                           | Reactive                                  | Signal forms                                       |
+| ----------------------- | ----------------------------------------- | ----------------------------------------- | -------------------------------------------------- |
+| Import in the component | `FormsModule`                             | `ReactiveFormsModule`                     | `FormField`                                        |
+| Define the data         | plain object `user = {...}`               | `fb.group({ name: new FormControl('') })` | `model = signal<T>({...})`                         |
+| Create the form         | automatic (`<form #form="ngForm">`)       | the `FormGroup` itself                    | `form(model, schema)`                              |
+| Bind an input           | `[(ngModel)]="user.name" name="name"`     | `formControlName="name"`                  | `[formField]="registerForm.name"`                  |
+| Built-in validator      | HTML attribute: `required email min="50"` | `Validators.required`, `Validators.email` | `required(field.name)`, `email(field.email)`       |
+| Custom validator        | Directive + `NG_VALIDATORS`               | Function returning a `ValidatorFn`        | Function calling `validate(path, ...)`             |
+| Get a field's state     | `#name="ngModel"` → `name.invalid`        | `form.get('name')?.invalid`               | `registerForm.name().invalid()`                    |
+| Error message           | written in the HTML                       | written in the HTML                       | comes from the validator (`error.message`)         |
+| Read the values         | `this.user`                               | `this.form.value`                         | `this.registerForm().value()` / `this.model()`     |
+| Submit                  | `(ngSubmit)="onSubmit(form)"`             | `(ngSubmit)="onSubmit()"`                 | `(submit)="onSubmit($event)"` + `preventDefault()` |
+| Show all errors         | `form.control.markAllAsTouched()`         | `form.markAllAsTouched()`                 | `field().markAsTouched()`                          |
+| Reset                   | `form.resetForm()`                        | `form.reset()`                            | `model.set(initial)` + `registerForm().reset()`    |
 
 ## Validators, one page per kind
 
 Built-in, custom, cross-field and async validators, each with a live demo:
 
-| Page | Guide |
-|---|---|
+| Page                        | Guide                                                                                        |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
 | `/form/reactive-validators` | [`reactive-validators/REACTIVE_VALIDATORS.md`](./reactive-validators/REACTIVE_VALIDATORS.md) |
 | `/form/template-validators` | [`template-validators/TEMPLATE_VALIDATORS.md`](./template-validators/TEMPLATE_VALIDATORS.md) |
-| `/form/signal-validators` | [`signal-validators/SIGNAL_VALIDATORS.md`](./signal-validators/SIGNAL_VALIDATORS.md) |
+| `/form/signal-validators`   | [`signal-validators/SIGNAL_VALIDATORS.md`](./signal-validators/SIGNAL_VALIDATORS.md)         |
 
 ## Shared files used by the three forms
 

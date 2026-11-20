@@ -1,53 +1,62 @@
 <h2>Unit tests (Vitest)</h2>
 
 <p>
-  A unit test checks <strong>one small piece</strong> (a component, a service) on its own, without opening a browser.
-  Each demo below has its test in the <code>.spec.ts</code> tab. Full guide: <code>UNIT_TEST.md</code>.
+    A unit test checks <strong>one small piece</strong> (a component, a service) on its own, without
+    opening a browser. Each demo below has its test in the <code>.spec.ts</code> tab. Full guide:
+    <code>UNIT_TEST.md</code>.
 </p>
 
 <section class="card card-body mb-3">
-  <h3>Run the tests</h3>
-  <app-code-snippet [code]="snippets.run" />
+    <h3>Run the tests</h3>
+    <app-code-snippet [code]="snippets.run" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>1. Component basics</h3>
-  <p>Create the component, read the HTML, click a button, check the result.</p>
-  <div class="border rounded p-3 mb-3">
-    <app-counter />
-  </div>
-  <app-code-snippet [code]="snippets.counter" />
+    <h3>1. Component basics</h3>
+    <p>Create the component, read the HTML, click a button, check the result.</p>
+    <div class="border rounded p-3 mb-3">
+        <app-counter />
+    </div>
+    <app-code-snippet [code]="snippets.counter" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>2. Inputs and outputs</h3>
-  <p>Give a value to an <code>input()</code> with <code>setInput()</code>, listen to an <code>output()</code> with a spy.</p>
-  <div class="border rounded p-3 mb-3">
-    <app-greeting name="Bob" (greet)="lastGreeting.set($event)" />
-    @if (lastGreeting()) {
-      <p class="mt-2 mb-0">The parent received: <strong>{{ lastGreeting() }}</strong></p>
-    }
-  </div>
-  <app-code-snippet [code]="snippets.greeting" />
+    <h3>2. Inputs and outputs</h3>
+    <p>
+        Give a value to an <code>input()</code> with <code>setInput()</code>, listen to an
+        <code>output()</code> with a spy.
+    </p>
+    <div class="border rounded p-3 mb-3">
+        <app-greeting name="Bob" (greet)="lastGreeting.set($event)" />
+        @if (lastGreeting()) {
+            <p class="mt-2 mb-0">
+                The parent received: <strong>{{ lastGreeting() }}</strong>
+            </p>
+        }
+    </div>
+    <app-code-snippet [code]="snippets.greeting" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>3. A service</h3>
-  <p>
-    The login service, which calls the fake API. In the test, <code>provideHttpClientTesting()</code> catches the
-    HTTP requests and <code>HttpTestingController</code> answers them, so no server is needed.
-  </p>
-  <app-code-snippet [code]="snippets.authService" />
+    <h3>3. A service</h3>
+    <p>
+        The login service, which calls the fake API. In the test,
+        <code>provideHttpClientTesting()</code> catches the HTTP requests and
+        <code>HttpTestingController</code> answers them, so no server is needed.
+    </p>
+    <app-code-snippet [code]="snippets.authService" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>4. A form (+ a fake service)</h3>
-  <p>
-    Type in the fields, check validation, submit. The first half uses the real <code>AuthService</code> with a fake
-    backend, the second half replaces <code>AuthService</code> with a fake (a "mock"). Run <code>npm run dev</code> and try <code>bob&#64;email.bob</code> / <code>BobIsTheBest99#</code>.
-  </p>
-  <div class="border rounded p-3 mb-3">
-    <app-login-form />
-  </div>
-  <app-code-snippet [code]="snippets.loginForm" />
+    <h3>4. A form (+ a fake service)</h3>
+    <p>
+        Type in the fields, check validation, submit. The first half uses the real
+        <code>AuthService</code> with a fake backend, the second half replaces
+        <code>AuthService</code> with a fake (a "mock"). Run <code>npm run dev</code> and try
+        <code>bob&#64;email.bob</code> / <code>BobIsTheBest99#</code>.
+    </p>
+    <div class="border rounded p-3 mb-3">
+        <app-login-form />
+    </div>
+    <app-code-snippet [code]="snippets.loginForm" />
 </section>

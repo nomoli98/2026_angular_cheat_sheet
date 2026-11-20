@@ -3,56 +3,87 @@
 <p>Click the links and watch the URL in the address bar. Full guide: <code>ROUTING.md</code>.</p>
 
 <section class="card card-body mb-3">
-  <h3>1. The 3 ways to declare a route</h3>
-  <p>All three open a page. The difference is <strong>when</strong> its code is downloaded.</p>
-  <div class="d-flex flex-wrap gap-2 mb-3">
-    <a class="btn btn-outline-primary btn-sm" routerLink="/router">component → /router</a>
-    <a class="btn btn-outline-primary btn-sm" routerLink="/router/loaded">loadComponent → /router/loaded</a>
-    <a class="btn btn-outline-primary btn-sm" routerLink="/router/routes/reactive-form">loadChildren → /router/routes/reactive-form</a>
-  </div>
-  <app-code-snippet [code]="snippets.declare" />
+    <h3>1. The 3 ways to declare a route</h3>
+    <p>All three open a page. The difference is <strong>when</strong> its code is downloaded.</p>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <a class="btn btn-outline-primary btn-sm" routerLink="/router">component → /router</a>
+        <a class="btn btn-outline-primary btn-sm" routerLink="/router/loaded"
+            >loadComponent → /router/loaded</a
+        >
+        <a class="btn btn-outline-primary btn-sm" routerLink="/router/routes/reactive-form"
+            >loadChildren → /router/routes/reactive-form</a
+        >
+    </div>
+    <app-code-snippet [code]="snippets.declare" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>2. Links and navigation</h3>
-  <p>
-    <code>routerLink</code> in the HTML, <code>router.navigate()</code> in the TS.
-    <code>routerLinkActive</code> adds a class when the link is the current page.
-  </p>
-  <div class="d-flex flex-wrap gap-2 mb-3">
-    <a class="btn btn-outline-secondary btn-sm" routerLink="/router/basics" routerLinkActive="active">This page (active)</a>
-    <a class="btn btn-outline-secondary btn-sm" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-    <button class="btn btn-outline-secondary btn-sm" (click)="goToSignalForm()">Go to signal form (TS)</button>
-  </div>
-  <app-code-snippet [code]="snippets.links" />
+    <h3>2. Links and navigation</h3>
+    <p>
+        <code>routerLink</code> in the HTML, <code>router.navigate()</code> in the TS.
+        <code>routerLinkActive</code> adds a class when the link is the current page.
+    </p>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <a
+            class="btn btn-outline-secondary btn-sm"
+            routerLink="/router/basics"
+            routerLinkActive="active"
+            >This page (active)</a
+        >
+        <a
+            class="btn btn-outline-secondary btn-sm"
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            >Home</a
+        >
+        <button class="btn btn-outline-secondary btn-sm" (click)="goToSignalForm()">
+            Go to signal form (TS)
+        </button>
+    </div>
+    <app-code-snippet [code]="snippets.links" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>3. Route params and query params</h3>
-  <p>
-    <code>/user/:id</code> → the <code>id</code> input. <code>?tab=posts</code> → the <code>tab</code> input.
-    The user page opens in the box below (a child route).
-  </p>
-  <div class="d-flex flex-wrap gap-2 mb-3">
-    <a class="btn btn-outline-primary btn-sm" routerLink="user/1">user/1</a>
-    <a class="btn btn-outline-primary btn-sm" [routerLink]="['user', 2]" [queryParams]="{ tab: 'posts' }">user/2?tab=posts</a>
-    <button class="btn btn-outline-primary btn-sm" (click)="goToUser42()">user/42?tab=settings (TS)</button>
-  </div>
-  <div class="border rounded p-3 mb-3">
-    <router-outlet #outlet="outlet" />
-    @if (!outlet.isActivated) {
-      <span class="text-body-secondary">(click a link above)</span>
-    }
-  </div>
-  <app-code-snippet [code]="snippets.params" />
+    <h3>3. Route params and query params</h3>
+    <p>
+        <code>/user/:id</code> → the <code>id</code> input. <code>?tab=posts</code> → the
+        <code>tab</code> input. The user page opens in the box below (a child route).
+    </p>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <a class="btn btn-outline-primary btn-sm" routerLink="user/1">user/1</a>
+        <a
+            class="btn btn-outline-primary btn-sm"
+            [routerLink]="['user', 2]"
+            [queryParams]="{ tab: 'posts' }"
+            >user/2?tab=posts</a
+        >
+        <button class="btn btn-outline-primary btn-sm" (click)="goToUser42()">
+            user/42?tab=settings (TS)
+        </button>
+    </div>
+    <div class="border rounded p-3 mb-3">
+        <router-outlet #outlet="outlet" />
+        @if (!outlet.isActivated) {
+            <span class="text-body-secondary">(click a link above)</span>
+        }
+    </div>
+    <app-code-snippet [code]="snippets.params" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>4. Redirects and the 404 page</h3>
-  <p><code>redirectTo</code> sends one URL to another. The <code>'**'</code> route catches every unknown URL.</p>
-  <div class="d-flex flex-wrap gap-2 mb-3">
-    <a class="btn btn-outline-primary btn-sm" routerLink="/router/old-basics">/router/old-basics → redirects here</a>
-    <a class="btn btn-outline-danger btn-sm" routerLink="/this-page-does-not-exist">/this-page-does-not-exist → 404</a>
-  </div>
-  <app-code-snippet [code]="snippets.redirect" />
+    <h3>4. Redirects and the 404 page</h3>
+    <p>
+        <code>redirectTo</code> sends one URL to another. The <code>'**'</code> route catches every
+        unknown URL.
+    </p>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <a class="btn btn-outline-primary btn-sm" routerLink="/router/old-basics"
+            >/router/old-basics → redirects here</a
+        >
+        <a class="btn btn-outline-danger btn-sm" routerLink="/this-page-does-not-exist"
+            >/this-page-does-not-exist → 404</a
+        >
+    </div>
+    <app-code-snippet [code]="snippets.redirect" />
 </section>

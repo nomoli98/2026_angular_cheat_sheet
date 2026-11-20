@@ -9,42 +9,42 @@ import { SubscriptionEnum } from '@core/enums/subscription.enum';
 import { RoleEnum } from '@core/enums/role.enum';
 
 const bob: UserResponse = {
-  id: 1,
-  name: 'Bob Martin',
-  email: 'bob@email.bob',
-  birthdate: '2000-09-22',
-  height: 195,
-  gender: GenderEnum.MALE,
-  subscription: SubscriptionEnum.PREMIUM,
-  role: RoleEnum.ADMIN,
+    id: 1,
+    name: 'Bob Martin',
+    email: 'bob@email.bob',
+    birthdate: '2000-09-22',
+    height: 195,
+    gender: GenderEnum.MALE,
+    subscription: SubscriptionEnum.PREMIUM,
+    role: RoleEnum.ADMIN,
 };
 
 describe('authGuard', () => {
-  const currentUser = signal<UserResponse | null>(null);
+    const currentUser = signal<UserResponse | null>(null);
 
-  // inject() → needs an injection context
-  const runGuard = (url: string) =>
-    TestBed.runInInjectionContext(() =>
-      authGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),
-    );
+    // inject() → needs an injection context
+    const runGuard = (url: string) =>
+        TestBed.runInInjectionContext(() =>
+            authGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),
+        );
 
-  beforeEach(() => {
-    currentUser.set(null);
-    TestBed.configureTestingModule({
-      providers: [{ provide: AuthService, useValue: { currentUser } }],
+    beforeEach(() => {
+        currentUser.set(null);
+        TestBed.configureTestingModule({
+            providers: [{ provide: AuthService, useValue: { currentUser } }],
+        });
     });
-  });
 
-  it('lets a logged-in user in', () => {
-    currentUser.set(bob);
+    it('lets a logged-in user in', () => {
+        currentUser.set(bob);
 
-    expect(runGuard('/service/get-all')).toBe(true);
-  });
+        expect(runGuard('/service/get-all')).toBe(true);
+    });
 
-  it('sends a logged-out user to the auth page, with the returnUrl', () => {
-    const result = runGuard('/service/get-all') as UrlTree;
+    it('sends a logged-out user to the auth page, with the returnUrl', () => {
+        const result = runGuard('/service/get-all') as UrlTree;
 
-    expect(result).toBeInstanceOf(UrlTree);
-    expect(result.toString()).toBe('/auth/auth-service?returnUrl=%2Fservice%2Fget-all');
-  });
+        expect(result).toBeInstanceOf(UrlTree);
+        expect(result.toString()).toBe('/auth/auth-service?returnUrl=%2Fservice%2Fget-all');
+    });
 });

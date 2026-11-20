@@ -6,12 +6,12 @@ Demo pages: `/auth/bcrypt/explain` (hash and compare live), `/auth/bcrypt/regist
 
 `BcryptAuthService` does **exactly the same job** as `AuthService` (see `../auth-service/AUTH_SERVICE.md`), with one change: the password is stored as a **bcrypt hash**.
 
-| | `AuthService` | `BcryptAuthService` |
-| - | - | - |
-| Users in | `/people` | `/securePeople` (same 10 people) |
-| Register stores | `"password": "BobIsTheBest99#"` | `"password": "$2b$10$xScy...MRS"` |
-| Login checks | `user.password !== typed` | `await compare(typed, user.password)` |
-| Controller | `AuthController` | `BcryptAuthController` |
+|                 | `AuthService`                   | `BcryptAuthService`                   |
+| --------------- | ------------------------------- | ------------------------------------- |
+| Users in        | `/people`                       | `/securePeople` (same 10 people)      |
+| Register stores | `"password": "BobIsTheBest99#"` | `"password": "$2b$10$xScy...MRS"`     |
+| Login checks    | `user.password !== typed`       | `await compare(typed, user.password)` |
+| Controller      | `AuthController`                | `BcryptAuthController`                |
 
 > ⚠️ **Demo only.** Here bcrypt runs **in the browser**, so you can see it work with json-server. In a real app the browser sends the password over **HTTPS** and the **server** hashes / compares it: the hash never comes back to the browser. The token version (`../token/TOKEN.md`) does it the real way.
 
@@ -19,11 +19,11 @@ Demo pages: `/auth/bcrypt/explain` (hash and compare live), `/auth/bcrypt/regist
 
 ## 1. Hash vs encryption
 
-| | Encryption | Hash (bcrypt) |
-| - | - | - |
-| Can you get the password back? | yes, with the key | **no**, never |
-| To check a login | decrypt, compare | hash the typed password the same way, compare |
-| If the database leaks | the key leaks too → every password | only hashes, very slow to guess |
+|                                | Encryption                         | Hash (bcrypt)                                 |
+| ------------------------------ | ---------------------------------- | --------------------------------------------- |
+| Can you get the password back? | yes, with the key                  | **no**, never                                 |
+| To check a login               | decrypt, compare                   | hash the typed password the same way, compare |
+| If the database leaks          | the key leaks too → every password | only hashes, very slow to guess               |
 
 bcrypt adds two things a simple hash (SHA-256...) doesn't have:
 
@@ -124,13 +124,13 @@ expect(await compare('ZoeIsTheBest99#', post.request.body.password)).toBe(true);
 
 ## 3. In a real app
 
-| Do | Why |
-| -- | --- |
-| Hash on the **server** | The browser can be modified; the server is the only place you control |
-| Send the password over **HTTPS**, in the **body** of a `POST` | Never in a URL (logs, history) |
-| Cost **10 to 12** | Aim for ~100–250 ms per hash on your server; raise it over the years |
-| Same error for "unknown email" and "wrong password" | Don't tell an attacker which emails exist |
-| Passwords up to **72 bytes** | bcrypt ignores the rest. Set a max length on the form (or use Argon2) |
+| Do                                                            | Why                                                                   |
+| ------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Hash on the **server**                                        | The browser can be modified; the server is the only place you control |
+| Send the password over **HTTPS**, in the **body** of a `POST` | Never in a URL (logs, history)                                        |
+| Cost **10 to 12**                                             | Aim for ~100–250 ms per hash on your server; raise it over the years  |
+| Same error for "unknown email" and "wrong password"           | Don't tell an attacker which emails exist                             |
+| Passwords up to **72 bytes**                                  | bcrypt ignores the rest. Set a max length on the form (or use Argon2) |
 
 ---
 

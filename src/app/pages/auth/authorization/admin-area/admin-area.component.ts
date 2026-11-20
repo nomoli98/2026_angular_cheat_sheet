@@ -4,10 +4,10 @@ import { AuthService } from '@core/services/auth.service';
 
 // admins only (adminGuard)
 @Component({
-  imports: [RouterLink],
-  selector: 'app-admin-area',
-  templateUrl: './admin-area.component.html',
+    imports: [RouterLink],
+    selector: 'app-admin-area',
+    templateUrl: './admin-area.component.html',
 })
 export class AdminAreaComponent {
-  protected readonly auth = inject(AuthService);
+    protected readonly auth = inject(AuthService);
 }

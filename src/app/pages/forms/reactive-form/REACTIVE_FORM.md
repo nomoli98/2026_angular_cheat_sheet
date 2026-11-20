@@ -30,15 +30,18 @@ protected readonly GenderEnum = GenderEnum; // to use the enum in the HTML
 
 ```ts
 formRegister = this._formBuilder.group({
-  name:         new FormControl('', Validators.required),
-  email:        new FormControl('', [Validators.required, Validators.email]),
-  password:     new FormControl('', [Validators.required, strongPasswordValidator()]),
-  // 'YYYY-MM-DD' string: <input type="date"> reads and writes that format directly
-  birthdate:    new FormControl('', [Validators.required, birthdateValidator(0, 135)]),
-  height:       new FormControl(50, [Validators.min(50), Validators.max(275)]),
-  gender:       new FormControl(GenderEnum.OTHER, [Validators.required, enumValidator(GenderEnum)]),
-  subscription: new FormControl<'free' | 'premium'>('free', [Validators.required, inValidator(['free', 'premium'])]),
-  agreeToTerms: new FormControl(false, Validators.requiredTrue),
+    name: new FormControl('', Validators.required),
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [Validators.required, strongPasswordValidator()]),
+    // 'YYYY-MM-DD' string: <input type="date"> reads and writes that format directly
+    birthdate: new FormControl('', [Validators.required, birthdateValidator(0, 135)]),
+    height: new FormControl(50, [Validators.min(50), Validators.max(275)]),
+    gender: new FormControl(GenderEnum.OTHER, [Validators.required, enumValidator(GenderEnum)]),
+    subscription: new FormControl<'free' | 'premium'>('free', [
+        Validators.required,
+        inValidator(['free', 'premium']),
+    ]),
+    agreeToTerms: new FormControl(false, Validators.requiredTrue),
 });
 ```
 
@@ -46,21 +49,21 @@ formRegister = this._formBuilder.group({
 
 Built-in validators:
 
-| Rule | Validator |
-|---|---|
-| Not empty | `Validators.required` |
-| Checkbox must be checked | `Validators.requiredTrue` |
-| Valid email | `Validators.email` |
-| Number range | `Validators.min(50)`, `Validators.max(275)` |
-| Text length | `Validators.minLength(3)`, `Validators.maxLength(20)` |
-| Regex | `Validators.pattern(/[a-z]+/)` |
+| Rule                     | Validator                                             |
+| ------------------------ | ----------------------------------------------------- |
+| Not empty                | `Validators.required`                                 |
+| Checkbox must be checked | `Validators.requiredTrue`                             |
+| Valid email              | `Validators.email`                                    |
+| Number range             | `Validators.min(50)`, `Validators.max(275)`           |
+| Text length              | `Validators.minLength(3)`, `Validators.maxLength(20)` |
+| Regex                    | `Validators.pattern(/[a-z]+/)`                        |
 
 Shorter syntax with the builder (same result):
 
 ```ts
 this._formBuilder.group({
-  name: ['', Validators.required],
-  email: ['', [Validators.required, Validators.email]],
+    name: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
 });
 ```
 
@@ -68,7 +71,7 @@ this._formBuilder.group({
 
 ```html
 <form [formGroup]="formRegister" (ngSubmit)="onSubmit()">
-  <input type="text" id="name" formControlName="name" />
+    <input type="text" id="name" formControlName="name" />
 </form>
 ```
 
@@ -78,11 +81,11 @@ this._formBuilder.group({
 
 ```html
 <select formControlName="gender">
-  <option value="">Choose a gender...</option>
-  <option value="{{GenderEnum.FEMALE}}">{{ GenderEnum.FEMALE }}</option>
+    <option value="">Choose a gender...</option>
+    <option value="{{GenderEnum.FEMALE}}">{{ GenderEnum.FEMALE }}</option>
 </select>
 
-<input type="radio" value="free"    formControlName="subscription" />
+<input type="radio" value="free" formControlName="subscription" />
 <input type="radio" value="premium" formControlName="subscription" />
 
 <input type="checkbox" formControlName="agreeToTerms" />
@@ -91,21 +94,27 @@ this._formBuilder.group({
 ## 5. Show the errors
 
 ```html
-<input formControlName="email" class="form-control"
-       [class.is-invalid]="formRegister.get('email')?.invalid && formRegister.get('email')?.touched" />
+<input
+    formControlName="email"
+    class="form-control"
+    [class.is-invalid]="formRegister.get('email')?.invalid && formRegister.get('email')?.touched"
+/>
 
 @if (formRegister.get('email')?.invalid && formRegister.get('email')?.touched) {
-  <div class="invalid-feedback">Enter valid email address</div>
+<div class="invalid-feedback">Enter valid email address</div>
 }
 ```
 
-`[class.is-invalid]="condition"` adds the class only when the condition is true (no `NgClass` needed). `.is-invalid` and `.invalid-feedback` are Bootstrap classes, see [BOOTSTRAP.md](../../../../../BOOTSTRAP.md).
+`[class.is-invalid]="condition"` adds the class only when the condition is true (no `NgClass` needed). `.is-invalid` and `.invalid-feedback` are Bootstrap classes, see [BOOTSTRAP.md](../../theme/bootstrap/BOOTSTRAP.md).
 
 A message per rule:
 
 ```html
-@if (formRegister.get('email')?.hasError('required')) { <p>Email is required</p> }
-@if (formRegister.get('email')?.hasError('email')) { <p>Email is not valid</p> }
+@if (formRegister.get('email')?.hasError('required')) {
+<p>Email is required</p>
+} @if (formRegister.get('email')?.hasError('email')) {
+<p>Email is not valid</p>
+}
 ```
 
 **Tip:** `formRegister.controls.email` is typed. `formRegister.get('email')` is not.
@@ -132,6 +141,7 @@ onSubmit() {
 ```
 
 Other useful things:
+
 - `this.formRegister.value`: the values (the fields are `| undefined`, hence the `!`)
 - `this.formRegister.getRawValue()`: the values including disabled fields, without `undefined`
 - `this.formRegister.reset()`: clear the form
@@ -150,16 +160,17 @@ With reactive forms, a custom validator is **a function that returns a function*
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 export function enumValidator(enumType: any): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    if (!control.value) return null; // empty: let Validators.required handle it
+    return (control: AbstractControl): ValidationErrors | null => {
+        if (!control.value) return null; // empty: let Validators.required handle it
 
-    const isValid = Object.values(enumType).includes(control.value);
-    return isValid ? null : { invalidEnum: { value: control.value } };
-  };
+        const isValid = Object.values(enumType).includes(control.value);
+        return isValid ? null : { invalidEnum: { value: control.value } };
+    };
 }
 ```
 
 The rules:
+
 - Return `null` if the value is **valid**.
 - Return an object `{ errorName: ... }` if it's **invalid**. You check for it with `hasError('errorName')`.
 - Return `null` for empty values, and let `Validators.required` handle those.
@@ -176,23 +187,25 @@ gender: new FormControl(GenderEnum.OTHER, [Validators.required, enumValidator(Ge
 
 ```ts
 export function strongPasswordValidator(): ValidatorFn {
-  return (control) => {
-    const value: string = control.value ?? '';
-    const result: Record<string, boolean> = {};
+    return (control) => {
+        const value: string = control.value ?? '';
+        const result: Record<string, boolean> = {};
 
-    if (!/[a-z]/.test(value)) result['lowercase'] = true;
-    if (!/[A-Z]/.test(value)) result['uppercase'] = true;
-    if (!/[0-9]/.test(value)) result['number'] = true;
-    if (!/[\W_]/.test(value)) result['specialChar'] = true;
-    if (value.length < 8) result['minlength'] = true;
+        if (!/[a-z]/.test(value)) result['lowercase'] = true;
+        if (!/[A-Z]/.test(value)) result['uppercase'] = true;
+        if (!/[0-9]/.test(value)) result['number'] = true;
+        if (!/[\W_]/.test(value)) result['specialChar'] = true;
+        if (value.length < 8) result['minlength'] = true;
 
-    return Object.keys(result).length > 0 ? result : null;
-  };
+        return Object.keys(result).length > 0 ? result : null;
+    };
 }
 ```
 
 ```html
-@if (formRegister.get('password')?.hasError('uppercase')) { <p>Needs an uppercase letter</p> }
+@if (formRegister.get('password')?.hasError('uppercase')) {
+<p>Needs an uppercase letter</p>
+}
 ```
 
 The validators in this repo are in `core/validators/reactive-form/`. Import them with the `@core` alias:
@@ -227,26 +240,27 @@ import { catchError, map, of, switchMap, timer } from 'rxjs';
 import { UserService } from '@core/services/user.service';
 
 export function emailTakenValidator(): AsyncValidatorFn {
-  const userService = inject(UserService); // ⚠️ needs an injection context (see below)
+    const userService = inject(UserService); // ⚠️ needs an injection context (see below)
 
-  return (control) => {
-    if (!control.value) return of(null); // empty: let Validators.required handle it
+    return (control) => {
+        if (!control.value) return of(null); // empty: let Validators.required handle it
 
-    return timer(400).pipe(                                       // wait 400 ms
-      switchMap(() => userService.emailExists(control.value)),    // GET /people?email=... → true/false
-      map((taken) => (taken ? { emailTaken: true } : null)),      // true → error, false → valid
-      catchError(() => of(null)),                                 // API down: don't block the form
-    );
-  };
+        return timer(400).pipe(
+            // wait 400 ms
+            switchMap(() => userService.emailExists(control.value)), // GET /people?email=... → true/false
+            map((taken) => (taken ? { emailTaken: true } : null)), // true → error, false → valid
+            catchError(() => of(null)), // API down: don't block the form
+        );
+    };
 }
 ```
 
-| Piece | Why |
-| ----- | --- |
-| `AsyncValidatorFn` | the type of an async validator (instead of `ValidatorFn`) |
-| `timer(400)` | a **debounce**: Angular cancels the previous Observable on every key, so the API is called only when the user stops typing |
-| `switchMap` | "when the timer ends, switch to the HTTP request" |
-| `catchError(() => of(null))` | if the API fails, the field stays valid instead of stuck |
+| Piece                        | Why                                                                                                                        |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `AsyncValidatorFn`           | the type of an async validator (instead of `ValidatorFn`)                                                                  |
+| `timer(400)`                 | a **debounce**: Angular cancels the previous Observable on every key, so the API is called only when the user stops typing |
+| `switchMap`                  | "when the timer ends, switch to the HTTP request"                                                                          |
+| `catchError(() => of(null))` | if the API fails, the field stays valid instead of stuck                                                                   |
 
 ### Step 2: add it to the control
 
@@ -267,18 +281,16 @@ While the API is answering, the control is **`pending`** (not valid, not invalid
 
 ```html
 @if (formRegister.get('email')?.pending) {
-  <div class="form-text">Checking the email...</div>
-}
-@if (formRegister.get('email')?.hasError('emailTaken')) {
-  <div class="invalid-feedback">This email is already taken</div>
+<div class="form-text">Checking the email...</div>
+} @if (formRegister.get('email')?.hasError('emailTaken')) {
+<div class="invalid-feedback">This email is already taken</div>
 }
 ```
 
-| Status | Meaning |
-| ------ | ------- |
-| `pending` | the async validator is still running |
-| `valid` / `invalid` | final answer |
+| Status               | Meaning                                                              |
+| -------------------- | -------------------------------------------------------------------- |
+| `pending`            | the async validator is still running                                 |
+| `valid` / `invalid`  | final answer                                                         |
 | `formRegister.valid` | `false` while a field is `pending` → the submit waits for the answer |
 
 > 💡 The validator makes the UI nicer, but it's not a guarantee: two people can type the same email at the same time. That's why `AuthService.register()` checks the email **again** before creating the user.
-

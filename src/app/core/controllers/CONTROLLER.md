@@ -12,11 +12,11 @@ Component ──await──▶ Controller ──allowed?──▶ Service ──
                                           the service is NOT called, nothing is sent
 ```
 
-| Layer | Job | Returns |
-| ----- | --- | ------- |
-| **Service** (`core/services/`) | HTTP, URLs, `UserEntity` → `UserResponse` | `Observable<...>` |
-| **Controller** (`core/controllers/`) | "is the logged-in user allowed?" + Observable → Promise | `Promise<...>` |
-| **Component** | the form / the page | – (it `await`s) |
+| Layer                                | Job                                                     | Returns           |
+| ------------------------------------ | ------------------------------------------------------- | ----------------- |
+| **Service** (`core/services/`)       | HTTP, URLs, `UserEntity` → `UserResponse`               | `Observable<...>` |
+| **Controller** (`core/controllers/`) | "is the logged-in user allowed?" + Observable → Promise | `Promise<...>`    |
+| **Component**                        | the form / the page                                     | – (it `await`s)   |
 
 > 💡 Roles, the component check, `adminGuard`, the Admin toggle and the server-side check: see `pages/auth/authorization/AUTHORIZATION.md` (demo page `/auth/authorization`).
 
@@ -48,16 +48,16 @@ Every person has a `role` (in `UserEntity`, `UserResponse` and `db.json`):
 ```ts
 // src/app/core/enums/role.enum.ts
 export enum RoleEnum {
-  ADMIN = 'admin',
-  USER = 'user',
+    ADMIN = 'admin',
+    USER = 'user',
 }
 ```
 
-| Who | Role |
-| --- | ---- |
-| Bob (`bob@email.bob` / `BobIsTheBest99#`) | `admin` |
-| Alice (`alice.dupont@mail.com` / `AliceIsTheBest99#`) and everybody else in `db.seed.json` | `user` |
-| every new account (`UserService.create`) | `user`, always: the service adds `role: RoleEnum.USER` |
+| Who                                                                                        | Role                                                   |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| Bob (`bob@email.bob` / `BobIsTheBest99#`)                                                  | `admin`                                                |
+| Alice (`alice.dupont@mail.com` / `AliceIsTheBest99#`) and everybody else in `db.seed.json` | `user`                                                 |
+| every new account (`UserService.create`)                                                   | `user`, always: the service adds `role: RoleEnum.USER` |
 
 > 💡 `UserService.updateFully` (PUT) keeps the current role: PUT replaces the whole object and `RegisterRequest` has no `role`, so without that the role would be deleted.
 
@@ -69,31 +69,31 @@ export enum RoleEnum {
 
 ```ts
 export function isLoggedIn(user: UserResponse | null): user is UserResponse {
-  return user !== null;
+    return user !== null;
 }
 
 // anything with an id and a role: a UserResponse, or the user read from a JWT
 type WithRole = Pick<UserResponse, 'id' | 'role'>;
 
 export function isAdmin(user: WithRole | null): boolean {
-  return user?.role === RoleEnum.ADMIN;
+    return user?.role === RoleEnum.ADMIN;
 }
 
 // Admin, or the user working on their OWN account (not used by UserController anymore: example only)
 export function isAdminOrSelf(user: WithRole | null, id: number): boolean {
-  return isAdmin(user) || user?.id === id;
+    return isAdmin(user) || user?.id === id;
 }
 
 // Throws the right error when the check fails
 export function deny(user: WithRole | null): never {
-  throw new Error(user ? 'forbidden' : 'unauthorized');
+    throw new Error(user ? 'forbidden' : 'unauthorized');
 }
 ```
 
-| Error | When | Same as HTTP |
-| ----- | ---- | ------------ |
-| `unauthorized` | nobody is logged in | `401 Unauthorized` |
-| `forbidden` | logged in, but not allowed | `403 Forbidden` |
+| Error          | When                       | Same as HTTP       |
+| -------------- | -------------------------- | ------------------ |
+| `unauthorized` | nobody is logged in        | `401 Unauthorized` |
+| `forbidden`    | logged in, but not allowed | `403 Forbidden`    |
 
 > 💡 `never` = "this function never returns normally" (it always throws). TypeScript then knows the code after `if (...) deny(user);` only runs when the check passed.
 
@@ -102,22 +102,22 @@ export function deny(user: WithRole | null): never {
 ```ts
 @Service()
 export class UserController {
-  private readonly _userService = inject(UserService);
-  private readonly _authService = inject(AuthService);
+    private readonly _userService = inject(UserService);
+    private readonly _authService = inject(AuthService);
 
-  // admin only
-  async getAll(): Promise<UserResponse[]> {
-    const user = this._authService.currentUser();         // 1. who is asking?
-    if (!isAdmin(user)) deny(user);                       // 2. not allowed → throw
-    return firstValueFrom(this._userService.getAll());    // 3. allowed → Observable → Promise
-  }
+    // admin only
+    async getAll(): Promise<UserResponse[]> {
+        const user = this._authService.currentUser(); // 1. who is asking?
+        if (!isAdmin(user)) deny(user); // 2. not allowed → throw
+        return firstValueFrom(this._userService.getAll()); // 3. allowed → Observable → Promise
+    }
 
-  // admin only
-  async delete(id: number): Promise<void> {
-    const user = this._authService.currentUser();
-    if (!isAdmin(user)) deny(user);
-    await firstValueFrom(this._userService.delete(id), { defaultValue: undefined });
-  }
+    // admin only
+    async delete(id: number): Promise<void> {
+        const user = this._authService.currentUser();
+        if (!isAdmin(user)) deny(user);
+        await firstValueFrom(this._userService.delete(id), { defaultValue: undefined });
+    }
 }
 ```
 
@@ -132,12 +132,12 @@ import { firstValueFrom } from 'rxjs';
 const users = await firstValueFrom(this._userService.getAll());
 ```
 
-| | |
-| - | - |
-| What it does | subscribes, waits for the **first** value, gives it back as a Promise |
-| The Observable errors | the Promise is **rejected** with the same error (→ `catch`) |
+|                                   |                                                                                                                             |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| What it does                      | subscribes, waits for the **first** value, gives it back as a Promise                                                       |
+| The Observable errors             | the Promise is **rejected** with the same error (→ `catch`)                                                                 |
 | The Observable ends with no value | rejected with `EmptyError`, unless you give `{ defaultValue: ... }` (that's why `delete` has `{ defaultValue: undefined }`) |
-| HTTP Observables | send **one** value then end, so `firstValueFrom` is a perfect fit |
+| HTTP Observables                  | send **one** value then end, so `firstValueFrom` is a perfect fit                                                           |
 
 > ⚠️ Not for Observables that keep sending values (a timer, a signal turned into an Observable...): you'd only get the first one. Use `subscribe` for those.
 
@@ -158,40 +158,40 @@ async getAll() {
 
 ### `UserController`
 
-| Method | Allowed | Returns |
-| ------ | ------- | ------- |
-| `getAll()` | admin | `Promise<UserResponse[]>` |
-| `getOne(id)` | admin | `Promise<UserResponse>` |
-| `getMe()` | **anybody logged in** (reads their own account) | `Promise<UserResponse>` |
-| `create(request)` | admin (people make their own account with `AuthController.register`) | `Promise<UserResponse>` |
-| `updateFully(id, request)` | admin | `Promise<UserResponse>` |
-| `updatePartial(id, changes)` | admin | `Promise<UserResponse>` |
-| `delete(id)` | admin | `Promise<void>` |
+| Method                       | Allowed                                                              | Returns                   |
+| ---------------------------- | -------------------------------------------------------------------- | ------------------------- |
+| `getAll()`                   | admin                                                                | `Promise<UserResponse[]>` |
+| `getOne(id)`                 | admin                                                                | `Promise<UserResponse>`   |
+| `getMe()`                    | **anybody logged in** (reads their own account)                      | `Promise<UserResponse>`   |
+| `create(request)`            | admin (people make their own account with `AuthController.register`) | `Promise<UserResponse>`   |
+| `updateFully(id, request)`   | admin                                                                | `Promise<UserResponse>`   |
+| `updatePartial(id, changes)` | admin                                                                | `Promise<UserResponse>`   |
+| `delete(id)`                 | admin                                                                | `Promise<void>`           |
 
 > 💡 Rule of thumb: **every CRUD method is admin only, except `getMe()`**. A simple user reads themselves with `getMe()` (no id to cheat with). The pages check `isAdmin()` too, to disable their buttons (see `AUTHORIZATION.md`).
 
 ### `AuthController`
 
-| Method | Allowed | Returns |
-| ------ | ------- | ------- |
-| `login(request)` | everybody (public) | `Promise<UserResponse>` |
+| Method              | Allowed                                  | Returns                 |
+| ------------------- | ---------------------------------------- | ----------------------- |
+| `login(request)`    | everybody (public)                       | `Promise<UserResponse>` |
 | `register(request)` | everybody (public), logs the new user in | `Promise<UserResponse>` |
-| `logout()` | logged in | `Promise<void>` |
+| `logout()`          | logged in                                | `Promise<void>`         |
 
 ### `TokenAuthController`
 
-| Method | Allowed | Returns |
-| ------ | ------- | ------- |
-| `login` / `register` | everybody (public) | `Promise<UserResponse>` |
-| `me()` | logged in (the server checks the token) | `Promise<UserResponse>` |
-| `getUsers()` | admin (checked here **and** by the server: `GET /token/users` → `403`) | `Promise<UserResponse[]>` |
-| `logout()` | logged in | `Promise<void>` |
+| Method               | Allowed                                                                | Returns                   |
+| -------------------- | ---------------------------------------------------------------------- | ------------------------- |
+| `login` / `register` | everybody (public)                                                     | `Promise<UserResponse>`   |
+| `me()`               | logged in (the server checks the token)                                | `Promise<UserResponse>`   |
+| `getUsers()`         | admin (checked here **and** by the server: `GET /token/users` → `403`) | `Promise<UserResponse[]>` |
+| `logout()`           | logged in                                                              | `Promise<void>`           |
 
 Change a rule? Change the `if` in that method. Need a new rule (e.g. "premium only")? Add a helper in `permissions.ts`:
 
 ```ts
 export function isPremium(user: UserResponse | null): boolean {
-  return user?.subscription === SubscriptionEnum.PREMIUM;
+    return user?.subscription === SubscriptionEnum.PREMIUM;
 }
 ```
 
@@ -203,51 +203,48 @@ export function isPremium(user: UserResponse | null): boolean {
 
 ```ts
 export class UserListComponent {
-  private readonly _userController = inject(UserController);
+    private readonly _userController = inject(UserController);
 
-  users = signal<UserResponse[]>([]);
-  loading = signal(false);
-  error = signal<string | null>(null);
+    users = signal<UserResponse[]>([]);
+    loading = signal(false);
+    error = signal<string | null>(null);
 
-  constructor() {
-    this.load(); // no await needed here: load() handles its own errors
-  }
-
-  async load() {
-    this.loading.set(true);
-    this.error.set(null);
-    try {
-      this.users.set(await this._userController.getAll());
-    } catch (err) {
-      this.error.set((err as Error).message); // 'forbidden', 'unauthorized', or an HTTP error
-    } finally {
-      this.loading.set(false); // success OR error
+    constructor() {
+        this.load(); // no await needed here: load() handles its own errors
     }
-  }
 
-  async delete(id: number) {
-    try {
-      await this._userController.delete(id);
-      this.users.update((users) => users.filter((u) => u.id !== id));
-    } catch (err) {
-      this.error.set((err as Error).message);
+    async load() {
+        this.loading.set(true);
+        this.error.set(null);
+        try {
+            this.users.set(await this._userController.getAll());
+        } catch (err) {
+            this.error.set((err as Error).message); // 'forbidden', 'unauthorized', or an HTTP error
+        } finally {
+            this.loading.set(false); // success OR error
+        }
     }
-  }
+
+    async delete(id: number) {
+        try {
+            await this._userController.delete(id);
+            this.users.update((users) => users.filter((u) => u.id !== id));
+        } catch (err) {
+            this.error.set((err as Error).message);
+        }
+    }
 }
 ```
 
 ```html
 @if (loading()) {
-  <p>Loading...</p>
-}
-@if (error() === 'forbidden') {
-  <p>Only an admin can see this page.</p>
+<p>Loading...</p>
+} @if (error() === 'forbidden') {
+<p>Only an admin can see this page.</p>
 } @else if (error() === 'unauthorized') {
-  <p>Log in first.</p>
-}
-
-@for (user of users(); track user.id) {
-  <p>{{ user.name }} ({{ user.role }}) <button (click)="delete(user.id)">Delete</button></p>
+<p>Log in first.</p>
+} @for (user of users(); track user.id) {
+<p>{{ user.name }} ({{ user.role }}) <button (click)="delete(user.id)">Delete</button></p>
 }
 ```
 
@@ -255,11 +252,11 @@ export class UserListComponent {
 
 > 💡 Try it: log in as Bob (admin) → the list loads. Log in as Alice (`alice.dupont@mail.com` / `AliceIsTheBest99#`) → `forbidden`.
 
-| Observable (service) | Promise (controller) |
-| -------------------- | -------------------- |
+| Observable (service)                          | Promise (controller)                                               |
+| --------------------------------------------- | ------------------------------------------------------------------ |
 | `service.getAll().subscribe({ next, error })` | `try { const users = await controller.getAll(); } catch (err) { }` |
-| `finalize(() => ...)` | `finally { ... }` |
-| nothing happens until `subscribe()` | starts **right away** when you call it |
+| `finalize(() => ...)`                         | `finally { ... }`                                                  |
+| nothing happens until `subscribe()`           | starts **right away** when you call it                             |
 
 ---
 
@@ -273,36 +270,36 @@ const fakeAuthService = { currentUser };
 const fakeUserService = { getAll: vi.fn().mockReturnValue(of([bob, alice])) /* ... */ };
 
 beforeEach(() => {
-  vi.clearAllMocks();
-  currentUser.set(null); // nobody logged in at the start of each test
-  TestBed.configureTestingModule({
-    providers: [
-      { provide: AuthService, useValue: fakeAuthService },
-      { provide: UserService, useValue: fakeUserService },
-    ],
-  });
-  controller = TestBed.inject(UserController);
+    vi.clearAllMocks();
+    currentUser.set(null); // nobody logged in at the start of each test
+    TestBed.configureTestingModule({
+        providers: [
+            { provide: AuthService, useValue: fakeAuthService },
+            { provide: UserService, useValue: fakeUserService },
+        ],
+    });
+    controller = TestBed.inject(UserController);
 });
 
 it('returns the list for an admin', async () => {
-  currentUser.set(bob); // log in as an admin
+    currentUser.set(bob); // log in as an admin
 
-  expect(await controller.getAll()).toEqual([bob, alice]);
+    expect(await controller.getAll()).toEqual([bob, alice]);
 });
 
 it('is forbidden for a simple user, and the service is NOT called', async () => {
-  currentUser.set(alice);
+    currentUser.set(alice);
 
-  await expect(controller.getAll()).rejects.toThrow('forbidden');
-  expect(fakeUserService.getAll).not.toHaveBeenCalled();
+    await expect(controller.getAll()).rejects.toThrow('forbidden');
+    expect(fakeUserService.getAll).not.toHaveBeenCalled();
 });
 ```
 
-| Check | How |
-| ----- | --- |
-| Allowed → the result | `expect(await controller.x()).toEqual(...)` |
-| Not allowed → the error | `await expect(controller.x()).rejects.toThrow('forbidden')` |
-| Not allowed → nothing sent | `expect(fakeService.x).not.toHaveBeenCalled()` |
+| Check                      | How                                                         |
+| -------------------------- | ----------------------------------------------------------- |
+| Allowed → the result       | `expect(await controller.x()).toEqual(...)`                 |
+| Not allowed → the error    | `await expect(controller.x()).rejects.toThrow('forbidden')` |
+| Not allowed → nothing sent | `expect(fakeService.x).not.toHaveBeenCalled()`              |
 
 > ⚠️ Don't forget the `await` before `expect(...).rejects`: without it the test ends before the Promise, and passes even when it's wrong.
 

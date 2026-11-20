@@ -21,20 +21,20 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
-  selector: 'app-basics',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet], // 👈 required
-  templateUrl: './basics.component.html',
+    selector: 'app-basics',
+    imports: [RouterLink, RouterLinkActive, RouterOutlet], // 👈 required
+    templateUrl: './basics.component.html',
 })
 export class BasicsComponent {
-  private router = inject(Router);
+    private router = inject(Router);
 
-  goToSignalForm() {
-    this.router.navigate(['/form', 'signal-form']); // pieces
-    // or: this.router.navigateByUrl('/form/signal-form'); // one full URL
-  }
+    goToSignalForm() {
+        this.router.navigate(['/form', 'signal-form']); // pieces
+        // or: this.router.navigateByUrl('/form/signal-form'); // one full URL
+    }
 
-  goToUser42() {
-    this.router.navigate(['/router/basics/user', 42], { queryParams: { tab: 'settings' } });
-  }
+    goToUser42() {
+        this.router.navigate(['/router/basics/user', 42], { queryParams: { tab: 'settings' } });
+    }
 }
 ```

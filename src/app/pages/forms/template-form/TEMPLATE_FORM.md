@@ -42,9 +42,7 @@ protected readonly GenderEnum = GenderEnum;
 ## 3. Add the `<form>` and get a reference to it
 
 ```html
-<form #form="ngForm" (ngSubmit)="onSubmit(form)">
-  ...
-</form>
+<form #form="ngForm" (ngSubmit)="onSubmit(form)">...</form>
 ```
 
 - Angular attaches `ngForm` to every `<form>` automatically.
@@ -54,9 +52,7 @@ protected readonly GenderEnum = GenderEnum;
 ## 4. Bind each input with `[(ngModel)]`
 
 ```html
-<input type="text" id="name" name="name"
-       [(ngModel)]="user.name" #name="ngModel"
-       required />
+<input type="text" id="name" name="name" [(ngModel)]="user.name" #name="ngModel" required />
 ```
 
 - `[(ngModel)]="user.name"`: two-way binding with the object.
@@ -65,14 +61,14 @@ protected readonly GenderEnum = GenderEnum;
 
 ## 5. Add validators as HTML attributes
 
-| Rule | Attribute |
-|---|---|
-| Not empty | `required` |
-| Checkbox must be checked | `required` on the checkbox |
-| Valid email | `email` |
-| Number range | `min="50" max="275"` |
-| Text length | `minlength="3" maxlength="20"` |
-| Regex | `pattern="[a-z]+"` |
+| Rule                     | Attribute                      |
+| ------------------------ | ------------------------------ |
+| Not empty                | `required`                     |
+| Checkbox must be checked | `required` on the checkbox     |
+| Valid email              | `email`                        |
+| Number range             | `min="50" max="275"`           |
+| Text length              | `minlength="3" maxlength="20"` |
+| Regex                    | `pattern="[a-z]+"`             |
 
 ```html
 <input type="email" name="email" [(ngModel)]="user.email" #email="ngModel" required email />
@@ -85,19 +81,22 @@ protected readonly GenderEnum = GenderEnum;
 <input ... class="form-control" [class.is-invalid]="name.invalid && name.touched" />
 
 @if (name.invalid && name.touched) {
-  <div class="invalid-feedback">Enter valid name</div>
+<div class="invalid-feedback">Enter valid name</div>
 }
 ```
 
-`[class.is-invalid]="condition"` adds the class only when the condition is true (no `NgClass` needed). `.is-invalid` and `.invalid-feedback` are Bootstrap classes, see [BOOTSTRAP.md](../../../../../BOOTSTRAP.md).
+`[class.is-invalid]="condition"` adds the class only when the condition is true (no `NgClass` needed). `.is-invalid` and `.invalid-feedback` are Bootstrap classes, see [BOOTSTRAP.md](../../theme/bootstrap/BOOTSTRAP.md).
 
 Check `touched` too, so the error doesn't show before the user has even clicked the field.
 
 To show a different message per rule, read `errors`:
 
 ```html
-@if (email.errors?.['required']) { <p>Email is required</p> }
-@if (email.errors?.['email']) { <p>Email is not valid</p> }
+@if (email.errors?.['required']) {
+<p>Email is required</p>
+} @if (email.errors?.['email']) {
+<p>Email is not valid</p>
+}
 ```
 
 ## 7. Selects, radios and checkboxes
@@ -105,16 +104,28 @@ To show a different message per rule, read `errors`:
 ```html
 <!-- Select: use [value] to bind an enum value -->
 <select name="gender" [(ngModel)]="user.gender" #gender="ngModel" required>
-  <option value="">Choose a gender...</option>
-  <option [value]="GenderEnum.FEMALE">{{ GenderEnum.FEMALE }}</option>
+    <option value="">Choose a gender...</option>
+    <option [value]="GenderEnum.FEMALE">{{ GenderEnum.FEMALE }}</option>
 </select>
 
 <!-- Radios: same name = one single field -->
-<input type="radio" name="subscription" value="free"    [(ngModel)]="user.subscription" #subscription="ngModel" />
+<input
+    type="radio"
+    name="subscription"
+    value="free"
+    [(ngModel)]="user.subscription"
+    #subscription="ngModel"
+/>
 <input type="radio" name="subscription" value="premium" [(ngModel)]="user.subscription" />
 
 <!-- Checkbox: the value is true / false -->
-<input type="checkbox" name="agreeToTerms" [(ngModel)]="user.agreeToTerms" #agreeToTerms="ngModel" required />
+<input
+    type="checkbox"
+    name="agreeToTerms"
+    [(ngModel)]="user.agreeToTerms"
+    #agreeToTerms="ngModel"
+    required
+/>
 ```
 
 ## 8. Submit
@@ -148,24 +159,28 @@ import { Directive } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 
 @Directive({
-  selector: '[appStrongPassword]',
-  // Register this directive in Angular's list of validators
-  providers: [{ provide: NG_VALIDATORS, useExisting: StrongPasswordDirective, multi: true }],
+    selector: '[appStrongPassword]',
+    // Register this directive in Angular's list of validators
+    providers: [{ provide: NG_VALIDATORS, useExisting: StrongPasswordDirective, multi: true }],
 })
 export class StrongPasswordDirective implements Validator {
-  validate(control: AbstractControl): ValidationErrors | null {
-    const password: string = control.value;
-    if (!password) return null; // empty: let "required" handle it
+    validate(control: AbstractControl): ValidationErrors | null {
+        const password: string = control.value;
+        if (!password) return null; // empty: let "required" handle it
 
-    const ok =
-      password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password);
+        const ok =
+            password.length >= 8 &&
+            /[A-Z]/.test(password) &&
+            /[a-z]/.test(password) &&
+            /[0-9]/.test(password);
 
-    return ok ? null : { strongPassword: true };
-  }
+        return ok ? null : { strongPassword: true };
+    }
 }
 ```
 
 The rules:
+
 - Return `null` if the value is **valid**.
 - Return an object like `{ errorName: true }` if it's **invalid**. That key is what shows up in `field.errors`.
 - Return `null` for empty values, and let `required` handle those.
@@ -180,26 +195,42 @@ imports: [FormsModule, StrongPasswordDirective],
 ```
 
 ```html
-<input type="password" name="password" [(ngModel)]="user.password" #password="ngModel" required appStrongPassword />
+<input
+    type="password"
+    name="password"
+    [(ngModel)]="user.password"
+    #password="ngModel"
+    required
+    appStrongPassword
+/>
 ```
 
 ### With parameters: use `@Input()`
 
 ```ts
 @Directive({
-  selector: '[appBirthdate]',
-  providers: [{ provide: NG_VALIDATORS, useExisting: BirthdateDirective, multi: true }],
+    selector: '[appBirthdate]',
+    providers: [{ provide: NG_VALIDATORS, useExisting: BirthdateDirective, multi: true }],
 })
 export class BirthdateDirective implements Validator {
-  @Input() minAge = 0;
-  @Input() maxAge = 135;
+    @Input() minAge = 0;
+    @Input() maxAge = 135;
 
-  validate(control: AbstractControl): ValidationErrors | null { /* uses this.minAge / this.maxAge */ }
+    validate(control: AbstractControl): ValidationErrors | null {
+        /* uses this.minAge / this.maxAge */
+    }
 }
 ```
 
 ```html
-<input type="date" name="birthdate" [(ngModel)]="user.birthdate" appBirthdate [minAge]="0" [maxAge]="135" />
+<input
+    type="date"
+    name="birthdate"
+    [(ngModel)]="user.birthdate"
+    appBirthdate
+    [minAge]="0"
+    [maxAge]="135"
+/>
 ```
 
 **Trick:** if the `@Input()` has the **same name as the selector**, you pass the value directly on the attribute:
@@ -212,11 +243,19 @@ export class InEnumDirective implements Validator {
 ```
 
 ```html
-<select name="gender" [(ngModel)]="user.gender" [appInEnum]="GenderEnum">...</select>
-<input type="radio" name="subscription" [(ngModel)]="user.subscription" [appInList]="['free', 'premium']" />
+<select name="gender" [(ngModel)]="user.gender" [appInEnum]="GenderEnum">
+    ...
+</select>
+<input
+    type="radio"
+    name="subscription"
+    [(ngModel)]="user.subscription"
+    [appInList]="['free', 'premium']"
+/>
 ```
 
 The directives in this repo are in `core/validators/template-form/`:
+
 - `strong-password.directive.ts`: `appStrongPassword`
 - `birthday.directive.ts`: `appBirthdate` + `[minAge]` / `[maxAge]`
 - `in-enum.directive.ts`: `[appInEnum]="SomeEnum"`

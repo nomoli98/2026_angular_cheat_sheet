@@ -1,11 +1,11 @@
 <div class="form-check form-switch mb-0">
-  <input
-    class="form-check-input"
-    type="checkbox"
-    role="switch"
-    id="theme-toggle"
-    [checked]="theme.theme() === 'dark'"
-    (change)="theme.set($any($event.target).checked ? 'dark' : 'light')"
-  />
-  <label class="form-check-label small" for="theme-toggle">Dark mode</label>
+    <input
+        class="form-check-input"
+        type="checkbox"
+        role="switch"
+        id="theme-toggle"
+        [checked]="theme.theme() === 'dark'"
+        (change)="theme.set($any($event.target).checked ? 'dark' : 'light')"
+    />
+    <label class="form-check-label small" for="theme-toggle">Dark mode</label>
 </div>

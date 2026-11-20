@@ -22,28 +22,28 @@ import { Component } from '@angular/core';
 import { ChildComponentComponent } from '../child-component/child-component.component';
 
 @Component({
-  selector: 'app-static-binding',
-  imports: [ChildComponentComponent],
-  templateUrl: './static-binding.component.html',
-  styles: `
-    .underlined {
-      text-decoration: underline;
-    }
+    selector: 'app-static-binding',
+    imports: [ChildComponentComponent],
+    templateUrl: './static-binding.component.html',
+    styles: `
+        .underlined {
+            text-decoration: underline;
+        }
 
-    .highlighted {
-      background-color: pink;
-    }
-  `,
+        .highlighted {
+            background-color: pink;
+        }
+    `,
 })
 export class StaticBindingComponent {
-  isDisabled = true;
-  inputPlaceholder = 'placeholder';
-  inputValue = 'The input value';
-  pRole = 'status';
-  live = 'polite';
-  firstName = 'Bob';
-  isUnderlined = true;
-  listClasses = 'highlighted';
+    isDisabled = true;
+    inputPlaceholder = 'placeholder';
+    inputValue = 'The input value';
+    pRole = 'status';
+    live = 'polite';
+    firstName = 'Bob';
+    isUnderlined = true;
+    listClasses = 'highlighted';
 }
 ```
 
@@ -55,11 +55,11 @@ This is the passed value : {{ value() }}
 import { Component, input } from '@angular/core';
 
 @Component({
-  selector: 'app-child-component',
-  templateUrl: './child-component.component.html',
+    selector: 'app-child-component',
+    templateUrl: './child-component.component.html',
 })
 export class ChildComponentComponent {
-  // always type input()
-  value = input.required<string>();
+    // always type input()
+    value = input.required<string>();
 }
 ```

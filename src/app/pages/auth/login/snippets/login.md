@@ -8,9 +8,9 @@
 }
 
 <form (submit)="onSubmit($event)">
-  <input type="email" [formField]="_form.email" />
-  <input type="password" [formField]="_form.password" />
-  <button type="submit" [disabled]="_form().invalid() || _busy()">Log in</button>
+    <input type="email" [formField]="_form.email" />
+    <input type="password" [formField]="_form.password" />
+    <button type="submit" [disabled]="_form().invalid() || _busy()">Log in</button>
 </form>
 
 <!-- 'Wrong email or password' -->
@@ -21,42 +21,42 @@
 
 ```ts login.component.ts
 @Component({
-  imports: [FormField],
-  selector: 'app-login',
-  templateUrl: './login.component.html',
+    imports: [FormField],
+    selector: 'app-login',
+    templateUrl: './login.component.html',
 })
 export class LoginComponent {
-  protected readonly _authController = inject(AuthController);
-  // read-only
-  protected readonly _currentUser = inject(AuthService).currentUser;
-  protected readonly _error = signal<string | null>(null);
-  protected readonly _busy = signal(false);
+    protected readonly _authController = inject(AuthController);
+    // read-only
+    protected readonly _currentUser = inject(AuthService).currentUser;
+    protected readonly _error = signal<string | null>(null);
+    protected readonly _busy = signal(false);
 
-  protected readonly _model = signal<LoginRequest>({ email: '', password: '' });
-  // login: required only
-  protected readonly _form = form(this._model, (field) => {
-    required(field.email);
-    email(field.email);
-    required(field.password);
-  });
+    protected readonly _model = signal<LoginRequest>({ email: '', password: '' });
+    // login: required only
+    protected readonly _form = form(this._model, (field) => {
+        required(field.email);
+        email(field.email);
+        required(field.password);
+    });
 
-  async onSubmit(event: Event) {
-    event.preventDefault();
-    if (this._form().invalid()) return;
+    async onSubmit(event: Event) {
+        event.preventDefault();
+        if (this._form().invalid()) return;
 
-    this._busy.set(true);
-    try {
-      await this._authController.login(this._form().value()); // fills currentUser
-    } catch (err) {
-      this._error.set(errorMessage(err)); // 'Wrong email or password'
-    } finally {
-      this._busy.set(false);
+        this._busy.set(true);
+        try {
+            await this._authController.login(this._form().value()); // fills currentUser
+        } catch (err) {
+            this._error.set(errorMessage(err)); // 'Wrong email or password'
+        } finally {
+            this._busy.set(false);
+        }
     }
-  }
 
-  async onLogout() {
-    await this._authController.logout(); // empties currentUser
-  }
+    async onLogout() {
+        await this._authController.logout(); // empties currentUser
+    }
 }
 ```
 

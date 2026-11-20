@@ -3,9 +3,9 @@ import { ThemeService } from './theme.service';
 
 // navbar switch (logic in ThemeService)
 @Component({
-  selector: 'app-theme-toggle',
-  templateUrl: './theme-toggle.component.html',
+    selector: 'app-theme-toggle',
+    templateUrl: './theme-toggle.component.html',
 })
 export class ThemeToggleComponent {
-  protected readonly theme = inject(ThemeService);
+    protected readonly theme = inject(ThemeService);
 }

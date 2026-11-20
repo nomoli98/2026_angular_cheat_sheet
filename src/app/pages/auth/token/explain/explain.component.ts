@@ -15,104 +15,104 @@ import angular from './snippets/angular.md';
 const BOB = { email: 'bob@email.bob', password: 'BobIsTheBest99#' };
 
 interface CallResult {
-  label: string;
-  ok: boolean;
-  text: string;
+    label: string;
+    ok: boolean;
+    text: string;
 }
 
 @Component({
-  imports: [CodeSnippetComponent, RouterLink, JsonPipe],
-  selector: 'app-token-explain',
-  templateUrl: './explain.component.html',
+    imports: [CodeSnippetComponent, RouterLink, JsonPipe],
+    selector: 'app-token-explain',
+    templateUrl: './explain.component.html',
 })
 export class TokenExplainComponent {
-  // page snippets
-  protected readonly snippets = { server, angular };
+    // page snippets
+    protected readonly snippets = { server, angular };
 
-  private readonly _http = inject(HttpClient);
-  private readonly _controller = inject(TokenAuthController);
-  protected readonly _auth = inject(TokenAuthService);
+    private readonly _http = inject(HttpClient);
+    private readonly _controller = inject(TokenAuthController);
+    protected readonly _auth = inject(TokenAuthService);
 
-  // header.payload.signature
-  protected readonly _parts = computed(() => {
-    const [header = '', payload = '', signature = ''] = (this._auth.token() ?? '').split('.');
-    return { header, payload, signature };
-  });
+    // header.payload.signature
+    protected readonly _parts = computed(() => {
+        const [header = '', payload = '', signature = ''] = (this._auth.token() ?? '').split('.');
+        return { header, payload, signature };
+    });
 
-  // clock for the countdown (exp in s)
-  private readonly _now = signal(Date.now());
-  protected readonly _secondsLeft = computed(() => {
-    const exp = this._auth.payload()?.exp;
-    return exp ? Math.max(0, Math.round(exp - this._now() / 1000)) : 0;
-  });
+    // clock for the countdown (exp in s)
+    private readonly _now = signal(Date.now());
+    protected readonly _secondsLeft = computed(() => {
+        const exp = this._auth.payload()?.exp;
+        return exp ? Math.max(0, Math.round(exp - this._now() / 1000)) : 0;
+    });
 
-  protected readonly _error = signal<string | null>(null);
-  protected readonly _calls = signal<CallResult[]>([]); // newest first
+    protected readonly _error = signal<string | null>(null);
+    protected readonly _calls = signal<CallResult[]>([]); // newest first
 
-  constructor() {
-    const timer = setInterval(() => this._now.set(Date.now()), 1000);
-    inject(DestroyRef).onDestroy(() => clearInterval(timer)); // stop on destroy
-  }
-
-  async onLogin(expiresInSeconds?: number) {
-    this._error.set(null);
-    try {
-      await this._controller.login(BOB, expiresInSeconds);
-    } catch (err) {
-      this._error.set(errorMessage(err));
+    constructor() {
+        const timer = setInterval(() => this._now.set(Date.now()), 1000);
+        inject(DestroyRef).onDestroy(() => clearInterval(timer)); // stop on destroy
     }
-  }
 
-  async onLogout() {
-    await this._controller.logout();
-    this._calls.set([]);
-  }
-
-  // 1. normal: the interceptor adds the token
-  async callWithToken() {
-    await this._call('with your token', () => this._controller.me());
-  }
-
-  // 2. no token (SKIP_TOKEN)
-  async callWithoutToken() {
-    await this._call('without a token', () =>
-      firstValueFrom(this._http.get(this._meUrl, { context: this._skip() })),
-    );
-  }
-
-  // 3. edited payload, old signature
-  async callWithTamperedToken() {
-    const { header, payload, signature } = this._parts();
-    const data = { ...this._auth.payload(), name: 'Hacker', role: 'admin' };
-    const forged = `${header}.${base64url(JSON.stringify(data))}.${signature}`;
-    await this._call('with a modified token (role: admin)', () =>
-      firstValueFrom(
-        this._http.get(this._meUrl, {
-          context: this._skip(),
-          headers: { Authorization: `Bearer ${forged}` },
-        }),
-      ),
-    );
-  }
-
-  private readonly _meUrl = `${environment.authUrl}/token/me`;
-  private _skip() {
-    return new HttpContext().set(SKIP_TOKEN, true);
-  }
-
-  private async _call(label: string, request: () => Promise<unknown>) {
-    let result: CallResult;
-    try {
-      const user = (await request()) as { name: string; role: string };
-      result = { label, ok: true, text: `200 OK: ${user.name} (${user.role})` };
-    } catch (err) {
-      const status = err instanceof HttpErrorResponse ? `${err.status} ` : '';
-      result = { label, ok: false, text: `${status}${errorMessage(err)}` };
+    async onLogin(expiresInSeconds?: number) {
+        this._error.set(null);
+        try {
+            await this._controller.login(BOB, expiresInSeconds);
+        } catch (err) {
+            this._error.set(errorMessage(err));
+        }
     }
-    this._calls.update((list) => [result, ...list].slice(0, 5));
-  }
+
+    async onLogout() {
+        await this._controller.logout();
+        this._calls.set([]);
+    }
+
+    // 1. normal: the interceptor adds the token
+    async callWithToken() {
+        await this._call('with your token', () => this._controller.me());
+    }
+
+    // 2. no token (SKIP_TOKEN)
+    async callWithoutToken() {
+        await this._call('without a token', () =>
+            firstValueFrom(this._http.get(this._meUrl, { context: this._skip() })),
+        );
+    }
+
+    // 3. edited payload, old signature
+    async callWithTamperedToken() {
+        const { header, payload, signature } = this._parts();
+        const data = { ...this._auth.payload(), name: 'Hacker', role: 'admin' };
+        const forged = `${header}.${base64url(JSON.stringify(data))}.${signature}`;
+        await this._call('with a modified token (role: admin)', () =>
+            firstValueFrom(
+                this._http.get(this._meUrl, {
+                    context: this._skip(),
+                    headers: { Authorization: `Bearer ${forged}` },
+                }),
+            ),
+        );
+    }
+
+    private readonly _meUrl = `${environment.authUrl}/token/me`;
+    private _skip() {
+        return new HttpContext().set(SKIP_TOKEN, true);
+    }
+
+    private async _call(label: string, request: () => Promise<unknown>) {
+        let result: CallResult;
+        try {
+            const user = (await request()) as { name: string; role: string };
+            result = { label, ok: true, text: `200 OK: ${user.name} (${user.role})` };
+        } catch (err) {
+            const status = err instanceof HttpErrorResponse ? `${err.status} ` : '';
+            result = { label, ok: false, text: `${status}${errorMessage(err)}` };
+        }
+        this._calls.update((list) => [result, ...list].slice(0, 5));
+    }
 }
 
 function base64url(text: string): string {
-  return btoa(text).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+    return btoa(text).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
 }

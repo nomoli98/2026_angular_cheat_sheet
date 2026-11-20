@@ -1,39 +1,42 @@
 <h2>E2E tests (Playwright)</h2>
 
 <p>
-  An end-to-end (e2e) test opens <strong>your real app in a real browser</strong> and uses it like a user:
-  go to a page, type, click, check what's on screen. Full guide: <code>E2E_TEST.md</code>.
+    An end-to-end (e2e) test opens <strong>your real app in a real browser</strong> and uses it like
+    a user: go to a page, type, click, check what's on screen. Full guide: <code>E2E_TEST.md</code>.
 </p>
 
 <section class="card card-body mb-3">
-  <h3>The page we test</h3>
-  <p>
-    The same login form as on the unit test page. Playwright opens this page, fills the form and checks the result.
-    Try <code>bob&#64;email.bob</code> / <code>BobIsTheBest99#</code>.
-  </p>
-  <div class="border rounded p-3">
-    <app-login-form />
-  </div>
+    <h3>The page we test</h3>
+    <p>
+        The same login form as on the unit test page. Playwright opens this page, fills the form and
+        checks the result. Try <code>bob&#64;email.bob</code> / <code>BobIsTheBest99#</code>.
+    </p>
+    <div class="border rounded p-3">
+        <app-login-form />
+    </div>
 </section>
 
 <section class="card card-body mb-3">
-  <h3>1. Install</h3>
-  <app-code-snippet [code]="snippets.setup" />
+    <h3>1. Install</h3>
+    <app-code-snippet [code]="snippets.setup" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>2. Configure</h3>
-  <p>One file at the root of the project. It starts the fake API and <code>ng serve</code> for you.</p>
-  <app-code-snippet [code]="snippets.config" />
+    <h3>2. Configure</h3>
+    <p>
+        One file at the root of the project. It starts the fake API and <code>ng serve</code> for
+        you.
+    </p>
+    <app-code-snippet [code]="snippets.config" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>3. Write the tests</h3>
-  <p>In the <code>e2e/</code> folder at the root of the project (not in <code>src/</code>).</p>
-  <app-code-snippet [code]="snippets.tests" />
+    <h3>3. Write the tests</h3>
+    <p>In the <code>e2e/</code> folder at the root of the project (not in <code>src/</code>).</p>
+    <app-code-snippet [code]="snippets.tests" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>4. Run them</h3>
-  <app-code-snippet [code]="snippets.run" />
+    <h3>4. Run them</h3>
+    <app-code-snippet [code]="snippets.run" />
 </section>

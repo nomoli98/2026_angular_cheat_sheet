@@ -6,10 +6,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-static-binding',
-  templateUrl: './static-binding.component.html',
+    selector: 'app-static-binding',
+    templateUrl: './static-binding.component.html',
 })
 export class StaticBindingComponent {
-  value = 'Readonly value';
+    value = 'Readonly value';
 }
 ```

@@ -4,10 +4,10 @@
 
 Demo pages: `/auth/authorization` (everything below, live), `/auth/authorization/admin-area` (admins only)
 
-| Word | Question | Answered by | Fails with |
-| ---- | -------- | ----------- | ---------- |
-| **Authentication** | *who are you?* | login, `AuthService.currentUser()`, a token | `unauthorized` / `401` |
-| **Authorization** | *are you allowed to do this?* | the **role** (`admin` / `user`) + a rule | `forbidden` / `403` |
+| Word               | Question                      | Answered by                                 | Fails with             |
+| ------------------ | ----------------------------- | ------------------------------------------- | ---------------------- |
+| **Authentication** | _who are you?_                | login, `AuthService.currentUser()`, a token | `unauthorized` / `401` |
+| **Authorization**  | _are you allowed to do this?_ | the **role** (`admin` / `user`) + a rule    | `forbidden` / `403`    |
 
 ```
 Template ──▶ Component ──▶ Controller ──▶ Service ──HTTP──▶ Server
@@ -21,20 +21,20 @@ Template ──▶ Component ──▶ Controller ──▶ Service ──HTTP�
 
 ## 1. The rules in this repo
 
-| `UserController` | Allowed |
-| ---------------- | ------- |
-| `getAll()` | admin |
-| `getOne(id)` | admin |
-| `getMe()` | **anybody logged in** (reads their own account) |
-| `create(request)` | admin |
-| `updateFully(id, request)` | admin |
-| `updatePartial(id, changes)` | admin |
-| `delete(id)` | admin |
+| `UserController`             | Allowed                                         |
+| ---------------------------- | ----------------------------------------------- |
+| `getAll()`                   | admin                                           |
+| `getOne(id)`                 | admin                                           |
+| `getMe()`                    | **anybody logged in** (reads their own account) |
+| `create(request)`            | admin                                           |
+| `updateFully(id, request)`   | admin                                           |
+| `updatePartial(id, changes)` | admin                                           |
+| `delete(id)`                 | admin                                           |
 
-| Account | Role |
-| ------- | ---- |
-| Bob (`bob@email.bob` / `BobIsTheBest99#`) | `admin` |
-| Alice (`alice.dupont@mail.com` / `AliceIsTheBest99#`) and everybody else | `user` |
+| Account                                                                  | Role    |
+| ------------------------------------------------------------------------ | ------- |
+| Bob (`bob@email.bob` / `BobIsTheBest99#`)                                | `admin` |
+| Alice (`alice.dupont@mail.com` / `AliceIsTheBest99#`) and everybody else | `user`  |
 
 ---
 
@@ -45,8 +45,8 @@ Template ──▶ Component ──▶ Controller ──▶ Service ──HTTP�
 ```ts
 // core/enums/role.enum.ts
 export enum RoleEnum {
-  ADMIN = 'admin',
-  USER = 'user',
+    ADMIN = 'admin',
+    USER = 'user',
 }
 ```
 
@@ -58,19 +58,19 @@ Add `role: RoleEnum` to `UserEntity`, `UserResponse`, the mapper, and `"role": "
 type WithRole = Pick<UserResponse, 'id' | 'role'>; // a UserResponse OR the user read from a JWT
 
 export function isAdmin(user: WithRole | null): boolean {
-  return user?.role === RoleEnum.ADMIN; // null (logged out) → false
+    return user?.role === RoleEnum.ADMIN; // null (logged out) → false
 }
 
 export function deny(user: WithRole | null): never {
-  throw new Error(user ? 'forbidden' : 'unauthorized');
+    throw new Error(user ? 'forbidden' : 'unauthorized');
 }
 ```
 
-| Helper | Use it for |
-| ------ | ---------- |
-| `isAdmin(user)` | admin only |
+| Helper                    | Use it for                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| `isAdmin(user)`           | admin only                                                                           |
 | `isAdminOrSelf(user, id)` | "admin, or your own data" (kept as an example, not used by `UserController` anymore) |
-| `deny(user)` | throw `unauthorized` (nobody) or `forbidden` (wrong role) |
+| `deny(user)`              | throw `unauthorized` (nobody) or `forbidden` (wrong role)                            |
 
 New rule? One more helper: `isPremium(user) { return user?.subscription === 'premium'; }`.
 
@@ -116,21 +116,21 @@ async onClick() {
 ```
 
 - `computed()`: re-runs by itself when `currentUser()` changes (login, logout, the **Admin** toggle).
-- A method with **two clicks** (delete: *Delete* → *Yes, delete*) checks again on the second click: the role may have changed in between.
+- A method with **two clicks** (delete: _Delete_ → _Yes, delete_) checks again on the second click: the role may have changed in between.
 
 ### Step 5. The template shows / hides
 
 ```html
 @if (!_isAdmin()) {
-  <div class="alert alert-warning">Only an admin can do this.</div>
+<div class="alert alert-warning">Only an admin can do this.</div>
 }
 
 <button (click)="onClick()" [disabled]="!_isAdmin()">Get All Users</button>
 
 <!-- hide data already loaded if the user stops being admin -->
-@if (_isAdmin()) {
-  @for (u of _users(); track u.id) { <li>{{ u.name }}</li> }
-}
+@if (_isAdmin()) { @for (u of _users(); track u.id) {
+<li>{{ u.name }}</li>
+} }
 ```
 
 > 💡 Write `!_isAdmin()` (call the signal). `!_isAdmin` (no `()`) is always `false`: a function is "truthy".
@@ -139,14 +139,16 @@ async onClick() {
 
 ```ts
 export const adminGuard: CanActivateFn = (_route, state) => {
-  const user = inject(AuthService).currentUser();
-  if (isAdmin(user)) return true;
+    const user = inject(AuthService).currentUser();
+    if (isAdmin(user)) return true;
 
-  const router = inject(Router);
-  if (!user) {
-    return router.createUrlTree(['/auth/auth-service'], { queryParams: { returnUrl: state.url } });
-  }
-  return router.createUrlTree(['/auth/authorization'], { queryParams: { forbidden: state.url } });
+    const router = inject(Router);
+    if (!user) {
+        return router.createUrlTree(['/auth/auth-service'], {
+            queryParams: { returnUrl: state.url },
+        });
+    }
+    return router.createUrlTree(['/auth/authorization'], { queryParams: { forbidden: state.url } });
 };
 ```
 
@@ -160,14 +162,14 @@ export const adminGuard: CanActivateFn = (_route, state) => {
 },
 ```
 
-| Guard | Asks | No → |
-| ----- | ---- | ---- |
-| `authGuard` | logged in? | `/auth/auth-service?returnUrl=...` |
-| `adminGuard` | admin? | logged out → same as above · simple user → `/auth/authorization?forbidden=...` |
+| Guard        | Asks       | No →                                                                           |
+| ------------ | ---------- | ------------------------------------------------------------------------------ |
+| `authGuard`  | logged in? | `/auth/auth-service?returnUrl=...`                                             |
+| `adminGuard` | admin?     | logged out → same as above · simple user → `/auth/authorization?forbidden=...` |
 
 Protect a whole group: `canActivate: [authGuard, adminGuard]` on a parent with `children` (they run **in order**).
 
-> ⚠️ The CRUD pages (`/service/*`) only use `authGuard`, **not** `adminGuard`, on purpose: a simple user can open them and see *why* the buttons are disabled. In a real app you'd usually put `adminGuard` on admin pages.
+> ⚠️ The CRUD pages (`/service/*`) only use `authGuard`, **not** `adminGuard`, on purpose: a simple user can open them and see _why_ the buttons are disabled. In a real app you'd usually put `adminGuard` on admin pages.
 
 > ⚠️ Never redirect a forbidden user to the page that sent them (or to a page with the same guard): infinite loop.
 
@@ -175,18 +177,18 @@ Protect a whole group: `canActivate: [authGuard, adminGuard]` on a parent with `
 
 ```js
 async function users(headers) {
-  const [user, error] = await authenticate(headers);                // 401: no / bad / expired token
-  if (error) return error;
-  if (user.role !== 'admin') return [403, { message: 'forbidden' }]; // 403: wrong role
-  return [200, (await data('')).map(withoutPassword)];
+    const [user, error] = await authenticate(headers); // 401: no / bad / expired token
+    if (error) return error;
+    if (user.role !== 'admin') return [403, { message: 'forbidden' }]; // 403: wrong role
+    return [200, (await data('')).map(withoutPassword)];
 }
 ```
 
-| Request | Header | Answer |
-| ------- | ------ | ------ |
-| `GET /token/users` | none | `401 no token` |
-| `GET /token/users` | Alice's token | `403 forbidden` |
-| `GET /token/users` | Bob's token | `200` the users, no passwords |
+| Request            | Header        | Answer                        |
+| ------------------ | ------------- | ----------------------------- |
+| `GET /token/users` | none          | `401 no token`                |
+| `GET /token/users` | Alice's token | `403 forbidden`               |
+| `GET /token/users` | Bob's token   | `200` the users, no passwords |
 
 `authenticate()` reads the role from the **database**, not from the token: if an admin is demoted, it counts right away (the token keeps the old role until it expires).
 
@@ -216,10 +218,10 @@ async getUsers(): Promise<UserResponse[]> {
 
 Two switches: **logged in** (on/off) and **Admin** (Bob ↔ Alice). Both are real logins through the API.
 
-| Switch | On | Off | Saved in `localStorage` |
-| ------ | -- | --- | ----------------------- |
-| logged in | log in with the chosen account | logout | `auth-toggle`: `'on'` / `'off'` |
-| Admin | Bob (`admin`) | Alice (`user`) | `auth-role`: `'admin'` / `'user'` |
+| Switch    | On                             | Off            | Saved in `localStorage`           |
+| --------- | ------------------------------ | -------------- | --------------------------------- |
+| logged in | log in with the chosen account | logout         | `auth-toggle`: `'on'` / `'off'`   |
+| Admin     | Bob (`admin`)                  | Alice (`user`) | `auth-role`: `'admin'` / `'user'` |
 
 ```ts
 // shared/auth-toggle/auth-toggle.service.ts
@@ -241,22 +243,22 @@ The Admin switch is disabled while logged out. The badge next to the name shows 
 ```ts
 // controller: a fake AuthService = a signal the test sets
 it('a user cannot delete an account, not even their own', async () => {
-  currentUser.set(alice);
-  await expect(controller.delete(2)).rejects.toThrow('forbidden');
-  expect(fakeUserService.delete).not.toHaveBeenCalled();
+    currentUser.set(alice);
+    await expect(controller.delete(2)).rejects.toThrow('forbidden');
+    expect(fakeUserService.delete).not.toHaveBeenCalled();
 });
 
 // guard: run it in an injection context
 const runGuard = () =>
-  TestBed.runInInjectionContext(() =>
-    adminGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),
-  );
+    TestBed.runInInjectionContext(() =>
+        adminGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),
+    );
 
 it('sends a simple user to the authorization page', () => {
-  currentUser.set(alice);
-  expect((runGuard() as UrlTree).toString()).toBe(
-    '/auth/authorization?forbidden=%2Fauth%2Fauthorization%2Fadmin-area',
-  );
+    currentUser.set(alice);
+    expect((runGuard() as UrlTree).toString()).toBe(
+        '/auth/authorization?forbidden=%2Fauth%2Fauthorization%2Fadmin-area',
+    );
 });
 ```
 

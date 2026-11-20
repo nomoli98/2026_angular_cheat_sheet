@@ -1,10 +1,10 @@
 ```html condition.component.html
 @if (firstOption()) {
-  <p>This is the first option</p>
+<p>This is the first option</p>
 } @else if (secondOption()) {
-  <p>This is the second option</p>
+<p>This is the second option</p>
 } @else {
-  <p>This is none</p>
+<p>This is none</p>
 }
 
 <button (click)="firstOption.set(true); secondOption.set(false)">Show first option</button>
@@ -16,11 +16,11 @@
 import { Component, signal } from '@angular/core';
 
 @Component({
-  selector: 'app-condition',
-  templateUrl: './condition.component.html',
+    selector: 'app-condition',
+    templateUrl: './condition.component.html',
 })
 export class ConditionComponent {
-  protected firstOption = signal(true);
-  protected secondOption = signal(false);
+    protected firstOption = signal(true);
+    protected secondOption = signal(false);
 }
 ```

@@ -13,107 +13,107 @@ const url = `${environment.apiUrl}/people`;
 
 // Bob as the fake API sends him
 const bob: UserEntity = {
-  id: 1,
-  name: 'Bob Martin',
-  email: 'bob@email.bob',
-  password: 'BobIsTheBest99#',
-  birthdate: '2000-09-22',
-  height: 195,
-  gender: GenderEnum.MALE,
-  subscription: SubscriptionEnum.PREMIUM,
-  agreeToTerms: true,
-  role: RoleEnum.ADMIN,
+    id: 1,
+    name: 'Bob Martin',
+    email: 'bob@email.bob',
+    password: 'BobIsTheBest99#',
+    birthdate: '2000-09-22',
+    height: 195,
+    gender: GenderEnum.MALE,
+    subscription: SubscriptionEnum.PREMIUM,
+    agreeToTerms: true,
+    role: RoleEnum.ADMIN,
 };
 
 describe('AuthService', () => {
-  let service: AuthService;
-  let httpTesting: HttpTestingController;
+    let service: AuthService;
+    let httpTesting: HttpTestingController;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()], // fake backend
-    });
-    service = TestBed.inject(AuthService);
-    httpTesting = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpTesting.verify(); // nothing left unanswered
-  });
-
-  it('logs in with the right email and password', async () => {
-    const result = firstValueFrom(
-      service.login({ email: 'bob@email.bob', password: 'BobIsTheBest99#' }),
-    );
-
-    // GET /people?email=... → [bob]
-    const req = httpTesting.expectOne(
-      (r) => r.url === url && r.params.get('email') === 'bob@email.bob',
-    );
-    req.flush([bob]);
-
-    const user = await result;
-    expect(user.name).toBe('Bob Martin');
-    expect('password' in user).toBe(false); // removed by the mapper
-    expect(service.currentUser()?.name).toBe('Bob Martin');
-  });
-
-  it('refuses a wrong password', async () => {
-    const result = firstValueFrom(service.login({ email: 'bob@email.bob', password: 'wrong' }));
-
-    httpTesting.expectOne((r) => r.url === url).flush([bob]);
-
-    await expect(result).rejects.toThrow('bad credentials');
-    expect(service.currentUser()).toBeNull();
-  });
-
-  it('refuses an unknown email', async () => {
-    const result = firstValueFrom(service.login({ email: 'nobody@mail.com', password: 'x' }));
-
-    httpTesting.expectOne((r) => r.url === url).flush([]); // nobody found
-
-    await expect(result).rejects.toThrow('bad credentials');
-  });
-
-  it('logs out', async () => {
-    const result = firstValueFrom(
-      service.login({ email: 'bob@email.bob', password: 'BobIsTheBest99#' }),
-    );
-    httpTesting.expectOne((r) => r.url === url).flush([bob]);
-    await result;
-
-    service.logout();
-
-    expect(service.currentUser()).toBeNull();
-  });
-
-  describe('register', () => {
-    const { id: _id, role: _role, ...newBob } = bob; // no id, no role
-
-    it('creates the user when the email is free', async () => {
-      const result = firstValueFrom(service.register(newBob));
-
-      // 1. email free?
-      httpTesting
-        .expectOne((r) => r.method === 'GET' && r.params.get('email') === bob.email)
-        .flush([]);
-      // 2. POST /people
-      const req = httpTesting.expectOne((r) => r.method === 'POST' && r.url === url);
-      expect(req.request.body).toEqual({ ...newBob, role: RoleEnum.USER }); // always a user
-      req.flush(bob);
-
-      expect((await result).name).toBe('Bob Martin');
-      expect(service.currentUser()?.name).toBe('Bob Martin'); // logged in
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [provideHttpClient(), provideHttpClientTesting()], // fake backend
+        });
+        service = TestBed.inject(AuthService);
+        httpTesting = TestBed.inject(HttpTestingController);
     });
 
-    it('refuses an email that is already taken', async () => {
-      const result = firstValueFrom(service.register(newBob));
-
-      httpTesting.expectOne((r) => r.method === 'GET').flush([bob]); // taken
-      httpTesting.expectNone((r) => r.method === 'POST'); // nothing created
-
-      await expect(result).rejects.toThrow('email already taken');
-      expect(service.currentUser()).toBeNull();
+    afterEach(() => {
+        httpTesting.verify(); // nothing left unanswered
     });
-  });
+
+    it('logs in with the right email and password', async () => {
+        const result = firstValueFrom(
+            service.login({ email: 'bob@email.bob', password: 'BobIsTheBest99#' }),
+        );
+
+        // GET /people?email=... → [bob]
+        const req = httpTesting.expectOne(
+            (r) => r.url === url && r.params.get('email') === 'bob@email.bob',
+        );
+        req.flush([bob]);
+
+        const user = await result;
+        expect(user.name).toBe('Bob Martin');
+        expect('password' in user).toBe(false); // removed by the mapper
+        expect(service.currentUser()?.name).toBe('Bob Martin');
+    });
+
+    it('refuses a wrong password', async () => {
+        const result = firstValueFrom(service.login({ email: 'bob@email.bob', password: 'wrong' }));
+
+        httpTesting.expectOne((r) => r.url === url).flush([bob]);
+
+        await expect(result).rejects.toThrow('bad credentials');
+        expect(service.currentUser()).toBeNull();
+    });
+
+    it('refuses an unknown email', async () => {
+        const result = firstValueFrom(service.login({ email: 'nobody@mail.com', password: 'x' }));
+
+        httpTesting.expectOne((r) => r.url === url).flush([]); // nobody found
+
+        await expect(result).rejects.toThrow('bad credentials');
+    });
+
+    it('logs out', async () => {
+        const result = firstValueFrom(
+            service.login({ email: 'bob@email.bob', password: 'BobIsTheBest99#' }),
+        );
+        httpTesting.expectOne((r) => r.url === url).flush([bob]);
+        await result;
+
+        service.logout();
+
+        expect(service.currentUser()).toBeNull();
+    });
+
+    describe('register', () => {
+        const { id: _id, role: _role, ...newBob } = bob; // no id, no role
+
+        it('creates the user when the email is free', async () => {
+            const result = firstValueFrom(service.register(newBob));
+
+            // 1. email free?
+            httpTesting
+                .expectOne((r) => r.method === 'GET' && r.params.get('email') === bob.email)
+                .flush([]);
+            // 2. POST /people
+            const req = httpTesting.expectOne((r) => r.method === 'POST' && r.url === url);
+            expect(req.request.body).toEqual({ ...newBob, role: RoleEnum.USER }); // always a user
+            req.flush(bob);
+
+            expect((await result).name).toBe('Bob Martin');
+            expect(service.currentUser()?.name).toBe('Bob Martin'); // logged in
+        });
+
+        it('refuses an email that is already taken', async () => {
+            const result = firstValueFrom(service.register(newBob));
+
+            httpTesting.expectOne((r) => r.method === 'GET').flush([bob]); // taken
+            httpTesting.expectNone((r) => r.method === 'POST'); // nothing created
+
+            await expect(result).rejects.toThrow('email already taken');
+            expect(service.currentUser()).toBeNull();
+        });
+    });
 });

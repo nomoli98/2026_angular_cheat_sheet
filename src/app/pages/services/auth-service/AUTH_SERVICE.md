@@ -6,11 +6,11 @@ Demo page: `/service/auth-service` (the guard sends you there when nobody is log
 
 Three pieces work together:
 
-| Piece | File | Job |
-| ----- | ---- | --- |
-| **AuthService** | `core/services/auth.service.ts` | knows **who is logged in**: `currentUser()` signal, `login()`, `logout()` |
-| **Route guard** | `core/guards/auth.guard.ts` | runs **before** a page opens: logged in → open it, otherwise → redirect |
-| **Auth toggle** | `shared/auth-toggle/` | the switch in the navbar: on = log in as Bob, off = log out (a demo helper, like a theme toggle) |
+| Piece           | File                            | Job                                                                                              |
+| --------------- | ------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **AuthService** | `core/services/auth.service.ts` | knows **who is logged in**: `currentUser()` signal, `login()`, `logout()`                        |
+| **Route guard** | `core/guards/auth.guard.ts`     | runs **before** a page opens: logged in → open it, otherwise → redirect                          |
+| **Auth toggle** | `shared/auth-toggle/`           | the switch in the navbar: on = log in as Bob, off = log out (a demo helper, like a theme toggle) |
 
 ```
 toggle off → AuthService.logout() → currentUser() = null
@@ -26,23 +26,23 @@ toggle on  → AuthService.login(Bob) → currentUser() = Bob
 ```ts
 @Service()
 export class AuthService {
-  private readonly _currentUser = signal<UserResponse | null>(null);
-  readonly currentUser = this._currentUser.asReadonly(); // read-only outside
+    private readonly _currentUser = signal<UserResponse | null>(null);
+    readonly currentUser = this._currentUser.asReadonly(); // read-only outside
 
-  login(request: LoginRequest): Observable<UserResponse> {
-    return this._http.get<UserEntity[]>(this._url, { params: { email: request.email } }).pipe(
-      map((users) => {
-        const user = users[0];
-        if (!user || user.password !== request.password) throw new Error('bad credentials');
-        return UserMapper(user);
-      }),
-      tap((user) => this._currentUser.set(user)), // 👈 remember who is logged in
-    );
-  }
+    login(request: LoginRequest): Observable<UserResponse> {
+        return this._http.get<UserEntity[]>(this._url, { params: { email: request.email } }).pipe(
+            map((users) => {
+                const user = users[0];
+                if (!user || user.password !== request.password) throw new Error('bad credentials');
+                return UserMapper(user);
+            }),
+            tap((user) => this._currentUser.set(user)), // 👈 remember who is logged in
+        );
+    }
 
-  logout(): void {
-    this._currentUser.set(null);
-  }
+    logout(): void {
+        this._currentUser.set(null);
+    }
 }
 ```
 
@@ -61,22 +61,22 @@ A guard is a **function** the router calls before opening a page.
 ```ts
 // core/guards/auth.guard.ts
 export const authGuard: CanActivateFn = (_route, state) => {
-  const auth = inject(AuthService); // inject() works inside a guard
-  if (auth.currentUser()) return true; // ✅ open the page
+    const auth = inject(AuthService); // inject() works inside a guard
+    if (auth.currentUser()) return true; // ✅ open the page
 
-  // ❌ go somewhere else instead, and remember where the user wanted to go
-  return inject(Router).createUrlTree(['/service/auth-service'], {
-    queryParams: { returnUrl: state.url },
-  });
+    // ❌ go somewhere else instead, and remember where the user wanted to go
+    return inject(Router).createUrlTree(['/service/auth-service'], {
+        queryParams: { returnUrl: state.url },
+    });
 };
 ```
 
-| The guard returns | What happens |
-| ----------------- | ------------ |
-| `true` | the page opens |
-| `false` | nothing happens, you stay where you are (bad UX: the user doesn't know why) |
-| a `UrlTree` (`router.createUrlTree([...])`) | Angular goes **there** instead ✅ |
-| a `Promise` / `Observable` of one of those | Angular waits for it (e.g. to ask the API) |
+| The guard returns                           | What happens                                                                |
+| ------------------------------------------- | --------------------------------------------------------------------------- |
+| `true`                                      | the page opens                                                              |
+| `false`                                     | nothing happens, you stay where you are (bad UX: the user doesn't know why) |
+| a `UrlTree` (`router.createUrlTree([...])`) | Angular goes **there** instead ✅                                           |
+| a `Promise` / `Observable` of one of those  | Angular waits for it (e.g. to ask the API)                                  |
 
 > 💡 `state.url` = the URL the user wanted (`/service/get-all`). `route` = the route being opened (its params, data...).
 
@@ -85,30 +85,35 @@ export const authGuard: CanActivateFn = (_route, state) => {
 ```ts
 // pages/services/service.routes.ts
 export const routes: Routes = [
-  {
-    // NOT protected: the page the guard sends you to (protecting it would loop forever)
-    path: 'auth-service',
-    loadComponent: () => import('./auth-service/auth-service.component').then((m) => m.AuthServiceComponent),
-  },
-  {
-    path: '',                         // a parent with no URL of its own...
-    canActivate: [authGuard],         // ...protects all its children at once
-    runGuardsAndResolvers: 'always',  // re-run the guard even when the URL doesn't change
-    children: [
-      { path: 'get-all', loadComponent: () => import('./get-all/get-all.component').then((m) => m.GetAllComponent) },
-      // add new protected pages here
-    ],
-  },
+    {
+        // NOT protected: the page the guard sends you to (protecting it would loop forever)
+        path: 'auth-service',
+        loadComponent: () =>
+            import('./auth-service/auth-service.component').then((m) => m.AuthServiceComponent),
+    },
+    {
+        path: '', // a parent with no URL of its own...
+        canActivate: [authGuard], // ...protects all its children at once
+        runGuardsAndResolvers: 'always', // re-run the guard even when the URL doesn't change
+        children: [
+            {
+                path: 'get-all',
+                loadComponent: () =>
+                    import('./get-all/get-all.component').then((m) => m.GetAllComponent),
+            },
+            // add new protected pages here
+        ],
+    },
 ];
 ```
 
-| Option | Use it for |
-| ------ | ---------- |
-| `canActivate: [guard]` | protect this route (and so everything under it) |
-| `canActivateChild: [guard]` | run the guard for each child **change** (not re-run on a same-URL reload, see troubleshooting) |
-| `canMatch: [guard]` | the route is **skipped** when the guard says no (the next matching route is tried, e.g. the 404) |
-| `canDeactivate: [guard]` | leaving the page ("you have unsaved changes") |
-| `runGuardsAndResolvers: 'always'` | re-run the guard on every navigation, even to the same URL |
+| Option                            | Use it for                                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `canActivate: [guard]`            | protect this route (and so everything under it)                                                  |
+| `canActivateChild: [guard]`       | run the guard for each child **change** (not re-run on a same-URL reload, see troubleshooting)   |
+| `canMatch: [guard]`               | the route is **skipped** when the guard says no (the next matching route is tried, e.g. the 404) |
+| `canDeactivate: [guard]`          | leaving the page ("you have unsaved changes")                                                    |
+| `runGuardsAndResolvers: 'always'` | re-run the guard on every navigation, even to the same URL                                       |
 
 ### 2.3 Come back after login: `returnUrl`
 
@@ -116,18 +121,18 @@ The guard adds `?returnUrl=/service/get-all`. Thanks to `withComponentInputBindi
 
 ```ts
 export class AuthServiceComponent {
-  protected readonly auth = inject(AuthService);
-  private readonly _router = inject(Router);
+    protected readonly auth = inject(AuthService);
+    private readonly _router = inject(Router);
 
-  readonly returnUrl = input<string>(); // ← ?returnUrl=...
+    readonly returnUrl = input<string>(); // ← ?returnUrl=...
 
-  constructor() {
-    // As soon as someone is logged in, go back to the page the guard blocked
-    effect(() => {
-      const url = this.returnUrl();
-      if (this.auth.currentUser() && url) this._router.navigateByUrl(url);
-    });
-  }
+    constructor() {
+        // As soon as someone is logged in, go back to the page the guard blocked
+        effect(() => {
+            const url = this.returnUrl();
+            if (this.auth.currentUser() && url) this._router.navigateByUrl(url);
+        });
+    }
 }
 ```
 
@@ -139,12 +144,12 @@ export class AuthServiceComponent {
 
 A switch in the navbar, like a theme toggle. **On by default**, so the protected pages work right away.
 
-| | On | Off |
-| - | -- | --- |
-| What it does | `AuthService.login(Bob)`: a **real** request to json-server | `AuthService.logout()` + re-runs the guard of the current page |
-| Label | `Logged in as Bob Martin (admin)` | `Logged out` |
-| `/service/*` pages | open | redirect to `/service/auth-service` |
-| Saved in `localStorage` (`auth-toggle`) | `'on'` | `'off'` |
+|                                         | On                                                          | Off                                                            |
+| --------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |
+| What it does                            | `AuthService.login(Bob)`: a **real** request to json-server | `AuthService.logout()` + re-runs the guard of the current page |
+| Label                                   | `Logged in as Bob Martin (admin)`                           | `Logged out`                                                   |
+| `/service/*` pages                      | open                                                        | redirect to `/service/auth-service`                            |
+| Saved in `localStorage` (`auth-toggle`) | `'on'`                                                      | `'off'`                                                        |
 
 ### 3.1 Log in again when the app starts
 
@@ -199,24 +204,24 @@ A guard uses `inject()`, so run it inside `TestBed.runInInjectionContext`:
 const currentUser = signal<UserResponse | null>(null);
 
 beforeEach(() => {
-  TestBed.configureTestingModule({
-    providers: [{ provide: AuthService, useValue: { currentUser } }],
-  });
+    TestBed.configureTestingModule({
+        providers: [{ provide: AuthService, useValue: { currentUser } }],
+    });
 });
 
 const runGuard = (url: string) =>
-  TestBed.runInInjectionContext(() =>
-    authGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),
-  );
+    TestBed.runInInjectionContext(() =>
+        authGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),
+    );
 
 it('lets a logged-in user in', () => {
-  currentUser.set(bob);
-  expect(runGuard('/service/get-all')).toBe(true);
+    currentUser.set(bob);
+    expect(runGuard('/service/get-all')).toBe(true);
 });
 
 it('sends a logged-out user to the auth page', () => {
-  const result = runGuard('/service/get-all') as UrlTree;
-  expect(result.toString()).toBe('/service/auth-service?returnUrl=%2Fservice%2Fget-all');
+    const result = runGuard('/service/get-all') as UrlTree;
+    expect(result.toString()).toBe('/service/auth-service?returnUrl=%2Fservice%2Fget-all');
 });
 ```
 
@@ -226,8 +231,8 @@ The toggle logs Bob in by default. To test the login form, set the toggle **befo
 
 ```ts
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('auth-toggle', 'off'));
-  await page.goto('/tests/e2e-test');
+    await page.addInitScript(() => localStorage.setItem('auth-toggle', 'off'));
+    await page.goto('/tests/e2e-test');
 });
 ```
 

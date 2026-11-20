@@ -5,16 +5,16 @@ import { UserService } from '@core/services/user.service';
 
 // async validator. ⚠️ uses inject(): field initializer or constructor
 export function emailTakenValidator(): AsyncValidatorFn {
-  const userService = inject(UserService);
+    const userService = inject(UserService);
 
-  return (control) => {
-    if (!control.value) return of(null); // empty: required handles it
+    return (control) => {
+        if (!control.value) return of(null); // empty: required handles it
 
-    // wait 400 ms: typing again cancels it → 1 request
-    return timer(400).pipe(
-      switchMap(() => userService.emailExists(control.value)),
-      map((taken) => (taken ? { emailTaken: true } : null)),
-      catchError(() => of(null)), // API down: don't block
-    );
-  };
+        // wait 400 ms: typing again cancels it → 1 request
+        return timer(400).pipe(
+            switchMap(() => userService.emailExists(control.value)),
+            map((taken) => (taken ? { emailTaken: true } : null)),
+            catchError(() => of(null)), // API down: don't block
+        );
+    };
 }

@@ -1,16 +1,23 @@
 <h2>🛠️ Admin area</h2>
 
 <section class="card card-body mb-3">
-  <p>
-    You see this page because <code>adminGuard</code> said <code>true</code>:
-    <strong>{{ auth.currentUser()?.name }}</strong> is <code>{{ auth.currentUser()?.role }}</code>.
-  </p>
-  <p class="mb-2">Now try:</p>
-  <ul class="mb-0">
-    <li>switch <em>Admin</em> off in the navbar → back to the authorization page with <code>?forbidden=</code></li>
-    <li>switch <em>logged in</em> off → the auth page with <code>?returnUrl=</code></li>
-    <li>as Alice, type <code>/auth/authorization/admin-area</code> in the address bar → same thing: the guard runs on every navigation</li>
-  </ul>
+    <p>
+        You see this page because <code>adminGuard</code> said <code>true</code>:
+        <strong>{{ auth.currentUser()?.name }}</strong> is
+        <code>{{ auth.currentUser()?.role }}</code>.
+    </p>
+    <p class="mb-2">Now try:</p>
+    <ul class="mb-0">
+        <li>
+            switch <em>Admin</em> off in the navbar → back to the authorization page with
+            <code>?forbidden=</code>
+        </li>
+        <li>switch <em>logged in</em> off → the auth page with <code>?returnUrl=</code></li>
+        <li>
+            as Alice, type <code>/auth/authorization/admin-area</code> in the address bar → same
+            thing: the guard runs on every navigation
+        </li>
+    </ul>
 </section>
 
 <a routerLink="/auth/authorization">← Back to Authorization</a>

@@ -19,20 +19,20 @@ import { Component, model, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-two-way-binding',
-  imports: [FormsModule],
-  templateUrl: './two-way-binding.component.html',
+    selector: 'app-two-way-binding',
+    imports: [FormsModule],
+    templateUrl: './two-way-binding.component.html',
 })
 export class TwoWayBindingComponent {
-  inputValue = '';
+    inputValue = '';
 
-  // two-way input
-  modelCount = model<number>(0);
+    // two-way input
+    modelCount = model<number>(0);
 
-  updateCount(amount: number): void {
-    this.modelCount.update((currentCount) => currentCount + amount);
-  }
+    updateCount(amount: number): void {
+        this.modelCount.update((currentCount) => currentCount + amount);
+    }
 
-  signalCount = signal(0);
+    signalCount = signal(0);
 }
 ```

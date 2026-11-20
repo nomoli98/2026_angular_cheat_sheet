@@ -12,12 +12,12 @@ register(request: RegisterRequest): Observable<UserResponse> {
 ```js auth-server.js
 // fake-api/auth-server.js (Node)
 async function register(body) {
-  const [taken] = await data(`?email=${encodeURIComponent(body.email ?? '')}`);
-  if (taken) return [409, { message: 'email already taken' }];
+    const [taken] = await data(`?email=${encodeURIComponent(body.email ?? '')}`);
+    if (taken) return [409, { message: 'email already taken' }];
 
-  const password = await bcrypt.hash(String(body.password ?? ''), BCRYPT_ROUNDS); // 👈 server-side
-  const user = await data('', { method: 'POST', body: { ...body, password, role: 'user' } });
-  return [201, { token: sign(user), user: withoutPassword(user) }];
+    const password = await bcrypt.hash(String(body.password ?? ''), BCRYPT_ROUNDS); // 👈 server-side
+    const user = await data('', { method: 'POST', body: { ...body, password, role: 'user' } });
+    return [201, { token: sign(user), user: withoutPassword(user) }];
 }
 ```
 

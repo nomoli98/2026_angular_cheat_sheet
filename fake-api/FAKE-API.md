@@ -34,6 +34,7 @@ my-angular-app/
 ## 2. `scripts/ensure-fake-api.js`
 
 Runs automatically before `npm run dev`. It:
+
 1. installs `json-server@0.17.4` and `concurrently` if they're **missing** (or json-server is the **wrong version**),
 2. creates `fake-api/db.json` from `db.seed.json` if it doesn't exist yet.
 
@@ -45,36 +46,36 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const wanted = {
-  'json-server': '0.17.4', // pinned: 1.0 beta works differently (see troubleshooting)
-  concurrently: null, // null = any version is fine
+    'json-server': '0.17.4', // pinned: 1.0 beta works differently (see troubleshooting)
+    concurrently: null, // null = any version is fine
 };
 
 function installedVersion(pkg) {
-  const file = path.join(process.cwd(), 'node_modules', pkg, 'package.json');
-  if (!fs.existsSync(file)) return null;
-  return JSON.parse(fs.readFileSync(file, 'utf8')).version;
+    const file = path.join(process.cwd(), 'node_modules', pkg, 'package.json');
+    if (!fs.existsSync(file)) return null;
+    return JSON.parse(fs.readFileSync(file, 'utf8')).version;
 }
 
 const missing = Object.entries(wanted)
-  .filter(([pkg, version]) => {
-    const current = installedVersion(pkg);
-    return current === null || (version !== null && current !== version);
-  })
-  .map(([pkg, version]) => (version ? `${pkg}@${version}` : pkg));
+    .filter(([pkg, version]) => {
+        const current = installedVersion(pkg);
+        return current === null || (version !== null && current !== version);
+    })
+    .map(([pkg, version]) => (version ? `${pkg}@${version}` : pkg));
 
 if (missing.length === 0) {
-  console.log('[fake-api] json-server + concurrently already installed ✔');
+    console.log('[fake-api] json-server + concurrently already installed ✔');
 } else {
-  console.log(`[fake-api] Installing: ${missing.join(' ')}`);
-  execSync(`npm install -D ${missing.join(' ')}`, { stdio: 'inherit' });
+    console.log(`[fake-api] Installing: ${missing.join(' ')}`);
+    execSync(`npm install -D ${missing.join(' ')}`, { stdio: 'inherit' });
 }
 
 // Create db.json from the seed the first time (db.json is the live data).
 const db = path.join('fake-api', 'db.json');
 const seed = path.join('fake-api', 'db.seed.json');
 if (!fs.existsSync(db) && fs.existsSync(seed)) {
-  fs.copyFileSync(seed, db);
-  console.log('[fake-api] Created fake-api/db.json from db.seed.json');
+    fs.copyFileSync(seed, db);
+    console.log('[fake-api] Created fake-api/db.json from db.seed.json');
 }
 ```
 
@@ -96,24 +97,24 @@ if (!fs.existsSync(db) && fs.existsSync(seed)) {
 }
 ```
 
-| Script | What it does |
-| ------ | ------------ |
-| `npm run dev` | ⭐ **Use this.** Checks/installs, then starts the API, the auth server **and** `ng serve` in one terminal |
-| `predev` | Runs **by itself** before `dev` (npm runs `preXxx` before `xxx`). Never call it directly. |
-| `npm start` | Angular only (as before) |
-| `npm run api` | API only, on port 3000 |
-| `npm run api:auth` | Auth server only, on port 3001 (needs the API running: it reads the users from it) |
-| `npm run api:slow` | API only, every answer waits 1 s → to test loading spinners |
-| `npm run api:reset` | Puts the 10 original people back in `db.json` (`people` and `securePeople`) |
+| Script              | What it does                                                                                              |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| `npm run dev`       | ⭐ **Use this.** Checks/installs, then starts the API, the auth server **and** `ng serve` in one terminal |
+| `predev`            | Runs **by itself** before `dev` (npm runs `preXxx` before `xxx`). Never call it directly.                 |
+| `npm start`         | Angular only (as before)                                                                                  |
+| `npm run api`       | API only, on port 3000                                                                                    |
+| `npm run api:auth`  | Auth server only, on port 3001 (needs the API running: it reads the users from it)                        |
+| `npm run api:slow`  | API only, every answer waits 1 s → to test loading spinners                                               |
+| `npm run api:reset` | Puts the 10 original people back in `db.json` (`people` and `securePeople`)                               |
 
 What the `concurrently` flags mean:
 
-| Flag | Meaning |
-| ---- | ------- |
-| `-k` | **k**ill the other one if one stops (if `ng serve` crashes, the API stops too) |
-| `-n api,ng` | **n**ames shown before each log line: `[api] ...` / `[ng] ...` |
-| `-c cyan,magenta` | **c**olors of those names |
-| `"npm:api"` | shortcut for `npm run api` |
+| Flag              | Meaning                                                                        |
+| ----------------- | ------------------------------------------------------------------------------ |
+| `-k`              | **k**ill the other one if one stops (if `ng serve` crashes, the API stops too) |
+| `-n api,ng`       | **n**ames shown before each log line: `[api] ...` / `[ng] ...`                 |
+| `-c cyan,magenta` | **c**olors of those names                                                      |
+| `"npm:api"`       | shortcut for `npm run api`                                                     |
 
 > The scripts are the same on **Windows (PowerShell / cmd)** and **Mac / Linux**: npm runs them, and everything inside is Node, so no OS-specific commands.
 
@@ -157,26 +158,26 @@ One person in `db.json`:
 
 ```json
 {
-  "id": 1,
-  "name": "Bob Martin",
-  "email": "bob@email.bob",
-  "password": "BobIsTheBest99#",
-  "birthdate": "2000-09-22",
-  "height": 195,
-  "gender": "male",
-  "subscription": "premium",
-  "agreeToTerms": true,
-  "role": "admin"
+    "id": 1,
+    "name": "Bob Martin",
+    "email": "bob@email.bob",
+    "password": "BobIsTheBest99#",
+    "birthdate": "2000-09-22",
+    "height": 195,
+    "gender": "male",
+    "subscription": "premium",
+    "agreeToTerms": true,
+    "role": "admin"
 }
 ```
 
 The matching types are in `src/app/core/`:
 
-| File | Type | Who uses it | Password? |
-| ---- | ---- | ----------- | --------- |
-| `entities/user.entity.ts` | `UserEntity` | what the **API** sends back (`GET`, and the answer to `POST`/`PUT`/`PATCH`). Only the **service** sees it. | ✅ yes |
-| `responses/user.response.ts` | `UserResponse` | what the **service** gives to components | ❌ no |
-| `requests/register.request.ts` | `RegisterRequest` | what you **send** to create a person (`POST`) or replace one (`PUT`) | ✅ yes |
+| File                           | Type              | Who uses it                                                                                                | Password? |
+| ------------------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------- | --------- |
+| `entities/user.entity.ts`      | `UserEntity`      | what the **API** sends back (`GET`, and the answer to `POST`/`PUT`/`PATCH`). Only the **service** sees it. | ✅ yes    |
+| `responses/user.response.ts`   | `UserResponse`    | what the **service** gives to components                                                                   | ❌ no     |
+| `requests/register.request.ts` | `RegisterRequest` | what you **send** to create a person (`POST`) or replace one (`PUT`)                                       | ✅ yes    |
 
 ```
           sends                    API returns              service returns
@@ -191,16 +192,16 @@ import { SubscriptionEnum } from '@core/enums/subscription.enum';
 import { RoleEnum } from '@core/enums/role.enum';
 
 export interface UserEntity {
-  id: number; // json-server gives every person an id
-  name: string;
-  email: string;
-  password: string;           // ⚠️ json-server sends it back. Never let it leave the service.
-  birthdate: string;          // ⚠️ JSON has no Date type → ISO string "YYYY-MM-DD"
-  height: number;
-  gender: GenderEnum;
-  subscription: SubscriptionEnum;
-  agreeToTerms: boolean;
-  role: RoleEnum;             // 'admin' | 'user', see core/controllers/CONTROLLER.md
+    id: number; // json-server gives every person an id
+    name: string;
+    email: string;
+    password: string; // ⚠️ json-server sends it back. Never let it leave the service.
+    birthdate: string; // ⚠️ JSON has no Date type → ISO string "YYYY-MM-DD"
+    height: number;
+    gender: GenderEnum;
+    subscription: SubscriptionEnum;
+    agreeToTerms: boolean;
+    role: RoleEnum; // 'admin' | 'user', see core/controllers/CONTROLLER.md
 }
 ```
 
@@ -212,14 +213,14 @@ import { SubscriptionEnum } from '@core/enums/subscription.enum';
 import { RoleEnum } from '@core/enums/role.enum';
 
 export interface UserResponse {
-  id: number;
-  name: string;
-  email: string;
-  birthdate: string;
-  height: number;
-  gender: GenderEnum;
-  subscription: SubscriptionEnum;
-  role: RoleEnum;
+    id: number;
+    name: string;
+    email: string;
+    birthdate: string;
+    height: number;
+    gender: GenderEnum;
+    subscription: SubscriptionEnum;
+    role: RoleEnum;
 }
 ```
 
@@ -227,16 +228,16 @@ export interface UserResponse {
 // src/app/core/mapper/user.mapper.ts
 // UserEntity → UserResponse: copies only the fields components may see.
 export function UserMapper(user: UserEntity): UserResponse {
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    birthdate: user.birthdate,
-    height: user.height,
-    gender: user.gender,
-    subscription: user.subscription,
-    role: user.role,
-  };
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        birthdate: user.birthdate,
+        height: user.height,
+        gender: user.gender,
+        subscription: user.subscription,
+        role: user.role,
+    };
 }
 ```
 
@@ -247,14 +248,14 @@ export function UserMapper(user: UserEntity): UserResponse {
 import { GenderEnum } from '@core/enums/gender.enum';
 
 export interface RegisterRequest {
-  name: string;
-  email: string;
-  password: string;
-  birthdate: string;
-  height: number;
-  gender: GenderEnum;
-  subscription: 'free' | 'premium';
-  agreeToTerms: boolean;
+    name: string;
+    email: string;
+    password: string;
+    birthdate: string;
+    height: number;
+    gender: GenderEnum;
+    subscription: 'free' | 'premium';
+    agreeToTerms: boolean;
 }
 ```
 
@@ -274,28 +275,28 @@ Base URL: `http://localhost:3000/people`
 
 What **json-server** returns (the service then turns every `UserEntity` into a `UserResponse`):
 
-| Action | Method | URL | Body | API returns |
-| ------ | ------ | --- | ---- | ----------- |
-| **Read** all | `GET` | `/people` | – | `UserEntity[]` |
-| **Read** one | `GET` | `/people/1` | – | `UserEntity` (or `404`) |
-| **Create** | `POST` | `/people` | `RegisterRequest` (no id) + `role: 'user'` | the new `UserEntity` with its `id` |
-| **Update** (replace everything) | `PUT` | `/people/1` | full `RegisterRequest` + the current `role` | updated `UserEntity` |
-| **Update** (only some fields) | `PATCH` | `/people/1` | `Partial<RegisterRequest>` e.g. `{ "subscription": "premium" }` | updated `UserEntity` |
-| **Delete** | `DELETE` | `/people/1` | – | `{}` |
-| **Log in** (fake) | `GET` | `/people?email=bob@email.bob` | – | `[UserEntity]` if the email exists, `[]` if not. The **service** then checks the password. |
-| **Exists?** (id) | `GET` | `/people?id=1` | – | `[UserEntity]` or `[]` → `UserService.exists(id)` turns it into `true` / `false` |
-| **Exists?** (email) | `GET` | `/people?email=bob@email.bob` | – | `[UserEntity]` or `[]` → `UserService.emailExists(email)` turns it into `true` / `false` |
+| Action                          | Method   | URL                           | Body                                                            | API returns                                                                                |
+| ------------------------------- | -------- | ----------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **Read** all                    | `GET`    | `/people`                     | –                                                               | `UserEntity[]`                                                                             |
+| **Read** one                    | `GET`    | `/people/1`                   | –                                                               | `UserEntity` (or `404`)                                                                    |
+| **Create**                      | `POST`   | `/people`                     | `RegisterRequest` (no id) + `role: 'user'`                      | the new `UserEntity` with its `id`                                                         |
+| **Update** (replace everything) | `PUT`    | `/people/1`                   | full `RegisterRequest` + the current `role`                     | updated `UserEntity`                                                                       |
+| **Update** (only some fields)   | `PATCH`  | `/people/1`                   | `Partial<RegisterRequest>` e.g. `{ "subscription": "premium" }` | updated `UserEntity`                                                                       |
+| **Delete**                      | `DELETE` | `/people/1`                   | –                                                               | `{}`                                                                                       |
+| **Log in** (fake)               | `GET`    | `/people?email=bob@email.bob` | –                                                               | `[UserEntity]` if the email exists, `[]` if not. The **service** then checks the password. |
+| **Exists?** (id)                | `GET`    | `/people?id=1`                | –                                                               | `[UserEntity]` or `[]` → `UserService.exists(id)` turns it into `true` / `false`           |
+| **Exists?** (email)             | `GET`    | `/people?email=bob@email.bob` | –                                                               | `[UserEntity]` or `[]` → `UserService.emailExists(email)` turns it into `true` / `false`   |
 
 - `POST` → the `id` is **auto-generated** (next number). Don't send one.
 - **Booleans:** json-server can't answer `true`/`false`. Use a **filter** (`?id=` / `?email=`): it always answers an array, never a `404`, and the service maps it: `users.length > 0`.
 - **Checks before writing** (in the services):
-  - `AuthService.register()` → `emailExists` first, errors with `email already taken` instead of creating a duplicate.
-  - `UserService.updateFully` / `updatePartial` / `delete` → `exists(id)` first, errors with `user not found` and sends nothing.
+    - `AuthService.register()` → `emailExists` first, errors with `email already taken` instead of creating a duplicate.
+    - `UserService.updateFully` / `updatePartial` / `delete` → `exists(id)` first, errors with `user not found` and sends nothing.
 - `PUT` → fields you don't send are **deleted**. Use `PATCH` to change only one field. That's why `updateFully` reads the user first and sends their `role` back.
 - Body requests need the header `Content-Type: application/json` (`HttpClient` adds it for you).
 - **Log in:** json-server has no login, so `AuthService.login()` does it in 2 steps:
-  1. asks json-server for the person with that email: `GET /people?email=...` → `[user]` or `[]`,
-  2. compares the password **in the service**: no user or wrong password → the Observable errors with `bad credentials`, otherwise it returns the `UserResponse` (no password) and fills `currentUser`.
+    1. asks json-server for the person with that email: `GET /people?email=...` → `[user]` or `[]`,
+    2. compares the password **in the service**: no user or wrong password → the Observable errors with `bad credentials`, otherwise it returns the `UserResponse` (no password) and fills `currentUser`.
 
 ```ts
 // src/app/core/services/auth.service.ts
@@ -321,17 +322,17 @@ login(request: LoginRequest): Observable<UserResponse> {
 
 All with `GET /people?...`. Combine them with `&`.
 
-| Need | URL |
-| ---- | --- |
-| Filter by field | `/people?subscription=premium` |
-| Several values | `/people?gender=male&gender=other` |
-| Full-text search (all fields) | `/people?q=alice` |
-| Contains (one field) | `/people?name_like=ali` |
-| Greater / lower than | `/people?height_gte=180` / `/people?height_lte=160` |
-| Not equal | `/people?gender_ne=male` |
-| Sort | `/people?_sort=height&_order=desc` |
-| First N results | `/people?_limit=3` |
-| Pagination | `/people?_page=2&_limit=3` |
+| Need                          | URL                                                 |
+| ----------------------------- | --------------------------------------------------- |
+| Filter by field               | `/people?subscription=premium`                      |
+| Several values                | `/people?gender=male&gender=other`                  |
+| Full-text search (all fields) | `/people?q=alice`                                   |
+| Contains (one field)          | `/people?name_like=ali`                             |
+| Greater / lower than          | `/people?height_gte=180` / `/people?height_lte=160` |
+| Not equal                     | `/people?gender_ne=male`                            |
+| Sort                          | `/people?_sort=height&_order=desc`                  |
+| First N results               | `/people?_limit=3`                                  |
+| Pagination                    | `/people?_page=2&_limit=3`                          |
 
 With `_page`, the total number of people is in the **response header** `X-Total-Count` (useful for "page 2 of 4").
 
@@ -350,12 +351,12 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes, withComponentInputBinding()),
-    // HttpClient for the services (withFetch: uses the browser's fetch() API)
-    provideHttpClient(withFetch()),   // 👈 DON'T FORGET THIS
-  ],
+    providers: [
+        provideBrowserGlobalErrorListeners(),
+        provideRouter(routes, withComponentInputBinding()),
+        // HttpClient for the services (withFetch: uses the browser's fetch() API)
+        provideHttpClient(withFetch()), // 👈 DON'T FORGET THIS
+    ],
 };
 ```
 
@@ -371,9 +372,9 @@ ng generate environments
 
 It creates two files and adds a `fileReplacements` to `angular.json`:
 
-| File | Used by |
-| ---- | ------- |
-| `src/environments/environment.ts` | `ng build` (production) |
+| File                                          | Used by                             |
+| --------------------------------------------- | ----------------------------------- |
+| `src/environments/environment.ts`             | `ng build` (production)             |
 | `src/environments/environment.development.ts` | `ng serve` (replaces the other one) |
 
 Both must export the same properties:
@@ -381,7 +382,7 @@ Both must export the same properties:
 ```ts
 // src/environments/environment.development.ts
 export const environment = {
-  apiUrl: 'http://localhost:3000', // the fake API (json-server)
+    apiUrl: 'http://localhost:3000', // the fake API (json-server)
 };
 ```
 
@@ -389,13 +390,13 @@ Import it from the file that is always there, `environment.ts`. Angular swaps it
 
 ### 8.3 The services
 
-| File | What it does |
-| ---- | ------------ |
-| `core/services/user.service.ts` | CRUD on `/people`: `create`, `getAll`, `getOne`, `updateFully` (PUT), `updatePartial` (PATCH), `delete`, plus the booleans `exists(id)` and `emailExists(email)` |
-| `core/services/auth.service.ts` | `register` (refuses a taken email, then `UserService.create`, then logs the new user in), `login`, `logout`, `currentUser` signal |
-| `core/validators/reactive-form/email-taken.validator.ts` | async validator: `emailExists` while the user types (see `REACTIVE_FORM.md`) |
-| `core/mapper/user.mapper.ts` | `UserMapper(entity)` → `UserResponse` (removes the password). A plain function: call it, don't `inject()` it |
-| `core/controllers/*.controller.ts` | what **components** call: check the logged-in user's role, then call the service and return a **Promise** (`firstValueFrom`), or throw `unauthorized` / `forbidden` (see `core/controllers/CONTROLLER.md`) |
+| File                                                     | What it does                                                                                                                                                                                               |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `core/services/user.service.ts`                          | CRUD on `/people`: `create`, `getAll`, `getOne`, `updateFully` (PUT), `updatePartial` (PATCH), `delete`, plus the booleans `exists(id)` and `emailExists(email)`                                           |
+| `core/services/auth.service.ts`                          | `register` (refuses a taken email, then `UserService.create`, then logs the new user in), `login`, `logout`, `currentUser` signal                                                                          |
+| `core/validators/reactive-form/email-taken.validator.ts` | async validator: `emailExists` while the user types (see `REACTIVE_FORM.md`)                                                                                                                               |
+| `core/mapper/user.mapper.ts`                             | `UserMapper(entity)` → `UserResponse` (removes the password). A plain function: call it, don't `inject()` it                                                                                               |
+| `core/controllers/*.controller.ts`                       | what **components** call: check the logged-in user's role, then call the service and return a **Promise** (`firstValueFrom`), or throw `unauthorized` / `forbidden` (see `core/controllers/CONTROLLER.md`) |
 
 All **service** methods return **Observables**: nothing is sent until you `.subscribe()` (or `firstValueFrom()` / `toSignal()`). The **controllers** return Promises: `await controller.getAll()`.
 
@@ -451,13 +452,13 @@ Angular ──▶ auth-server.js (localhost:3001) ──▶ json-server (localho
             bcrypt.compare + jwt.sign/verify      /securePeople
 ```
 
-| Request | Body / header | Answer |
-| ------- | ------------- | ------ |
-| `POST /token/register` | `RegisterRequest` | `201 { token, user }`, `409` if the email is taken |
-| `POST /token/login` | `{ email, password }` | `200 { token, user }`, `401 bad credentials` |
-| `GET /token/me` | `Authorization: Bearer <token>` | `200` the user, `401 no token` / `invalid token` / `token expired` |
-| `GET /token/users` | `Authorization: Bearer <token>` | `200` all users (no passwords) for an **admin**, `403 forbidden` for a user, `401` without a valid token |
-| `GET /health` | – | `200`: Playwright waits for it before the tests |
+| Request                | Body / header                   | Answer                                                                                                   |
+| ---------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `POST /token/register` | `RegisterRequest`               | `201 { token, user }`, `409` if the email is taken                                                       |
+| `POST /token/login`    | `{ email, password }`           | `200 { token, user }`, `401 bad credentials`                                                             |
+| `GET /token/me`        | `Authorization: Bearer <token>` | `200` the user, `401 no token` / `invalid token` / `token expired`                                       |
+| `GET /token/users`     | `Authorization: Bearer <token>` | `200` all users (no passwords) for an **admin**, `403 forbidden` for a user, `401` without a valid token |
+| `GET /health`          | –                               | `200`: Playwright waits for it before the tests                                                          |
 
 - It never writes `db.json` itself: it asks json-server over HTTP. Two programs writing the same file would overwrite each other.
 - `npm run dev` starts it with the others. Alone: `npm run api:auth` (json-server must run too).
@@ -479,6 +480,7 @@ The API isn't running. You probably used `npm start` / `ng serve` → use `npm r
 ### `'concurrently' is not recognized` / `concurrently: command not found`
 
 `predev` didn't run. Check:
+
 1. The script is called exactly `predev` (same name as `dev` + `pre`).
 2. You use **npm**. `pnpm` skips `pre` scripts by default → run `node scripts/ensure-fake-api.js` once by hand, or just `npm install -D json-server@0.17.4 concurrently`.
 3. npm's `ignore-scripts` isn't on: `npm config get ignore-scripts` must say `false`.

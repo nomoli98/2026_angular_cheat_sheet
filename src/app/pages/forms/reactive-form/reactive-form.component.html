@@ -1,111 +1,177 @@
 <h2>Reactive Form</h2>
 
 <form [formGroup]="formRegister" (ngSubmit)="onSubmit()" class="card card-body">
-
-  <div class="mb-3">
-    <label for="name" class="form-label">Name</label>
-    <input type="text" name="name" id="name" placeholder="name123" class="form-control"
-           formControlName="name"
-           [class.is-invalid]="formRegister.get('name')?.invalid && formRegister.get('name')?.touched" />
-    @if (formRegister.get('name')?.invalid && formRegister.get('name')?.touched) {
-      <div class="invalid-feedback">Enter valid name</div>
-    }
-  </div>
-
-  <div class="mb-3">
-    <label for="email" class="form-label">Email</label>
-    <input type="text" name="email" id="email" placeholder="example@email.com" class="form-control"
-           formControlName="email"
-           [class.is-invalid]="formRegister.get('email')?.invalid && formRegister.get('email')?.touched" />
-    @if (formRegister.get('email')?.pending) {
-      <div class="form-text">Checking the email...</div>
-    }
-    @if (formRegister.get('email')?.invalid && formRegister.get('email')?.touched) {
-      <div class="invalid-feedback">
-        @if (formRegister.get('email')?.hasError('emailTaken')) {
-          This email is already taken
-        } @else {
-          Enter valid email address
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input
+            type="text"
+            name="name"
+            id="name"
+            placeholder="name123"
+            class="form-control"
+            formControlName="name"
+            [class.is-invalid]="
+                formRegister.get('name')?.invalid && formRegister.get('name')?.touched
+            "
+        />
+        @if (formRegister.get('name')?.invalid && formRegister.get('name')?.touched) {
+            <div class="invalid-feedback">Enter valid name</div>
         }
-      </div>
-    }
-  </div>
-
-  <div class="mb-3">
-    <label for="password" class="form-label">Password</label>
-    <input type="password" name="password" id="password" placeholder="Password123" class="form-control"
-           formControlName="password"
-           [class.is-invalid]="formRegister.get('password')?.invalid && formRegister.get('password')?.touched" />
-    @if (formRegister.get('password')?.invalid && formRegister.get('password')?.touched) {
-      <div class="invalid-feedback">Enter valid password</div>
-    }
-  </div>
-
-  <div class="mb-3">
-    <label for="birthdate" class="form-label">Birthdate</label>
-    <input type="date" name="birthdate" id="birthdate" class="form-control"
-           formControlName="birthdate"
-           [class.is-invalid]="formRegister.get('birthdate')?.invalid && formRegister.get('birthdate')?.touched" />
-    @if (formRegister.get('birthdate')?.invalid && formRegister.get('birthdate')?.touched) {
-      <div class="invalid-feedback">Enter valid birthdate</div>
-    }
-  </div>
-
-  <div class="mb-3">
-    <label for="height" class="form-label">Height</label>
-    <input type="number" name="height" id="height" class="form-control" formControlName="height"
-           [class.is-invalid]="formRegister.get('height')?.invalid && formRegister.get('height')?.touched" />
-    @if (formRegister.get('height')?.invalid && formRegister.get('height')?.touched) {
-      <div class="invalid-feedback">Enter valid height</div>
-    }
-  </div>
-
-  <div class="mb-3">
-    <label for="gender" class="form-label">Gender</label>
-    <select name="gender" id="gender" class="form-select" formControlName="gender"
-            [class.is-invalid]="formRegister.get('gender')?.invalid && formRegister.get('gender')?.touched">
-      <option value="">Choose a gender...</option>
-      <option value="{{GenderEnum.FEMALE}}">{{ GenderEnum.FEMALE }}</option>
-      <option value="{{GenderEnum.MALE}}">{{ GenderEnum.MALE }}</option>
-      <option value="{{GenderEnum.OTHER}}">{{ GenderEnum.OTHER }}</option>
-    </select>
-    @if (formRegister.get('gender')?.invalid && formRegister.get('gender')?.touched) {
-      <div class="invalid-feedback">Enter valid gender</div>
-    }
-  </div>
-
-  <div class="mb-3">
-    <div class="form-check">
-      <input type="radio" value="free" id="free" class="form-check-input" formControlName="subscription" />
-      <label for="free" class="form-check-label">Free</label>
     </div>
-    <div class="form-check">
-      <input type="radio" value="premium" id="premium" class="form-check-input" formControlName="subscription" />
-      <label for="premium" class="form-check-label">Premium</label>
+
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input
+            type="text"
+            name="email"
+            id="email"
+            placeholder="example@email.com"
+            class="form-control"
+            formControlName="email"
+            [class.is-invalid]="
+                formRegister.get('email')?.invalid && formRegister.get('email')?.touched
+            "
+        />
+        @if (formRegister.get('email')?.pending) {
+            <div class="form-text">Checking the email...</div>
+        }
+        @if (formRegister.get('email')?.invalid && formRegister.get('email')?.touched) {
+            <div class="invalid-feedback">
+                @if (formRegister.get('email')?.hasError('emailTaken')) {
+                    This email is already taken
+                } @else {
+                    Enter valid email address
+                }
+            </div>
+        }
     </div>
-    @if (formRegister.get('subscription')?.invalid && formRegister.get('subscription')?.touched) {
-      <div class="invalid-feedback d-block">Choose a Subscription</div>
-    }
-  </div>
 
-  <div class="mb-3 form-check">
-    <input type="checkbox" id="agreeToTerms" class="form-check-input" formControlName="agreeToTerms" />
-    <label for="agreeToTerms" class="form-check-label">I agree to the terms</label>
-    @if (formRegister.get('agreeToTerms')?.invalid && formRegister.get('agreeToTerms')?.touched) {
-      <div class="invalid-feedback d-block">You need to agree to the terms</div>
-    }
-  </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input
+            type="password"
+            name="password"
+            id="password"
+            placeholder="Password123"
+            class="form-control"
+            formControlName="password"
+            [class.is-invalid]="
+                formRegister.get('password')?.invalid && formRegister.get('password')?.touched
+            "
+        />
+        @if (formRegister.get('password')?.invalid && formRegister.get('password')?.touched) {
+            <div class="invalid-feedback">Enter valid password</div>
+        }
+    </div>
 
-  <button class="btn btn-primary" [disabled]="formRegister.invalid || loading()" type="submit">
-    @if (!loading()) {
-      Register
-    } @else {
-      Loading...
-    }
-  </button>
+    <div class="mb-3">
+        <label for="birthdate" class="form-label">Birthdate</label>
+        <input
+            type="date"
+            name="birthdate"
+            id="birthdate"
+            class="form-control"
+            formControlName="birthdate"
+            [class.is-invalid]="
+                formRegister.get('birthdate')?.invalid && formRegister.get('birthdate')?.touched
+            "
+        />
+        @if (formRegister.get('birthdate')?.invalid && formRegister.get('birthdate')?.touched) {
+            <div class="invalid-feedback">Enter valid birthdate</div>
+        }
+    </div>
+
+    <div class="mb-3">
+        <label for="height" class="form-label">Height</label>
+        <input
+            type="number"
+            name="height"
+            id="height"
+            class="form-control"
+            formControlName="height"
+            [class.is-invalid]="
+                formRegister.get('height')?.invalid && formRegister.get('height')?.touched
+            "
+        />
+        @if (formRegister.get('height')?.invalid && formRegister.get('height')?.touched) {
+            <div class="invalid-feedback">Enter valid height</div>
+        }
+    </div>
+
+    <div class="mb-3">
+        <label for="gender" class="form-label">Gender</label>
+        <select
+            name="gender"
+            id="gender"
+            class="form-select"
+            formControlName="gender"
+            [class.is-invalid]="
+                formRegister.get('gender')?.invalid && formRegister.get('gender')?.touched
+            "
+        >
+            <option value="">Choose a gender...</option>
+            <option value="{{ GenderEnum.FEMALE }}">{{ GenderEnum.FEMALE }}</option>
+            <option value="{{ GenderEnum.MALE }}">{{ GenderEnum.MALE }}</option>
+            <option value="{{ GenderEnum.OTHER }}">{{ GenderEnum.OTHER }}</option>
+        </select>
+        @if (formRegister.get('gender')?.invalid && formRegister.get('gender')?.touched) {
+            <div class="invalid-feedback">Enter valid gender</div>
+        }
+    </div>
+
+    <div class="mb-3">
+        <div class="form-check">
+            <input
+                type="radio"
+                value="free"
+                id="free"
+                class="form-check-input"
+                formControlName="subscription"
+            />
+            <label for="free" class="form-check-label">Free</label>
+        </div>
+        <div class="form-check">
+            <input
+                type="radio"
+                value="premium"
+                id="premium"
+                class="form-check-input"
+                formControlName="subscription"
+            />
+            <label for="premium" class="form-check-label">Premium</label>
+        </div>
+        @if (
+            formRegister.get('subscription')?.invalid && formRegister.get('subscription')?.touched
+        ) {
+            <div class="invalid-feedback d-block">Choose a Subscription</div>
+        }
+    </div>
+
+    <div class="mb-3 form-check">
+        <input
+            type="checkbox"
+            id="agreeToTerms"
+            class="form-check-input"
+            formControlName="agreeToTerms"
+        />
+        <label for="agreeToTerms" class="form-check-label">I agree to the terms</label>
+        @if (
+            formRegister.get('agreeToTerms')?.invalid && formRegister.get('agreeToTerms')?.touched
+        ) {
+            <div class="invalid-feedback d-block">You need to agree to the terms</div>
+        }
+    </div>
+
+    <button class="btn btn-primary" [disabled]="formRegister.invalid || loading()" type="submit">
+        @if (!loading()) {
+            Register
+        } @else {
+            Loading...
+        }
+    </button>
 </form>
 
 <section class="card card-body mt-3">
-  <h3>Code</h3>
-  <app-code-snippet [code]="snippets.reactiveForm" />
+    <h3>Code</h3>
+    <app-code-snippet [code]="snippets.reactiveForm" />
 </section>

@@ -36,35 +36,57 @@ export class TemplateValidatorsComponent {
 
 ```html template-validators.component.html
 <form #builtInForm="ngForm">
-  <!-- name="" is mandatory -->
-  <input name="name" class="form-control" [(ngModel)]="builtIn.name" #nameCtrl="ngModel"
-         required minlength="2" maxlength="50"
-         [class.is-invalid]="nameCtrl.invalid && nameCtrl.touched" />
+    <!-- name="" is mandatory -->
+    <input
+        name="name"
+        class="form-control"
+        [(ngModel)]="builtIn.name"
+        #nameCtrl="ngModel"
+        required
+        minlength="2"
+        maxlength="50"
+        [class.is-invalid]="nameCtrl.invalid && nameCtrl.touched"
+    />
 
-  @if (nameCtrl.touched) {
-    @if (nameCtrl.errors?.['required']) { <div class="invalid-feedback">Name is required</div> }
-    @if (nameCtrl.errors?.['minlength']) {
-      <div class="invalid-feedback">At least {{ nameCtrl.errors?.['minlength'].requiredLength }} characters</div>
-    }
-  }
+    @if (nameCtrl.touched) { @if (nameCtrl.errors?.['required']) {
+    <div class="invalid-feedback">Name is required</div>
+    } @if (nameCtrl.errors?.['minlength']) {
+    <div class="invalid-feedback">
+        At least {{ nameCtrl.errors?.['minlength'].requiredLength }} characters
+    </div>
+    } }
 
-  <!-- type="number" only -->
-  <input name="height" type="number" class="form-control" [(ngModel)]="builtIn.height"
-         #heightCtrl="ngModel" required min="50" max="275" />
+    <!-- type="number" only -->
+    <input
+        name="height"
+        type="number"
+        class="form-control"
+        [(ngModel)]="builtIn.height"
+        #heightCtrl="ngModel"
+        required
+        min="50"
+        max="275"
+    />
 
-  <!-- checkbox: must be checked -->
-  <input name="agreeToTerms" type="checkbox" class="form-check-input"
-         [(ngModel)]="builtIn.agreeToTerms" #termsCtrl="ngModel" required />
+    <!-- checkbox: must be checked -->
+    <input
+        name="agreeToTerms"
+        type="checkbox"
+        class="form-check-input"
+        [(ngModel)]="builtIn.agreeToTerms"
+        #termsCtrl="ngModel"
+        required
+    />
 </form>
 ```
 
-| Attribute | Error key | Works on |
-| --------- | --------- | -------- |
-| `required` | `required` | any input (on a checkbox → must be **checked**) |
-| `minlength="2"` / `maxlength="50"` | `minlength` / `maxlength` | text |
-| `email` | `email` | text / email |
-| `pattern="[A-Z].*"` | `pattern` | text (the whole value must match) |
-| `min="50"` / `max="275"` | `min` / `max` | `type="number"` only |
+| Attribute                          | Error key                 | Works on                                        |
+| ---------------------------------- | ------------------------- | ----------------------------------------------- |
+| `required`                         | `required`                | any input (on a checkbox → must be **checked**) |
+| `minlength="2"` / `maxlength="50"` | `minlength` / `maxlength` | text                                            |
+| `email`                            | `email`                   | text / email                                    |
+| `pattern="[A-Z].*"`                | `pattern`                 | text (the whole value must match)               |
+| `min="50"` / `max="275"`           | `min` / `max`             | `type="number"` only                            |
 
 Dynamic value? Bind it: `[required]="isRequired"`, `[min]="minHeight"`.
 
@@ -79,42 +101,42 @@ import { Directive } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 
 @Directive({
-  selector: '[appStrongPassword]',
-  // multi: true!
-  providers: [{ provide: NG_VALIDATORS, useExisting: StrongPasswordDirective, multi: true }],
+    selector: '[appStrongPassword]',
+    // multi: true!
+    providers: [{ provide: NG_VALIDATORS, useExisting: StrongPasswordDirective, multi: true }],
 })
 export class StrongPasswordDirective implements Validator {
-  validate(control: AbstractControl): ValidationErrors | null {
-    const password: string = control.value;
-    if (!password) return null; // empty: required's job
+    validate(control: AbstractControl): ValidationErrors | null {
+        const password: string = control.value;
+        if (!password) return null; // empty: required's job
 
-    const isLongEnough = password.length >= 8;
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasLowercase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
+        const isLongEnough = password.length >= 8;
+        const hasUppercase = /[A-Z]/.test(password);
+        const hasLowercase = /[a-z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
 
-    if (isLongEnough && hasUppercase && hasLowercase && hasNumber) return null;
-    return { strongPassword: true };
-  }
+        if (isLongEnough && hasUppercase && hasLowercase && hasNumber) return null;
+        return { strongPassword: true };
+    }
 }
 ```
 
 ```ts birthday.directive.ts
 @Directive({
-  selector: '[appBirthdate]',
-  providers: [{ provide: NG_VALIDATORS, useExisting: BirthdateDirective, multi: true }],
+    selector: '[appBirthdate]',
+    providers: [{ provide: NG_VALIDATORS, useExisting: BirthdateDirective, multi: true }],
 })
 export class BirthdateDirective implements Validator {
-  // parameters
-  @Input() minAge = 0;
-  @Input() maxAge = 135;
+    // parameters
+    @Input() minAge = 0;
+    @Input() maxAge = 135;
 
-  validate(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-    // ...'YYYY-MM-DD' → age
-    if (age < this.minAge || age > this.maxAge) return { birthdate: true };
-    return null;
-  }
+    validate(control: AbstractControl): ValidationErrors | null {
+        if (!control.value) return null;
+        // ...'YYYY-MM-DD' → age
+        if (age < this.minAge || age > this.maxAge) return { birthdate: true };
+        return null;
+    }
 }
 ```
 
@@ -130,18 +152,33 @@ export class TemplateValidatorsComponent {
 ```
 
 ```html template-validators.component.html
-<input name="password" type="password" class="form-control"
-       [(ngModel)]="custom.password" #passwordCtrl="ngModel" required appStrongPassword />
+<input
+    name="password"
+    type="password"
+    class="form-control"
+    [(ngModel)]="custom.password"
+    #passwordCtrl="ngModel"
+    required
+    appStrongPassword
+/>
 @if (passwordCtrl.touched && passwordCtrl.errors?.['strongPassword']) {
-  <div class="invalid-feedback">8+ characters, an uppercase, a lowercase and a digit</div>
+<div class="invalid-feedback">8+ characters, an uppercase, a lowercase and a digit</div>
 }
 
 <!-- with parameters -->
-<input name="birthdate" type="date" class="form-control"
-       [(ngModel)]="custom.birthdate" #birthdateCtrl="ngModel"
-       required appBirthdate [minAge]="18" [maxAge]="120" />
+<input
+    name="birthdate"
+    type="date"
+    class="form-control"
+    [(ngModel)]="custom.birthdate"
+    #birthdateCtrl="ngModel"
+    required
+    appBirthdate
+    [minAge]="18"
+    [maxAge]="120"
+/>
 @if (birthdateCtrl.touched && birthdateCtrl.errors?.['birthdate']) {
-  <div class="invalid-feedback">You must be 18 to 120 years old</div>
+<div class="invalid-feedback">You must be 18 to 120 years old</div>
 }
 ```
 
@@ -157,34 +194,46 @@ import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@an
 import { matchFieldsValidator } from '../reactive-form/match-fields.validator';
 
 @Directive({
-  selector: '[appMatchFields]',
-  providers: [{ provide: NG_VALIDATORS, useExisting: MatchFieldsDirective, multi: true }],
+    selector: '[appMatchFields]',
+    providers: [{ provide: NG_VALIDATORS, useExisting: MatchFieldsDirective, multi: true }],
 })
 export class MatchFieldsDirective implements Validator {
-  readonly fields = input<[string, string]>(undefined, { alias: 'appMatchFields' }); // optional: NG0950
+    readonly fields = input<[string, string]>(undefined, { alias: 'appMatchFields' }); // optional: NG0950
 
-  // group = the whole form
-  validate(group: AbstractControl): ValidationErrors | null {
-    const fields = this.fields();
-    if (!fields) return null; // runs before inputs
-    const [field, confirmField] = fields;
-    return matchFieldsValidator(field, confirmField)(group); // reuses reactive one
-  }
+    // group = the whole form
+    validate(group: AbstractControl): ValidationErrors | null {
+        const fields = this.fields();
+        if (!fields) return null; // runs before inputs
+        const [field, confirmField] = fields;
+        return matchFieldsValidator(field, confirmField)(group); // reuses reactive one
+    }
 }
 ```
 
 ```html template-validators.component.html
 <!-- directive on the form -->
 <form #crossForm="ngForm" [appMatchFields]="['password', 'confirmPassword']">
-  <input name="password" type="password" class="form-control" [(ngModel)]="cross.password" required />
+    <input
+        name="password"
+        type="password"
+        class="form-control"
+        [(ngModel)]="cross.password"
+        required
+    />
 
-  <input name="confirmPassword" type="password" class="form-control"
-         [(ngModel)]="cross.confirmPassword" #confirmCtrl="ngModel" required />
+    <input
+        name="confirmPassword"
+        type="password"
+        class="form-control"
+        [(ngModel)]="cross.confirmPassword"
+        #confirmCtrl="ngModel"
+        required
+    />
 
-  <!-- error on the FORM -->
-  @if (confirmCtrl.touched && crossForm.hasError('fieldsMismatch')) {
+    <!-- error on the FORM -->
+    @if (confirmCtrl.touched && crossForm.hasError('fieldsMismatch')) {
     <div class="invalid-feedback">Passwords don't match</div>
-  }
+    }
 </form>
 ```
 
@@ -198,33 +247,46 @@ Same as a custom directive, but in **`NG_ASYNC_VALIDATORS`**, and `validate()` r
 
 ```ts email-taken.directive.ts
 import { Directive } from '@angular/core';
-import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
+import {
+    AbstractControl,
+    AsyncValidator,
+    NG_ASYNC_VALIDATORS,
+    ValidationErrors,
+} from '@angular/forms';
 import { Observable } from 'rxjs';
 import { emailTakenValidator } from '../reactive-form/email-taken.validator';
 
 @Directive({
-  selector: '[appEmailTaken]',
-  // ASYNC token
-  providers: [{ provide: NG_ASYNC_VALIDATORS, useExisting: EmailTakenDirective, multi: true }],
+    selector: '[appEmailTaken]',
+    // ASYNC token
+    providers: [{ provide: NG_ASYNC_VALIDATORS, useExisting: EmailTakenDirective, multi: true }],
 })
 export class EmailTakenDirective implements AsyncValidator {
-  private readonly _validator = emailTakenValidator(); // reuses the reactive one
+    private readonly _validator = emailTakenValidator(); // reuses the reactive one
 
-  validate(control: AbstractControl): Observable<ValidationErrors | null> {
-    return this._validator(control) as Observable<ValidationErrors | null>;
-  }
+    validate(control: AbstractControl): Observable<ValidationErrors | null> {
+        return this._validator(control) as Observable<ValidationErrors | null>;
+    }
 }
 ```
 
 ```html template-validators.component.html
-<input name="email" type="email" class="form-control" [(ngModel)]="async.email"
-       #emailCtrl="ngModel" required email appEmailTaken />
+<input
+    name="email"
+    type="email"
+    class="form-control"
+    [(ngModel)]="async.email"
+    #emailCtrl="ngModel"
+    required
+    email
+    appEmailTaken
+/>
 
 <!-- while waiting -->
-@if (emailCtrl.pending) { <div class="form-text">Checking the email...</div> }
-
-@if (emailCtrl.touched && emailCtrl.errors?.['emailTaken']) {
-  <div class="invalid-feedback">This email is already taken</div>
+@if (emailCtrl.pending) {
+<div class="form-text">Checking the email...</div>
+} @if (emailCtrl.touched && emailCtrl.errors?.['emailTaken']) {
+<div class="invalid-feedback">This email is already taken</div>
 }
 ```
 

@@ -6,10 +6,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-responsive-binding',
-  templateUrl: './responsive-binding.component.html',
+    selector: 'app-responsive-binding',
+    templateUrl: './responsive-binding.component.html',
 })
 export class ResponsiveBindingComponent {
-  protected clicked = false;
+    protected clicked = false;
 }
 ```

@@ -1,18 +1,27 @@
 <nav class="navbar bg-body-tertiary border-bottom">
-  <div class="container">
-    <a class="navbar-brand fw-semibold" routerLink="/">Angular 22 cheat sheet</a>
-    <div class="d-flex align-items-center gap-4">
-      <app-theme-toggle />
-      <app-auth-toggle />
+    <div class="container">
+        <a class="navbar-brand fw-semibold" routerLink="/">Angular 22 cheat sheet</a>
+        <div class="d-flex align-items-center gap-4">
+            <app-theme-toggle />
+            <app-auth-toggle />
+        </div>
     </div>
-  </div>
 </nav>
 
 <main class="container py-4">
-  <!-- hidden on the index, whatever the ?tab= -->
-  <a routerLink="/" routerLinkActive="d-none"
-     [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
-     class="d-inline-block mb-3 link-secondary text-decoration-none">← Back to index</a>
+    <!-- hidden on the index, whatever the ?tab= -->
+    <a
+        routerLink="/"
+        routerLinkActive="d-none"
+        [routerLinkActiveOptions]="{
+            paths: 'exact',
+            queryParams: 'ignored',
+            fragment: 'ignored',
+            matrixParams: 'ignored',
+        }"
+        class="d-inline-block mb-3 link-secondary text-decoration-none"
+        >← Back to index</a
+    >
 
-  <router-outlet />
+    <router-outlet />
 </main>

@@ -1,0 +1,123 @@
+<h2>Prettier (code formatting)</h2>
+
+<p>
+    Prettier rewrites your files so they all look the same: quotes, indentation, line length,
+    commas. You stop arguing about style and stop fixing it by hand. In this repo it runs on every
+    file when you start <code>npm run dev</code>. Full guide: <code>PRETTIER.md</code> ·
+    <a href="https://prettier.io/docs/" target="_blank" rel="noopener">Prettier docs</a>.
+</p>
+
+<section class="card card-body mb-3">
+    <h3>How it works</h3>
+    <ul class="mb-0">
+        <li>
+            Prettier <strong>throws away</strong> your formatting and prints the code again from
+            scratch, following <code>.prettierrc</code>. Same code in → same layout out, whoever
+            wrote it.
+        </li>
+        <li>
+            It only changes <strong>how the code looks</strong>, never what it does. It formats
+            <code>.ts</code>, <code>.html</code>, <code>.css</code>, <code>.json</code> and
+            <code>.md</code> (including the code blocks inside the snippets).
+        </li>
+        <li>
+            <code>npm run dev</code> first runs <code>predev</code>: npm automatically runs a script
+            called <code>pre&lt;name&gt;</code> before <code>&lt;name&gt;</code>. That's where
+            <code>prettier --write .</code> sits, so the whole repo is formatted before the API and
+            <code>ng serve</code> start.
+        </li>
+    </ul>
+</section>
+
+<section class="card card-body mb-3">
+    <h3>1. Install</h3>
+    <p>A dev dependency: it's only used while you write code, not in the built app.</p>
+    <app-code-snippet [code]="snippets.install" />
+</section>
+
+<section class="card card-body mb-3">
+    <h3>2. Configure it</h3>
+    <ul>
+        <li>
+            <code>tabWidth: 4</code> + <code>useTabs: false</code> → indent with
+            <strong>4 spaces</strong>.
+        </li>
+        <li>
+            <code>singleQuote: true</code> → <code>'text'</code> instead of <code>"text"</code> in
+            TS. JSON and HTML attributes keep double quotes: that's their syntax.
+        </li>
+        <li><code>printWidth: 100</code> → lines are wrapped after 100 characters.</li>
+        <li>
+            The <code>*.html</code> override uses the <strong>angular</strong> parser, so it
+            understands <code>&#64;if</code>, <code>&#64;for</code>, <code>[prop]</code>,
+            <code>(event)</code>.
+        </li>
+    </ul>
+    <p>
+        Set the same indentation in <code>.editorconfig</code>, so your editor types 4 spaces too
+        and Prettier has nothing to fix.
+    </p>
+    <app-code-snippet [code]="snippets.config" />
+</section>
+
+<section class="card card-body mb-3">
+    <h3>3. Tell it what to skip</h3>
+    <p>
+        <code>.prettierignore</code> works like <code>.gitignore</code>. Skip generated files and
+        <code>fake-api/db.json</code>: json-server rewrites it with its own formatting on every
+        change.
+    </p>
+    <app-code-snippet [code]="snippets.ignore" />
+</section>
+
+<section class="card card-body mb-3">
+    <h3>4. Add the scripts</h3>
+    <ul>
+        <li>
+            <code>--write</code> changes the files, <code>--check</code> only lists the ones that
+            aren't formatted (and fails, handy in CI).
+        </li>
+        <li><code>.</code> = every file in the project, minus <code>.prettierignore</code>.</li>
+        <li>
+            <code>--log-level warn</code> in <code>predev</code>: don't print every file, only
+            problems.
+        </li>
+    </ul>
+    <app-code-snippet [code]="snippets.scripts" />
+</section>
+
+<section class="card card-body mb-3">
+    <h3>5. What it does to a file</h3>
+    <app-code-snippet [code]="snippets.result" />
+</section>
+
+<section class="card card-body mb-3">
+    <h3>6. (Optional) Format on save in VS Code</h3>
+    <p>
+        Install the <strong>Prettier</strong> extension. It reads the same <code>.prettierrc</code>,
+        so saving a file gives the same result as <code>npm run format</code>.
+    </p>
+    <app-code-snippet [code]="snippets.vscode" />
+</section>
+
+<section class="card card-body mb-3">
+    <h3>Gotchas</h3>
+    <ul class="mb-0">
+        <li>
+            Changed the config? Run <code>npm run format</code> once: Prettier doesn't touch files
+            until it runs.
+        </li>
+        <li>
+            A file with a syntax error can't be formatted: Prettier prints the error and leaves it
+            as it is.
+        </li>
+        <li>
+            Want Prettier to leave one block alone? Put <code>// prettier-ignore</code> (or
+            <code>&lt;!-- prettier-ignore --&gt;</code> in HTML) on the line before it.
+        </li>
+        <li>
+            Reformatting the whole repo touches almost every file: commit it on its own, so real
+            changes stay easy to read in the history.
+        </li>
+    </ul>
+</section>

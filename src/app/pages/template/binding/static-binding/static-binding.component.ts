@@ -6,31 +6,31 @@ import dataBinding from './snippets/data-binding.md';
 import propertiesBinding from './snippets/properties-binding.md';
 
 @Component({
-  selector: 'app-static-binding',
-  standalone: true,
-  imports: [CodeSnippetComponent, CommonModule, ChildComponentComponent],
-  templateUrl: './static-binding.component.html',
-  styles: `
-    .underlined {
-      text-decoration: underline;
-    }
+    selector: 'app-static-binding',
+    standalone: true,
+    imports: [CodeSnippetComponent, CommonModule, ChildComponentComponent],
+    templateUrl: './static-binding.component.html',
+    styles: `
+        .underlined {
+            text-decoration: underline;
+        }
 
-    .highlighted {
-      background-color: pink;
-    }
-  `,
+        .highlighted {
+            background-color: pink;
+        }
+    `,
 })
 export class StaticBindingComponent {
-  // page snippets
-  protected readonly snippets = { dataBinding, propertiesBinding };
+    // page snippets
+    protected readonly snippets = { dataBinding, propertiesBinding };
 
-  value = 'Readonly value';
-  isDisabled = true;
-  inputPlaceholder = 'placeholder';
-  inputValue = 'The input value';
-  pRole = 'status';
-  live = 'polite';
-  firstName = 'Bob';
-  isUnderlined = true;
-  listClasses = 'highlighted';
+    value = 'Readonly value';
+    isDisabled = true;
+    inputPlaceholder = 'placeholder';
+    inputValue = 'The input value';
+    pRole = 'status';
+    live = 'polite';
+    firstName = 'Bob';
+    isUnderlined = true;
+    listClasses = 'highlighted';
 }

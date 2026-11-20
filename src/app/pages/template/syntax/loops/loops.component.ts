@@ -4,22 +4,21 @@ import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.componen
 import forLoop from './snippets/for.md';
 
 @Component({
-  selector: 'app-loops',
-  standalone: true,
-  imports: [CodeSnippetComponent, CommonModule],
-  templateUrl: './loops.component.html'
+    selector: 'app-loops',
+    standalone: true,
+    imports: [CodeSnippetComponent, CommonModule],
+    templateUrl: './loops.component.html',
 })
 export class LoopsComponent {
-  // page snippets
-  protected readonly snippets = { forLoop };
+    // page snippets
+    protected readonly snippets = { forLoop };
 
-  protected items = [
-    {id: 1, name: 'item 1'},
-    {id: 2, name: 'item 2'},
-    {id: 3, name: 'item 3'},
-    {id: 4, name: 'item 4'},
-    {id: 5, name: 'item 5'},
-    {id: 6, name: 'item 6'},
-  ]
-
+    protected items = [
+        { id: 1, name: 'item 1' },
+        { id: 2, name: 'item 2' },
+        { id: 3, name: 'item 3' },
+        { id: 4, name: 'item 4' },
+        { id: 5, name: 'item 5' },
+        { id: 6, name: 'item 6' },
+    ];
 }

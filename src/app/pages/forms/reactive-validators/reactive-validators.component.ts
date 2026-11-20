@@ -12,57 +12,60 @@ import crossField from './snippets/cross-field.md';
 import async from './snippets/async.md';
 
 @Component({
-  imports: [CodeSnippetComponent, ReactiveFormsModule, JsonPipe],
-  selector: 'app-reactive-validators',
-  templateUrl: './reactive-validators.component.html',
+    imports: [CodeSnippetComponent, ReactiveFormsModule, JsonPipe],
+    selector: 'app-reactive-validators',
+    templateUrl: './reactive-validators.component.html',
 })
 export class ReactiveValidatorsComponent {
-  // The code shown on the page
-  protected readonly snippets = { builtIn, custom, crossField, async };
+    // The code shown on the page
+    protected readonly snippets = { builtIn, custom, crossField, async };
 
-  // 1. Built-in
-  protected readonly builtInForm = new FormGroup({
-    name: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(50)],
-    }),
-    height: new FormControl(50, {
-      nonNullable: true,
-      validators: [Validators.required, Validators.min(50), Validators.max(275)],
-    }),
-    agreeToTerms: new FormControl(false, {
-      nonNullable: true,
-      validators: Validators.requiredTrue,
-    }),
-  });
+    // 1. Built-in
+    protected readonly builtInForm = new FormGroup({
+        name: new FormControl('', {
+            nonNullable: true,
+            validators: [Validators.required, Validators.minLength(2), Validators.maxLength(50)],
+        }),
+        height: new FormControl(50, {
+            nonNullable: true,
+            validators: [Validators.required, Validators.min(50), Validators.max(275)],
+        }),
+        agreeToTerms: new FormControl(false, {
+            nonNullable: true,
+            validators: Validators.requiredTrue,
+        }),
+    });
 
-  // 2. Custom
-  protected readonly customForm = new FormGroup({
-    password: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, strongPasswordValidator()],
-    }),
-    birthdate: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, birthdateValidator(18, 120)],
-    }),
-  });
+    // 2. Custom
+    protected readonly customForm = new FormGroup({
+        password: new FormControl('', {
+            nonNullable: true,
+            validators: [Validators.required, strongPasswordValidator()],
+        }),
+        birthdate: new FormControl('', {
+            nonNullable: true,
+            validators: [Validators.required, birthdateValidator(18, 120)],
+        }),
+    });
 
-  // 3. Cross-field
-  protected readonly crossForm = new FormGroup(
-    {
-      password: new FormControl('', { nonNullable: true, validators: Validators.required }),
-      confirmPassword: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    },
-    { validators: matchFieldsValidator('password', 'confirmPassword') },
-  );
+    // 3. Cross-field
+    protected readonly crossForm = new FormGroup(
+        {
+            password: new FormControl('', { nonNullable: true, validators: Validators.required }),
+            confirmPassword: new FormControl('', {
+                nonNullable: true,
+                validators: Validators.required,
+            }),
+        },
+        { validators: matchFieldsValidator('password', 'confirmPassword') },
+    );
 
-  // 4. Async
-  protected readonly asyncForm = new FormGroup({
-    email: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.email],
-      asyncValidators: [emailTakenValidator()],
-    }),
-  });
+    // 4. Async
+    protected readonly asyncForm = new FormGroup({
+        email: new FormControl('', {
+            nonNullable: true,
+            validators: [Validators.required, Validators.email],
+            asyncValidators: [emailTakenValidator()],
+        }),
+    });
 }

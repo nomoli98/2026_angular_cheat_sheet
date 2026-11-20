@@ -1,31 +1,31 @@
 <h2>Static Binding</h2>
 
 <section class="card card-body mb-3">
-  <h3>Data binding</h3>
-  <p>This is the value I get from the .ts file : {{ value }}</p>
+    <h3>Data binding</h3>
+    <p>This is the value I get from the .ts file : {{ value }}</p>
 
-  <app-code-snippet [code]="snippets.dataBinding" />
+    <app-code-snippet [code]="snippets.dataBinding" />
 </section>
 
 <section class="card card-body mb-3">
-  <h3>Properties and attributes binding</h3>
+    <h3>Properties and attributes binding</h3>
 
-  <h4>Native properties</h4>
-  <input [placeholder]="inputPlaceholder" />
-  <button [disabled]="isDisabled">Disabled button</button>
+    <h4>Native properties</h4>
+    <input [placeholder]="inputPlaceholder" />
+    <button [disabled]="isDisabled">Disabled button</button>
 
-  <h4>Components properties</h4>
-  <app-child-component [value]="inputValue" />
+    <h4>Components properties</h4>
+    <app-child-component [value]="inputValue" />
 
-  <h4>Attributes binding</h4>
-  <p [attr.role]="pRole" [attr.aria-live]="live">Status: OK</p>
+    <h4>Attributes binding</h4>
+    <p [attr.role]="pRole" [attr.aria-live]="live">Status: OK</p>
 
-  <h4>Text interpolation in properties and attributes</h4>
-  <img src="" alt="Profile photo of {{ firstName }}" />
+    <h4>Text interpolation in properties and attributes</h4>
+    <img src="" alt="Profile photo of {{ firstName }}" />
 
-  <h4>Style property binding</h4>
-  <p [class.underlined]="isUnderlined">Give a condition for a style class.</p>
-  <p [class]="listClasses">Or just pass a list of classes</p>
+    <h4>Style property binding</h4>
+    <p [class.underlined]="isUnderlined">Give a condition for a style class.</p>
+    <p [class]="listClasses">Or just pass a list of classes</p>
 
-  <app-code-snippet [code]="snippets.propertiesBinding" />
+    <app-code-snippet [code]="snippets.propertiesBinding" />
 </section>

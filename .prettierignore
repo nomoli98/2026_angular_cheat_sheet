@@ -1,0 +1,17 @@
+# Build output and caches
+dist
+.angular
+coverage
+out-tsc
+
+# Dependencies (npm writes the lock file itself)
+node_modules
+package-lock.json
+
+# Playwright reports
+test-results
+playwright-report
+blob-report
+
+# Live fake-API data: json-server rewrites it on every POST/PUT/PATCH/DELETE
+fake-api/db.json

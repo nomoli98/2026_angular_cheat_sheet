@@ -2,7 +2,7 @@
 import { compare } from 'bcryptjs';
 
 const ok = await compare('BobIsTheBest99#', storedHash); // true
-const ko = await compare('wrong', storedHash);           // false
+const ko = await compare('wrong', storedHash); // false
 
 // ❌ never (new salt each time)
 (await hash(typed, 10)) === storedHash; // always false

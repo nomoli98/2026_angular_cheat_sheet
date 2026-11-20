@@ -21,21 +21,21 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    // withComponentInputBinding: route params (:id) and query params go into the component's input()
-    provideRouter(routes, withComponentInputBinding()),
-  ],
+    providers: [
+        provideBrowserGlobalErrorListeners(),
+        // withComponentInputBinding: route params (:id) and query params go into the component's input()
+        provideRouter(routes, withComponentInputBinding()),
+    ],
 };
 ```
 
 Useful options for `provideRouter(routes, ...)`:
 
-| Option | What it does |
-|---|---|
-| `withComponentInputBinding()` | Route params (`:id`), query params and route `data` go straight into the component's `input()` |
-| `withHashLocation()` | URLs look like `/#/form` (for servers that can't redirect everything to `index.html`) |
-| `withInMemoryScrolling({ scrollPositionRestoration: 'top' })` | Scroll back to the top when you change page |
+| Option                                                        | What it does                                                                                   |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `withComponentInputBinding()`                                 | Route params (`:id`), query params and route `data` go straight into the component's `input()` |
+| `withHashLocation()`                                          | URLs look like `/#/form` (for servers that can't redirect everything to `index.html`)          |
+| `withInMemoryScrolling({ scrollPositionRestoration: 'top' })` | Scroll back to the top when you change page                                                    |
 
 ## 2. Put a `<router-outlet>` where the page should appear
 
@@ -61,34 +61,34 @@ The router renders the matched component **right after** `<router-outlet />`. An
 ```ts
 // pages/routers/app.routes.example.ts
 export const routes: Routes = [
-  // 1. component: eager
-  { path: '', component: IndexComponent },
+    // 1. component: eager
+    { path: '', component: IndexComponent },
 
-  // 2. loadComponent: lazy, ONE component
-  {
-    path: 'loaded',
-    loadComponent: () => import('../@index/index.component').then((m) => m.IndexComponent),
-  },
+    // 2. loadComponent: lazy, ONE component
+    {
+        path: 'loaded',
+        loadComponent: () => import('../@index/index.component').then((m) => m.IndexComponent),
+    },
 
-  // 3. loadChildren: lazy, a whole Routes array
-  {
-    path: 'routes',
-    loadChildren: () => import('../forms/form.routes').then((r) => r.routes),
-  },
+    // 3. loadChildren: lazy, a whole Routes array
+    {
+        path: 'routes',
+        loadChildren: () => import('../forms/form.routes').then((r) => r.routes),
+    },
 
-  // 4. loadChildren to a routes file that uses sub-routing → see SUB-ROUTING.md
-  {
-    path: 'sub-outlet',
-    loadChildren: () => import('./sub-outlet.routes.example').then((r) => r.routes),
-  },
+    // 4. loadChildren to a routes file that uses sub-routing → see SUB-ROUTING.md
+    {
+        path: 'sub-outlet',
+        loadChildren: () => import('./sub-outlet.routes.example').then((r) => r.routes),
+    },
 ];
 ```
 
-| | Loads | When it's downloaded | Use it for |
-|---|---|---|---|
-| `component` | 1 component | When the app starts, in the main bundle | Small or always-needed pages: home, layout, 404 |
-| `loadComponent` | 1 component | The first time someone visits that route | One standalone page |
-| `loadChildren` | A `Routes` array (many pages) | The first time someone visits **any** route of the group | A feature area: forms, admin, shop… |
+|                 | Loads                         | When it's downloaded                                     | Use it for                                      |
+| --------------- | ----------------------------- | -------------------------------------------------------- | ----------------------------------------------- |
+| `component`     | 1 component                   | When the app starts, in the main bundle                  | Small or always-needed pages: home, layout, 404 |
+| `loadComponent` | 1 component                   | The first time someone visits that route                 | One standalone page                             |
+| `loadChildren`  | A `Routes` array (many pages) | The first time someone visits **any** route of the group | A feature area: forms, admin, shop…             |
 
 ### `component`
 
@@ -154,10 +154,10 @@ URL: /router/sub-outlet/1
 
 ```ts
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
-  // ...
-  { path: '**', loadComponent: () => import('./not-found/not-found.component') }, // ALWAYS LAST
+    { path: '', redirectTo: 'home', pathMatch: 'full' },
+    { path: 'home', component: HomeComponent },
+    // ...
+    { path: '**', loadComponent: () => import('./not-found/not-found.component') }, // ALWAYS LAST
 ];
 ```
 
@@ -170,9 +170,12 @@ export const routes: Routes = [
 In the HTML, import `RouterLink` in the component, then:
 
 ```html
-<a routerLink="/form/reactive-form">Reactive Forms</a>        <!-- absolute: starts with / -->
-<a routerLink="reactive-form">Reactive Forms</a>              <!-- relative to the current route -->
-<a [routerLink]="['/users', user.id]">Profile</a>             <!-- array: when part of it is a variable -->
+<a routerLink="/form/reactive-form">Reactive Forms</a>
+<!-- absolute: starts with / -->
+<a routerLink="reactive-form">Reactive Forms</a>
+<!-- relative to the current route -->
+<a [routerLink]="['/users', user.id]">Profile</a>
+<!-- array: when part of it is a variable -->
 ```
 
 > `routerLink="..."` (no brackets) is a **plain string URL**. `[routerLink]="..."` (brackets) is **TS code**: an array, a variable or an object. Writing an array without the brackets turns it into a broken URL.
@@ -199,10 +202,10 @@ goToForms() {
 
 > 📖 [Read route state](https://angular.dev/guide/routing/read-route-state)
 
-| | URL | Route | Read it as |
-|---|---|---|---|
-| **Route param** | `/user/42` | `{ path: 'user/:id' }` | `id = input<string>()` |
-| **Query param** | `/user/42?tab=posts` | nothing to declare | `tab = input<string>()` |
+|                 | URL                  | Route                  | Read it as              |
+| --------------- | -------------------- | ---------------------- | ----------------------- |
+| **Route param** | `/user/42`           | `{ path: 'user/:id' }` | `id = input<string>()`  |
+| **Query param** | `/user/42?tab=posts` | nothing to declare     | `tab = input<string>()` |
 
 ### Step 1: turn on input binding (once)
 
@@ -221,8 +224,8 @@ provideRouter(routes, withComponentInputBinding()),
 
 ```ts
 export class UserComponent {
-  id = input<string>();    // ':id'  → '42'
-  tab = input<string>();   // '?tab' → 'posts' (undefined if not in the URL)
+    id = input<string>(); // ':id'  → '42'
+    tab = input<string>(); // '?tab' → 'posts' (undefined if not in the URL)
 }
 ```
 
@@ -249,23 +252,23 @@ import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
 
 export class UserComponent {
-  private route = inject(ActivatedRoute);
+    private route = inject(ActivatedRoute);
 
-  id = toSignal(this.route.paramMap.pipe(map((p) => p.get('id'))));
-  tab = toSignal(this.route.queryParamMap.pipe(map((q) => q.get('tab'))));
+    id = toSignal(this.route.paramMap.pipe(map((p) => p.get('id'))));
+    tab = toSignal(this.route.queryParamMap.pipe(map((q) => q.get('tab'))));
 
-  // Or once, if the component is never reused for another id:
-  // id = this.route.snapshot.paramMap.get('id');
+    // Or once, if the component is never reused for another id:
+    // id = this.route.snapshot.paramMap.get('id');
 }
 ```
 
 ## Common errors
 
-| Error / symptom | Cause |
-|---|---|
+| Error / symptom                                        | Cause                                                                                                                                                                     |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NG04002: Cannot match any routes. URL Segment: '...'` | No route has that path: a typo, a missing `'**'`, a `redirectTo` pointing to a path that doesn't exist, or a named-outlet path used as a normal path (see SUB-ROUTING.md) |
-| The link does nothing / `Can't bind to 'routerLink'` | `RouterLink` is missing from the component's `imports` |
-| Page is blank, no error | `<router-outlet />` is missing, or `RouterOutlet` is missing from `imports` |
-| Every URL redirects to the same page | `redirectTo` on `path: ''` without `pathMatch: 'full'` |
-| The `'**'` page shows instead of the right page | `'**'` isn't the last route |
-| The param `input()` stays `undefined` | `withComponentInputBinding()` is missing in `app.config.ts`, or the input's name isn't the same as `:id` / `?tab` |
+| The link does nothing / `Can't bind to 'routerLink'`   | `RouterLink` is missing from the component's `imports`                                                                                                                    |
+| Page is blank, no error                                | `<router-outlet />` is missing, or `RouterOutlet` is missing from `imports`                                                                                               |
+| Every URL redirects to the same page                   | `redirectTo` on `path: ''` without `pathMatch: 'full'`                                                                                                                    |
+| The `'**'` page shows instead of the right page        | `'**'` isn't the last route                                                                                                                                               |
+| The param `input()` stays `undefined`                  | `withComponentInputBinding()` is missing in `app.config.ts`, or the input's name isn't the same as `:id` / `?tab`                                                         |

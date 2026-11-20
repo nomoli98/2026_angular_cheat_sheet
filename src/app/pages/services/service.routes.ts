@@ -2,38 +2,45 @@ import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth.guard';
 
 export const routes: Routes = [
-  {
-    // protects every child
-    path: '',
-    canActivate: [authGuard],
-    // re-run even on the same URL (toggle off)
-    runGuardsAndResolvers: 'always',
-    children: [
-      {
-        path: 'get-all',
-        loadComponent: () => import('./get-all/get-all.component').then((m) => m.GetAllComponent),
-      },
-      {
-        path: 'get-one',
-        loadComponent: () => import('./get-one/get-one.component').then((m) => m.GetOneComponent),
-      },
-      {
-        path: 'get-me',
-        loadComponent: () => import('./get-me/get-me.component').then((m) => m.GetMeComponent),
-      },
-      {
-        path: 'update-fully',
-        loadComponent: () =>
-          import('./update-fully/update-fully.component').then((m) => m.UpdateFullyComponent),
-      },
-      {
-        path: 'update',
-        loadComponent: () => import('./update/update.component').then((m) => m.UpdateComponent),
-      },
-      {
-        path: 'delete',
-        loadComponent: () => import('./delete/delete.component').then((m) => m.DeleteComponent),
-      },
-    ],
-  },
+    {
+        // protects every child
+        path: '',
+        canActivate: [authGuard],
+        // re-run even on the same URL (toggle off)
+        runGuardsAndResolvers: 'always',
+        children: [
+            {
+                path: 'get-all',
+                loadComponent: () =>
+                    import('./get-all/get-all.component').then((m) => m.GetAllComponent),
+            },
+            {
+                path: 'get-one',
+                loadComponent: () =>
+                    import('./get-one/get-one.component').then((m) => m.GetOneComponent),
+            },
+            {
+                path: 'get-me',
+                loadComponent: () =>
+                    import('./get-me/get-me.component').then((m) => m.GetMeComponent),
+            },
+            {
+                path: 'update-fully',
+                loadComponent: () =>
+                    import('./update-fully/update-fully.component').then(
+                        (m) => m.UpdateFullyComponent,
+                    ),
+            },
+            {
+                path: 'update',
+                loadComponent: () =>
+                    import('./update/update.component').then((m) => m.UpdateComponent),
+            },
+            {
+                path: 'delete',
+                loadComponent: () =>
+                    import('./delete/delete.component').then((m) => m.DeleteComponent),
+            },
+        ],
+    },
 ];

@@ -1,11 +1,11 @@
 <h2>Output</h2>
 
 <section class="card card-body mb-3">
-  <app-child-component (outputValue)="onClick($event)"/>
-  <p class="boom"> {{output()}}</p>
+    <app-child-component (outputValue)="onClick($event)" />
+    <p class="boom">{{ output() }}</p>
 </section>
 
 <section class="card card-body mt-3">
-  <h3>Code</h3>
-  <app-code-snippet [code]="snippets.outputCode" />
+    <h3>Code</h3>
+    <app-code-snippet [code]="snippets.outputCode" />
 </section>

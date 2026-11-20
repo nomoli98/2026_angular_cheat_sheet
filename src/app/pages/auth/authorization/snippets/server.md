@@ -2,26 +2,26 @@
 // fake-api/auth-server.js
 // 1. authentication (401)
 async function authenticate(headers) {
-  const auth = headers['authorization'] ?? '';
-  if (!auth.startsWith('Bearer ')) return [null, [401, { message: 'no token' }]];
-  let payload;
-  try {
-    payload = jwt.verify(auth.slice(7), JWT_SECRET); // signature + expiry
-  } catch (err) {
-    return [null, [401, { message: 'invalid token' }]];
-  }
-  // role from the DB
-  const user = await data(`/${payload.sub}`).catch(() => null);
-  if (!user) return [null, [401, { message: 'user not found' }]];
-  return [user, null];
+    const auth = headers['authorization'] ?? '';
+    if (!auth.startsWith('Bearer ')) return [null, [401, { message: 'no token' }]];
+    let payload;
+    try {
+        payload = jwt.verify(auth.slice(7), JWT_SECRET); // signature + expiry
+    } catch (err) {
+        return [null, [401, { message: 'invalid token' }]];
+    }
+    // role from the DB
+    const user = await data(`/${payload.sub}`).catch(() => null);
+    if (!user) return [null, [401, { message: 'user not found' }]];
+    return [user, null];
 }
 
 // 2. authorization (403)
 async function users(headers) {
-  const [user, error] = await authenticate(headers);
-  if (error) return error;
-  if (user.role !== 'admin') return [403, { message: 'forbidden' }];
-  return [200, (await data('')).map(withoutPassword)];
+    const [user, error] = await authenticate(headers);
+    if (error) return error;
+    if (user.role !== 'admin') return [403, { message: 'forbidden' }];
+    return [200, (await data('')).map(withoutPassword)];
 }
 
 // the router

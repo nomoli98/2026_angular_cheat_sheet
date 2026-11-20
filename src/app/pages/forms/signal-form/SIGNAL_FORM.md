@@ -15,14 +15,14 @@ Files: `signal-form.component.ts`, `signal-form.component.html`
 import { GenderEnum } from '@core/enums/gender.enum';
 
 export interface RegisterRequest {
-  name: string;
-  email: string;
-  password: string;
-  birthdate: string; // 'YYYY-MM-DD', '' when empty
-  height: number;
-  gender: GenderEnum;
-  subscription: 'free' | 'premium';
-  agreeToTerms: boolean;
+    name: string;
+    email: string;
+    password: string;
+    birthdate: string; // 'YYYY-MM-DD', '' when empty
+    height: number;
+    gender: GenderEnum;
+    subscription: 'free' | 'premium';
+    agreeToTerms: boolean;
 }
 ```
 
@@ -77,20 +77,20 @@ protected registerForm = form(this.EmptyForm, (field) => {
 
 Built-in rules:
 
-| Rule | Function |
-|---|---|
-| Not empty | `required(field.x, { message })` |
-| Valid email | `email(field.x, { message })` |
-| Number range | `min(field.x, 50)`, `max(field.x, 275)` |
-| Text length | `minLength(field.x, 3)`, `maxLength(field.x, 20)` |
-| Regex | `pattern(field.x, /[a-z]+/)` |
+| Rule          | Function                                            |
+| ------------- | --------------------------------------------------- |
+| Not empty     | `required(field.x, { message })`                    |
+| Valid email   | `email(field.x, { message })`                       |
+| Number range  | `min(field.x, 50)`, `max(field.x, 275)`             |
+| Text length   | `minLength(field.x, 3)`, `maxLength(field.x, 20)`   |
+| Regex         | `pattern(field.x, /[a-z]+/)`                        |
 | Anything else | `validate(field.x, ({ value }) => ...)` (see below) |
 
 ## 5. Bind the HTML with `[formField]`
 
 ```html
 <form (submit)="onSubmit($event)">
-  <input id="name" type="text" [formField]="registerForm.name" />
+    <input id="name" type="text" [formField]="registerForm.name" />
 </form>
 ```
 
@@ -99,11 +99,11 @@ Built-in rules:
 
 ```html
 <select [formField]="registerForm.gender">
-  <option value="">Choose a gender...</option>
-  <option value="{{GenderEnum.FEMALE}}">{{ GenderEnum.FEMALE }}</option>
+    <option value="">Choose a gender...</option>
+    <option value="{{GenderEnum.FEMALE}}">{{ GenderEnum.FEMALE }}</option>
 </select>
 
-<input type="radio" value="free"    [formField]="registerForm.subscription" />
+<input type="radio" value="free" [formField]="registerForm.subscription" />
 <input type="radio" value="premium" [formField]="registerForm.subscription" />
 
 <input type="checkbox" [formField]="registerForm.agreeToTerms" />
@@ -114,17 +114,19 @@ Built-in rules:
 Call the field to get its state: `registerForm.name()`. Then every property is a signal too: `.touched()`, `.invalid()`, `.errors()`, `.value()`.
 
 ```html
-<input class="form-control" [formField]="registerForm.name"
-       [class.is-invalid]="registerForm.name().touched() && registerForm.name().invalid()">
+<input
+    class="form-control"
+    [formField]="registerForm.name"
+    [class.is-invalid]="registerForm.name().touched() && registerForm.name().invalid()"
+/>
 
-@if (registerForm.name().touched()) {
-  @for (error of registerForm.name().errors(); track error.kind) {
-    <div class="invalid-feedback">{{ error.message }}</div>
-  }
-}
+@if (registerForm.name().touched()) { @for (error of registerForm.name().errors(); track error.kind)
+{
+<div class="invalid-feedback">{{ error.message }}</div>
+} }
 ```
 
-`.is-invalid` and `.invalid-feedback` are Bootstrap classes, see [BOOTSTRAP.md](../../../../../BOOTSTRAP.md).
+`.is-invalid` and `.invalid-feedback` are Bootstrap classes, see [BOOTSTRAP.md](../../theme/bootstrap/BOOTSTRAP.md).
 
 The messages come from the schema, so you don't write them in the HTML.
 
@@ -188,17 +190,18 @@ The component uses this in `toggleSubscription()` so that a second click on a se
 
 ```ts
 validate(field.gender, ({ value }) => {
-  if (!value()) return undefined; // empty: let required() handle it
+    if (!value()) return undefined; // empty: let required() handle it
 
-  const GENDERS = Object.values(GenderEnum) as string[];
-  if (!GENDERS.includes(value())) {
-    return { kind: 'invalidGender', message: `Gender must be one of: ${GENDERS.join(', ')}` };
-  }
-  return undefined;
+    const GENDERS = Object.values(GenderEnum) as string[];
+    if (!GENDERS.includes(value())) {
+        return { kind: 'invalidGender', message: `Gender must be one of: ${GENDERS.join(', ')}` };
+    }
+    return undefined;
 });
 ```
 
 The rules:
+
 - Return `undefined` (or `null`) if the value is **valid**.
 - Return `{ kind, message }` if it's **invalid**. `kind` is the error's id (used in `track error.kind`), and `message` is what you display.
 - To return **several errors**, return an array of them.
@@ -212,17 +215,19 @@ Write a function that takes a `SchemaPath` and calls `validate` on it:
 import { SchemaPath, validate, ValidationError } from '@angular/forms/signals';
 
 export function strongPassword(path: SchemaPath<string>) {
-  validate(path, ({ value }) => {
-    const v = value() ?? '';
-    const errors: ValidationError[] = [];
+    validate(path, ({ value }) => {
+        const v = value() ?? '';
+        const errors: ValidationError[] = [];
 
-    if (!/[a-z]/.test(v)) errors.push({ kind: 'lowercase', message: 'At least one lowercase letter' });
-    if (!/[A-Z]/.test(v)) errors.push({ kind: 'uppercase', message: 'At least one uppercase letter' });
-    if (!/[0-9]/.test(v)) errors.push({ kind: 'number', message: 'At least one digit' });
-    if (v.length < 8)     errors.push({ kind: 'minlength', message: 'At least 8 characters' });
+        if (!/[a-z]/.test(v))
+            errors.push({ kind: 'lowercase', message: 'At least one lowercase letter' });
+        if (!/[A-Z]/.test(v))
+            errors.push({ kind: 'uppercase', message: 'At least one uppercase letter' });
+        if (!/[0-9]/.test(v)) errors.push({ kind: 'number', message: 'At least one digit' });
+        if (v.length < 8) errors.push({ kind: 'minlength', message: 'At least 8 characters' });
 
-    return errors.length ? errors : undefined;
-  });
+        return errors.length ? errors : undefined;
+    });
 }
 ```
 
@@ -238,10 +243,12 @@ Add a second argument:
 
 ```ts
 export function birthdate<T extends Date | string | null | undefined>(
-  path: SchemaPath<T>,
-  opts: { minAge?: number; maxAge?: number },
+    path: SchemaPath<T>,
+    opts: { minAge?: number; maxAge?: number },
 ) {
-  validate(path, ({ value }) => { /* uses opts.minAge / opts.maxAge */ });
+    validate(path, ({ value }) => {
+        /* uses opts.minAge / opts.maxAge */
+    });
 }
 ```
 

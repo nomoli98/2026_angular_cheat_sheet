@@ -8,16 +8,16 @@ import { matchFieldsValidator } from '../reactive-form/match-fields.validator';
  * Usage: <form #form="ngForm" [appMatchFields]="['password', 'confirmPassword']">
  */
 @Directive({
-  selector: '[appMatchFields]',
-  providers: [{ provide: NG_VALIDATORS, useExisting: MatchFieldsDirective, multi: true }],
+    selector: '[appMatchFields]',
+    providers: [{ provide: NG_VALIDATORS, useExisting: MatchFieldsDirective, multi: true }],
 })
 export class MatchFieldsDirective implements Validator {
-  readonly fields = input<[string, string]>(undefined, { alias: 'appMatchFields' }); // optional: NG0950
+    readonly fields = input<[string, string]>(undefined, { alias: 'appMatchFields' }); // optional: NG0950
 
-  validate(group: AbstractControl): ValidationErrors | null {
-    const fields = this.fields();
-    if (!fields) return null; // runs before inputs
-    const [field, confirmField] = fields;
-    return matchFieldsValidator(field, confirmField)(group);
-  }
+    validate(group: AbstractControl): ValidationErrors | null {
+        const fields = this.fields();
+        if (!fields) return null; // runs before inputs
+        const [field, confirmField] = fields;
+        return matchFieldsValidator(field, confirmField)(group);
+    }
 }

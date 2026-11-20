@@ -6,11 +6,11 @@ import scripts from './snippets/scripts.md';
 import angular from './snippets/angular.md';
 
 @Component({
-  imports: [CodeSnippetComponent],
-  selector: 'app-fake-api',
-  templateUrl: './fake-api.component.html',
+    imports: [CodeSnippetComponent],
+    selector: 'app-fake-api',
+    templateUrl: './fake-api.component.html',
 })
 export class FakeApiComponent {
-  // page snippets
-  protected readonly snippets = { install, db, scripts, angular };
+    // page snippets
+    protected readonly snippets = { install, db, scripts, angular };
 }

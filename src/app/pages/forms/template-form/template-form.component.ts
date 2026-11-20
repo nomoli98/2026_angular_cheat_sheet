@@ -9,47 +9,47 @@ import { InListDirective } from '@core/validators/template-form/in-list.directiv
 import { GenderEnum } from '@core/enums/gender.enum';
 
 @Component({
-  imports: [
-    CodeSnippetComponent,
-    FormsModule,
-    StrongPasswordDirective,
-    BirthdateDirective,
-    InEnumDirective,
-    InListDirective,
-  ],
-  selector: 'app-template-form',
-  templateUrl: './template-form.component.html',
+    imports: [
+        CodeSnippetComponent,
+        FormsModule,
+        StrongPasswordDirective,
+        BirthdateDirective,
+        InEnumDirective,
+        InListDirective,
+    ],
+    selector: 'app-template-form',
+    templateUrl: './template-form.component.html',
 })
 export class TemplateFormComponent {
-  // page snippets
-  protected readonly snippets = { templateForm };
+    // page snippets
+    protected readonly snippets = { templateForm };
 
-  loading = signal<boolean>(false);
+    loading = signal<boolean>(false);
 
-  // [(ngModel)] keeps these in sync
-  user = {
-    name: '',
-    email: '',
-    password: '',
-    birthdate: '', // 'YYYY-MM-DD'
-    height: 50,
-    gender: GenderEnum.OTHER,
-    subscription: 'free',
-    agreeToTerms: false,
-  };
+    // [(ngModel)] keeps these in sync
+    user = {
+        name: '',
+        email: '',
+        password: '',
+        birthdate: '', // 'YYYY-MM-DD'
+        height: 50,
+        gender: GenderEnum.OTHER,
+        subscription: 'free',
+        agreeToTerms: false,
+    };
 
-  onSubmit(form: NgForm) {
-    // show every error
-    form.control.markAllAsTouched();
+    onSubmit(form: NgForm) {
+        // show every error
+        form.control.markAllAsTouched();
 
-    if (form.invalid) {
-      return;
+        if (form.invalid) {
+            return;
+        }
+
+        this.loading.set(true);
+        // call your service here
+        console.log(this.user);
     }
 
-    this.loading.set(true);
-    // call your service here
-    console.log(this.user);
-  }
-
-  protected readonly GenderEnum = GenderEnum;
+    protected readonly GenderEnum = GenderEnum;
 }

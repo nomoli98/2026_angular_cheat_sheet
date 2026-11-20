@@ -16,10 +16,10 @@
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    // 👇 params → input()
-    provideRouter(routes, withComponentInputBinding()),
-  ],
+    providers: [
+        // 👇 params → input()
+        provideRouter(routes, withComponentInputBinding()),
+    ],
 };
 ```
 
@@ -27,13 +27,13 @@ export const appConfig: ApplicationConfig = {
 import { Component, input } from '@angular/core';
 
 @Component({
-  selector: 'app-user',
-  templateUrl: './user.component.html',
+    selector: 'app-user',
+    templateUrl: './user.component.html',
 })
 export class UserComponent {
-  // withComponentInputBinding()
-  id = input<string>(); // /user/:id
-  tab = input<string>(); // ?tab=posts
+    // withComponentInputBinding()
+    id = input<string>(); // /user/:id
+    tab = input<string>(); // ?tab=posts
 }
 ```
 

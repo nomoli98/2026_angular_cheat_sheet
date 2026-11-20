@@ -1,30 +1,35 @@
 <h2>Loops</h2>
 
 <section class="card card-body mb-3">
-  <h3>&#64;For</h3>
-  <ul>
-    @for (item of items; track item.id) {
-      <li>{{ item.name }}</li>
-    }
-  </ul>
+    <h3>&#64;For</h3>
+    <ul>
+        @for (item of items; track item.id) {
+            <li>{{ item.name }}</li>
+        }
+    </ul>
 
-  <p>IMPORTANT : the track in the parameter in the loops. You can track a unique property of your items OR the $index of
-    the item in the list or any of the other contextual variables available
-    (https://angular.dev/guide/templates/control-flow#contextual-variables-in-for-blocks)</p>
-  <p>Which one to pick:</p>
+    <p>
+        IMPORTANT : the track in the parameter in the loops. You can track a unique property of your
+        items OR the $index of the item in the list or any of the other contextual variables
+        available
+        (https://angular.dev/guide/templates/control-flow#contextual-variables-in-for-blocks)
+    </p>
+    <p>Which one to pick:</p>
 
-  <ul>
-    <li>track item.id: the default. Use it whenever the items have a unique id.</li>
-    <li>track item: for a list of strings or numbers with no duplicates.</li>
-    <li>track $index: only for a list that never gets items added, removed or re-ordered. Otherwise Angular re-uses the
-      wrong DOM elements (inputs keep the old text, animations break).
-    </li>
-  </ul>
-  <ul>
-    @for (item of items; track $index) {
-      <li>{{ item.name }}</li>
-    }
-  </ul>
+    <ul>
+        <li>track item.id: the default. Use it whenever the items have a unique id.</li>
+        <li>track item: for a list of strings or numbers with no duplicates.</li>
+        <li>
+            track $index: only for a list that never gets items added, removed or re-ordered.
+            Otherwise Angular re-uses the wrong DOM elements (inputs keep the old text, animations
+            break).
+        </li>
+    </ul>
+    <ul>
+        @for (item of items; track $index) {
+            <li>{{ item.name }}</li>
+        }
+    </ul>
 
-  <app-code-snippet [code]="snippets.forLoop" />
+    <app-code-snippet [code]="snippets.forLoop" />
 </section>

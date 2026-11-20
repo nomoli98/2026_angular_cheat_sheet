@@ -15,9 +15,9 @@
 <!-- hide when not admin -->
 @if (_isAdmin()) {
 <ul>
-  @for (u of _users(); track u.id) {
-  <li>{{ u.name }}</li>
-  }
+    @for (u of _users(); track u.id) {
+    <li>{{ u.name }}</li>
+    }
 </ul>
 }
 ```
@@ -30,35 +30,35 @@ import { AuthService } from '@core/services/auth.service';
 import { isAdmin } from '@core/controllers/permissions';
 
 @Component({
-  selector: 'app-get-all',
-  templateUrl: './get-all.component.html',
+    selector: 'app-get-all',
+    templateUrl: './get-all.component.html',
 })
 export class GetAllComponent {
-  protected readonly _userController = inject(UserController);
-  protected readonly _users = signal<UserResponse[]>([]);
-  protected readonly _error = signal<string | null>(null);
+    protected readonly _userController = inject(UserController);
+    protected readonly _users = signal<UserResponse[]>([]);
+    protected readonly _error = signal<string | null>(null);
 
-  // re-runs on user change
-  private readonly _authService = inject(AuthService);
-  protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
+    // re-runs on user change
+    private readonly _authService = inject(AuthService);
+    protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
 
-  async onClick() {
-    this._error.set(null);
+    async onClick() {
+        this._error.set(null);
 
-    // 1. component check
-    if (!this._isAdmin()) {
-      this._error.set('forbidden: only an admin can see the list of users');
-      return;
+        // 1. component check
+        if (!this._isAdmin()) {
+            this._error.set('forbidden: only an admin can see the list of users');
+            return;
+        }
+
+        try {
+            // 2. controller checks again
+            this._users.set(await this._userController.getAll());
+        } catch (err) {
+            // 'unauthorized' / 'forbidden' / HTTP
+            this._error.set((err as Error).message);
+        }
     }
-
-    try {
-      // 2. controller checks again
-      this._users.set(await this._userController.getAll());
-    } catch (err) {
-      // 'unauthorized' / 'forbidden' / HTTP
-      this._error.set((err as Error).message);
-    }
-  }
 }
 ```
 
@@ -66,15 +66,15 @@ export class GetAllComponent {
 // core/controllers/user.controller.ts
 @Service()
 export class UserController {
-  private readonly _userService = inject(UserService);
-  private readonly _authService = inject(AuthService);
+    private readonly _userService = inject(UserService);
+    private readonly _authService = inject(AuthService);
 
-  // admin only
-  async getAll(): Promise<UserResponse[]> {
-    const user = this._authService.currentUser(); // 1. who?
-    if (!isAdmin(user)) deny(user); // 2. allowed?
-    return firstValueFrom(this._userService.getAll()); // 3. Observable → Promise
-  }
+    // admin only
+    async getAll(): Promise<UserResponse[]> {
+        const user = this._authService.currentUser(); // 1. who?
+        if (!isAdmin(user)) deny(user); // 2. allowed?
+        return firstValueFrom(this._userService.getAll()); // 3. Observable → Promise
+    }
 }
 ```
 
@@ -82,15 +82,15 @@ export class UserController {
 // core/services/user.service.ts
 @Service()
 export class UserService {
-  private readonly _http = inject(HttpClient);
-  private readonly _url = `${environment.apiUrl}/people`;
-  private readonly _mapper = UserMapper;
+    private readonly _http = inject(HttpClient);
+    private readonly _url = `${environment.apiUrl}/people`;
+    private readonly _mapper = UserMapper;
 
-  // UserEntity[] → UserResponse[]
-  getAll(): Observable<UserResponse[]> {
-    return this._http
-      .get<UserEntity[]>(this._url)
-      .pipe(map((users) => users.map((u) => this._mapper(u))));
-  }
+    // UserEntity[] → UserResponse[]
+    getAll(): Observable<UserResponse[]> {
+        return this._http
+            .get<UserEntity[]>(this._url)
+            .pipe(map((users) => users.map((u) => this._mapper(u))));
+    }
 }
 ```

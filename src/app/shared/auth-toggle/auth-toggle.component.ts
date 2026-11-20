@@ -4,10 +4,10 @@ import { AuthToggleService } from './auth-toggle.service';
 
 // the 2 navbar switches (logic in AuthToggleService)
 @Component({
-  selector: 'app-auth-toggle',
-  templateUrl: './auth-toggle.component.html',
+    selector: 'app-auth-toggle',
+    templateUrl: './auth-toggle.component.html',
 })
 export class AuthToggleComponent {
-  protected readonly toggle = inject(AuthToggleService);
-  protected readonly RoleEnum = RoleEnum; // for the template
+    protected readonly toggle = inject(AuthToggleService);
+    protected readonly RoleEnum = RoleEnum; // for the template
 }

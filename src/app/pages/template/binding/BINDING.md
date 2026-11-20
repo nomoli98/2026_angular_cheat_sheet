@@ -10,12 +10,12 @@ Files: `static-binding/`, `responsive-binding/`, `event-binding/`, `two-way-bind
 
 ## The four kinds of binding
 
-| Syntax | Direction | Example | Demo |
-|---|---|---|---|
-| `{{ value }}` | TS → HTML (text) | `<p>{{ title() }}</p>` | static-binding |
-| `[property]="value"` | TS → HTML (property / input) | `<button [disabled]="busy()">` | static / responsive |
-| `(event)="handler()"` | HTML → TS | `<button (click)="save()">` | event-binding |
-| `[(property)]="value"` | both ways | `<input [(ngModel)]="name" />` | two-way-binding |
+| Syntax                 | Direction                    | Example                        | Demo                |
+| ---------------------- | ---------------------------- | ------------------------------ | ------------------- |
+| `{{ value }}`          | TS → HTML (text)             | `<p>{{ title() }}</p>`         | static-binding      |
+| `[property]="value"`   | TS → HTML (property / input) | `<button [disabled]="busy()">` | static / responsive |
+| `(event)="handler()"`  | HTML → TS                    | `<button (click)="save()">`    | event-binding       |
+| `[(property)]="value"` | both ways                    | `<input [(ngModel)]="name" />` | two-way-binding     |
 
 Easy way to remember: `[ ]` goes **into** the element, `( )` comes **out of** it, `[( )]` ("banana in a box") does both.
 
@@ -25,9 +25,12 @@ Easy way to remember: `[ ]` goes **into** the element, `( )` comes **out of** it
 
 ```html
 <p>This is the value I get from the .ts file : {{ value }}</p>
-<p>{{ count() }}</p>                       <!-- a signal: call it with () -->
-<p>{{ price() * quantity() }}</p>          <!-- any simple expression -->
-<p>{{ user()?.name ?? 'Anonymous' }}</p>   <!-- ?. and ?? work -->
+<p>{{ count() }}</p>
+<!-- a signal: call it with () -->
+<p>{{ price() * quantity() }}</p>
+<!-- any simple expression -->
+<p>{{ user()?.name ?? 'Anonymous' }}</p>
+<!-- ?. and ?? work -->
 ```
 
 It also works inside an attribute value. Angular turns it into a property binding:
@@ -52,9 +55,14 @@ Sets a **DOM property** of a native element, or an **input** of a component.
 ```
 
 ```html
-<button disabled="isDisabled">   <!-- ❌ the STRING "isDisabled" -->
-<button [disabled]="isDisabled"> <!-- ✅ the value of the field -->
-<app-child value="hello" />      <!-- ✅ a plain string with no [] is fine -->
+<button disabled="isDisabled">
+    <!-- ❌ the STRING "isDisabled" -->
+    <button [disabled]="isDisabled">
+        <!-- ✅ the value of the field -->
+        <app-child value="hello" />
+        <!-- ✅ a plain string with no [] is fine -->
+    </button>
+</button>
 ```
 
 ## 3. Attribute binding `[attr.x]`
@@ -77,12 +85,16 @@ If the value is `null` or `undefined`, the attribute is **removed**.
 <!-- several classes at once -->
 <p [class]="listClasses">string: 'highlighted bold'</p>
 <p [class]="['highlighted', 'bold']">array</p>
-<p [class]="{ highlighted: isHighlighted(), bold: isBold() }">object: key = class, value = on/off</p>
+<p [class]="{ highlighted: isHighlighted(), bold: isBold() }">
+    object: key = class, value = on/off
+</p>
 
 <!-- styles -->
 <p [style.color]="color()"></p>
-<p [style.width.px]="width()"></p>         <!-- the unit goes in the binding -->
-<p [style.width]="'200px'"></p>            <!-- or in the value -->
+<p [style.width.px]="width()"></p>
+<!-- the unit goes in the binding -->
+<p [style.width]="'200px'"></p>
+<!-- or in the value -->
 <p [style]="{ color: color(), 'font-size.px': size() }"></p>
 ```
 
@@ -110,12 +122,12 @@ isDisabled = signal(false);
 <button (click)="isDisabled.update((v) => !v)">Toggle (same thing)</button>
 ```
 
-| Signal method | Use it to |
-|---|---|
-| `mySignal()` | read the value |
-| `mySignal.set(x)` | replace the value |
-| `mySignal.update((old) => ...)` | compute the new value from the old one |
-| `computed(() => a() + b())` | make a read-only signal from other signals |
+| Signal method                   | Use it to                                  |
+| ------------------------------- | ------------------------------------------ |
+| `mySignal()`                    | read the value                             |
+| `mySignal.set(x)`               | replace the value                          |
+| `mySignal.update((old) => ...)` | compute the new value from the old one     |
+| `computed(() => a() + b())`     | make a read-only signal from other signals |
 
 **Why it matters in Angular 22:** components are `OnPush` by default. A plain field changed by a `(click)` still shows up (the event triggers a check, like `clicked = !clicked` in `responsive-binding`). A plain field changed by a timer, an HTTP call or a `subscribe` **won't**. A signal always works. When in doubt, use a signal.
 
@@ -140,10 +152,14 @@ protected showPressedKey(event: KeyboardEvent) {
 ### Handy shortcuts
 
 ```html
-<input (keyup.enter)="search()" />              <!-- only on Enter -->
-<input (keydown.control.s)="save($event)" />    <!-- key combos -->
-<input (input)="name.set($any($event.target).value)" />  <!-- read an input's value -->
-<button (click)="a(); b()">Two calls</button>   <!-- several statements with ; -->
+<input (keyup.enter)="search()" />
+<!-- only on Enter -->
+<input (keydown.control.s)="save($event)" />
+<!-- key combos -->
+<input (input)="name.set($any($event.target).value)" />
+<!-- read an input's value -->
+<button (click)="a(); b()">Two calls</button>
+<!-- several statements with ; -->
 ```
 
 ### Template reference variables `#ref`
@@ -151,8 +167,7 @@ protected showPressedKey(event: KeyboardEvent) {
 Get hold of an element without any TS:
 
 ```html
-<input #box />
-<button (click)="search(box.value)">Search</button>
+<input #box /> <button (click)="search(box.value)">Search</button>
 ```
 
 ## 7. Passing data to a child: `input()`
@@ -160,9 +175,9 @@ Get hold of an element without any TS:
 ```ts
 // child-component.component.ts
 export class ChildComponentComponent {
-  value = input.required<string>(); // must be given by the parent
-  label = input('Default label'); // optional, with a default value
-  size = input<number>(); // optional, number | undefined
+    value = input.required<string>(); // must be given by the parent
+    label = input('Default label'); // optional, with a default value
+    size = input<number>(); // optional, number | undefined
 }
 ```
 
@@ -180,28 +195,29 @@ This is the passed value : {{ value() }}
 - An input is a **read-only signal**: read it with `value()`, you can't `set()` it from the child.
 - **Always give the type** (`input.required<string>()`), otherwise the value is `unknown`.
 - Useful options:
-  ```ts
-  disabled = input(false, { transform: booleanAttribute }); // <app-x disabled /> = true
-  width = input(0, { transform: numberAttribute }); // <app-x width="50" /> = 50
-  userId = input.required<string>({ alias: 'id' }); // parent writes [id]="..."
-  ```
+    ```ts
+    disabled = input(false, { transform: booleanAttribute }); // <app-x disabled /> = true
+    width = input(0, { transform: numberAttribute }); // <app-x width="50" /> = 50
+    userId = input.required<string>({ alias: 'id' }); // parent writes [id]="..."
+    ```
 
 ## 8. Sending events to the parent: `output()`
 
 ```ts
 // child
 export class ItemComponent {
-  deleted = output<number>(); // the type is what $event will be
+    deleted = output<number>(); // the type is what $event will be
 
-  protected onDelete() {
-    this.deleted.emit(42);
-  }
+    protected onDelete() {
+        this.deleted.emit(42);
+    }
 }
 ```
 
 ```html
 <!-- parent -->
-<app-item (deleted)="removeItem($event)" />  <!-- $event = 42 -->
+<app-item (deleted)="removeItem($event)" />
+<!-- $event = 42 -->
 ```
 
 Name the output after **what happened** (`deleted`, `selected`, `closed`), not `onDelete`.
@@ -221,7 +237,7 @@ inputValue = '';
 ```
 
 ```html
-<input type="text" [(ngModel)]="inputValue">
+<input type="text" [(ngModel)]="inputValue" />
 <p>{{inputValue}}</p>
 ```
 
@@ -257,16 +273,17 @@ signalCount = signal(0);
 
 The difference is **who else can see it**:
 
-| | `signal()` | `model()` |
-|---|---|---|
-| Read / write inside the component | ✅ `count()`, `set()`, `update()` | ✅ same |
-| A parent can give it a value | ❌ private to the component | ✅ it's an **input**: `<app-x [modelCount]="5" />` |
-| A parent hears when it changes | ❌ | ✅ it's also an **output**: `(modelCountChange)="..."` |
-| Two-way with a parent | ❌ | ✅ `<app-x [(modelCount)]="parentSignal" />` |
+|                                   | `signal()`                        | `model()`                                              |
+| --------------------------------- | --------------------------------- | ------------------------------------------------------ |
+| Read / write inside the component | ✅ `count()`, `set()`, `update()` | ✅ same                                                |
+| A parent can give it a value      | ❌ private to the component       | ✅ it's an **input**: `<app-x [modelCount]="5" />`     |
+| A parent hears when it changes    | ❌                                | ✅ it's also an **output**: `(modelCountChange)="..."` |
+| Two-way with a parent             | ❌                                | ✅ `<app-x [(modelCount)]="parentSignal" />`           |
 
 So `[(modelCount)]="parentSignal"` is the shortcut for `[modelCount]="parentSignal()" (modelCountChange)="parentSignal.set($event)"`, and the parent's signal and the child's model stay in sync.
 
 **Which one to use:**
+
 - The value only lives in this component → `signal()`.
 - The value comes from a parent **and** the component changes it (a counter, a toggle, a date picker, a custom input) → `model()`.
 - The value comes from a parent and the component only reads it → `input()`.
@@ -274,24 +291,25 @@ So `[(modelCount)]="parentSignal"` is the shortcut for `[modelCount]="parentSign
 A routed page like this one has no parent template binding it, so here `modelCount` never receives or sends anything: `signal()` is enough. `model()` only shows its difference when the component is used as `<app-two-way-binding [(modelCount)]="..." />`.
 
 Other `model()` details:
+
 - The parent passes the **signal itself** (`[(count)]="parentCount"`), not its value (`parentCount()`).
 - `model.required<T>()` exists too.
 
 ## 10. `input()` vs `output()` vs `model()`
 
-| | Parent → child | Child → parent | Child can change it | Parent writes |
-|---|---|---|---|---|
-| `input()` | ✅ | | ❌ | `[value]="x"` |
-| `output()` | | ✅ (an event) | | `(changed)="fn($event)"` |
-| `model()` | ✅ | ✅ | ✅ | `[(count)]="mySignal"` |
+|            | Parent → child | Child → parent | Child can change it | Parent writes            |
+| ---------- | -------------- | -------------- | ------------------- | ------------------------ |
+| `input()`  | ✅             |                | ❌                  | `[value]="x"`            |
+| `output()` |                | ✅ (an event)  |                     | `(changed)="fn($event)"` |
+| `model()`  | ✅             | ✅             | ✅                  | `[(count)]="mySignal"`   |
 
 ## Common mistakes
 
-| Problem | Fix |
-|---|---|
-| Shows `[object Object]` or `function...` | You forgot the `()` on a signal: `{{ count() }}` |
-| `Can't bind to 'ngModel'` | Add `FormsModule` to `imports` |
-| `Can't bind to 'x' since it isn't a known property of 'app-y'` | Add the component to `imports`, or check the input name |
-| The value changes in TS but not on screen | It's a plain field changed outside an event (OnPush): make it a `signal` |
-| `[(ngModel)]="name()"` error | No `()` inside the banana box: `[(ngModel)]="name"` |
-| Child input is `unknown` | Give it a type: `input.required<string>()` |
+| Problem                                                        | Fix                                                                      |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Shows `[object Object]` or `function...`                       | You forgot the `()` on a signal: `{{ count() }}`                         |
+| `Can't bind to 'ngModel'`                                      | Add `FormsModule` to `imports`                                           |
+| `Can't bind to 'x' since it isn't a known property of 'app-y'` | Add the component to `imports`, or check the input name                  |
+| The value changes in TS but not on screen                      | It's a plain field changed outside an event (OnPush): make it a `signal` |
+| `[(ngModel)]="name()"` error                                   | No `()` inside the banana box: `[(ngModel)]="name"`                      |
+| Child input is `unknown`                                       | Give it a type: `input.required<string>()`                               |

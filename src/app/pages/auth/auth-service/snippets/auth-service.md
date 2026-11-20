@@ -12,47 +12,44 @@ import { LoginRequest } from '@core/requests/login.request';
 
 @Service()
 export class AuthService {
-  private readonly _http = inject(HttpClient);
-  private readonly _url = `${environment.apiUrl}/people`;
-  private readonly _userService = inject(UserService);
+    private readonly _http = inject(HttpClient);
+    private readonly _url = `${environment.apiUrl}/people`;
+    private readonly _userService = inject(UserService);
 
-  private readonly _currentUser = signal<UserResponse | null>(null);
-  readonly currentUser = this._currentUser.asReadonly();
+    private readonly _currentUser = signal<UserResponse | null>(null);
+    readonly currentUser = this._currentUser.asReadonly();
 
-  register(request: RegisterRequest): Observable<UserResponse> {
-    return this._userService
-      .emailExists(request.email)
-      .pipe(
-        switchMap((taken) =>
-          taken
-            ? throwError(() => new Error('email already taken'))
-            : this._userService.create(request),
-        ),
-        tap((user) => this._currentUser.set(user)), // logged in
-      );
-  }
+    register(request: RegisterRequest): Observable<UserResponse> {
+        return this._userService.emailExists(request.email).pipe(
+            switchMap((taken) =>
+                taken
+                    ? throwError(() => new Error('email already taken'))
+                    : this._userService.create(request),
+            ),
+            tap((user) => this._currentUser.set(user)), // logged in
+        );
+    }
 
-  login(request: LoginRequest): Observable<UserResponse> {
-    return this._http.get<UserEntity[]>(this._url, { params: { email: request.email } }).pipe(
-      map((users) => {
-        const user = users[0];
-        if (!user || user.password !== request.password) throw new Error('bad credentials');
-        return UserMapper(user);
-      }),
-      tap((user) => this._currentUser.set(user)),
-    );
-  }
+    login(request: LoginRequest): Observable<UserResponse> {
+        return this._http.get<UserEntity[]>(this._url, { params: { email: request.email } }).pipe(
+            map((users) => {
+                const user = users[0];
+                if (!user || user.password !== request.password) throw new Error('bad credentials');
+                return UserMapper(user);
+            }),
+            tap((user) => this._currentUser.set(user)),
+        );
+    }
 
-  logout(): void {
-    this._currentUser.set(null);
-  }
+    logout(): void {
+        this._currentUser.set(null);
+    }
 }
 ```
 
 ```ts login.request.ts
-
 export interface LoginRequest {
-  email: string;
-  password: string;
+    email: string;
+    password: string;
 }
 ```

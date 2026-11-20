@@ -4,19 +4,19 @@ import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.componen
 import nativeEvents from './snippets/native-events.md';
 
 @Component({
-  selector: 'app-event-binding',
-  standalone: true,
-  imports: [CodeSnippetComponent, CommonModule],
-  templateUrl: './event-binding.component.html',
+    selector: 'app-event-binding',
+    standalone: true,
+    imports: [CodeSnippetComponent, CommonModule],
+    templateUrl: './event-binding.component.html',
 })
 export class EventBindingComponent {
-  // page snippets
-  protected readonly snippets = { nativeEvents };
+    // page snippets
+    protected readonly snippets = { nativeEvents };
 
-  value = signal('initial value');
-  pressedKey = signal('');
+    value = signal('initial value');
+    pressedKey = signal('');
 
-  protected showPressedKey(event: KeyboardEvent) {
-    this.pressedKey.set(event.key);
-  }
+    protected showPressedKey(event: KeyboardEvent) {
+        this.pressedKey.set(event.key);
+    }
 }

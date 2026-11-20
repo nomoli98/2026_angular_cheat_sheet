@@ -1,0 +1,259 @@
+<h2>Bootstrap</h2>
+
+<p>
+    How to add Bootstrap (CSS only) to an Angular project, and how this cheat sheet uses it. Full
+    guide: <code>BOOTSTRAP.md</code> ·
+    <a
+        href="https://getbootstrap.com/docs/5.3/getting-started/introduction/"
+        target="_blank"
+        rel="noopener"
+        >Bootstrap 5.3 docs</a
+    >.
+</p>
+
+<section class="card card-body mb-3">
+    <h3>1. Install</h3>
+    <p>
+        That's it for the CSS. No <code>&#64;popperjs/core</code>, no
+        <code>&#64;angular/localize</code>: those are only needed for Bootstrap's JavaScript (step
+        7).
+    </p>
+    <app-code-snippet [code]="snippets.install" />
+</section>
+
+<section class="card card-body mb-3">
+    <h3>2. Load the CSS</h3>
+    <p>
+        In <code>angular.json</code> (<code
+            >projects &gt; your-project &gt; architect &gt; build &gt; options</code
+        >), add Bootstrap <strong>before</strong> your own <code>styles.css</code>. Order matters:
+        the last file wins, so your styles can override Bootstrap. Or import it at the top of
+        <code>styles.css</code> instead.
+    </p>
+    <p class="mb-3">
+        <strong>⚠️ Restart <code>ng serve</code></strong> after changing <code>angular.json</code>:
+        it isn't hot-reloaded.
+    </p>
+    <app-code-snippet [code]="snippets.loadCss" />
+</section>
+
+<section class="card card-body mb-3">
+    <h3>3. Use the classes</h3>
+    <p>
+        Nothing to import in the component: the CSS is global, so the classes work in every
+        template.
+    </p>
+    <app-code-snippet [code]="snippets.use" />
+
+    <h4 class="mt-4">The classes used most</h4>
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>What</th>
+                    <th>Classes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Page width</td>
+                    <td>
+                        <code>container</code> (centred, max width),
+                        <code>container-fluid</code> (full width)
+                    </td>
+                </tr>
+                <tr>
+                    <td>Spacing</td>
+                    <td>
+                        <code>m-3</code>, <code>mb-3</code>, <code>p-3</code>, <code>py-4</code>…
+                        (<code>m</code>/<code>p</code> + side <code>t b s e x y</code> + size
+                        <code>0</code>–<code>5</code>)
+                    </td>
+                </tr>
+                <tr>
+                    <td>Grid</td>
+                    <td>
+                        <code>row</code> &gt; <code>col</code>, <code>col-md-6</code> (half width
+                        from medium screens), <code>g-3</code> (gap)
+                    </td>
+                </tr>
+                <tr>
+                    <td>Buttons</td>
+                    <td>
+                        <code>btn</code> + <code>btn-primary</code> / <code>btn-secondary</code> /
+                        <code>btn-danger</code> / <code>btn-outline-primary</code>, size
+                        <code>btn-sm</code> /
+                        <code>btn-lg</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Cards</td>
+                    <td>
+                        <code>card</code> &gt; <code>card-header</code> + <code>card-body</code>, or
+                        <code>card card-body</code> for a simple box
+                    </td>
+                </tr>
+                <tr>
+                    <td>Lists</td>
+                    <td>
+                        <code>list-group</code> &gt; <code>list-group-item</code>,
+                        <code>list-group-flush</code>, <code>list-group-item-action</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Text</td>
+                    <td>
+                        <code>text-muted</code>, <code>text-danger</code>,
+                        <code>text-primary</code>, <code>fw-bold</code>, <code>fw-semibold</code>,
+                        <code>small</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Display</td>
+                    <td>
+                        <code>d-none</code>, <code>d-block</code>, <code>d-flex</code>,
+                        <code>gap-2</code>, <code>justify-content-between</code>,
+                        <code>align-items-center</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Borders</td>
+                    <td><code>border</code>, <code>border-bottom</code>, <code>rounded</code></td>
+                </tr>
+                <tr>
+                    <td>Navbar</td>
+                    <td>
+                        <code>navbar</code> &gt; <code>container</code> &gt;
+                        <code>navbar-brand</code>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card card-body mb-3">
+    <h3>4. Forms</h3>
+    <p>
+        <code>&lt;label&gt;</code> → <code>form-label</code> · <code>&lt;input&gt;</code>,
+        <code>&lt;textarea&gt;</code> → <code>form-control</code> · <code>&lt;select&gt;</code> →
+        <code>form-select</code> · checkbox / radio → wrapper <code>form-check</code>, input
+        <code>form-check-input</code>, label <code>form-check-label</code>.
+    </p>
+    <app-code-snippet [code]="snippets.forms" />
+</section>
+
+<section class="card card-body mb-3">
+    <h3>5. Form validation with Angular</h3>
+    <p>
+        Bootstrap shows an input in red with <code>is-invalid</code> and shows the message in
+        <code>invalid-feedback</code>. Angular decides <strong>when</strong>, with a class binding.
+    </p>
+    <ul>
+        <li>
+            <code>[class.is-invalid]="condition"</code> adds the class only while the condition is
+            true. No <code>NgClass</code> needed.
+        </li>
+        <li>
+            <code>.invalid-feedback</code> is hidden
+            <strong>unless the element right before it</strong> is <code>.is-invalid</code>. For
+            radios and checkboxes, force it: <code>class="invalid-feedback d-block"</code>.
+        </li>
+    </ul>
+    <app-code-snippet [code]="snippets.validation" />
+    <p class="mt-3 mb-0">
+        Same idea with all three kinds of form: see the form pages (<code>/form/...</code>).
+    </p>
+</section>
+
+<section class="card card-body mb-3">
+    <h3>6. Customise the look</h3>
+    <p>
+        Bootstrap 5.3 exposes its colours and sizes as CSS variables (<code>--bs-primary</code>,
+        <code>--bs-border-radius</code>, <code>--bs-body-bg</code>…). Use them in your CSS, or
+        override them in <code>styles.css</code> (loaded after Bootstrap). Dark mode =
+        <code>data-bs-theme="dark"</code> on <code>&lt;html&gt;</code> (see the Dark mode page).
+    </p>
+    <app-code-snippet [code]="snippets.customise" />
+    <p class="mt-3 mb-0 small text-body-secondary">
+        To change the brand colours everywhere (<code>$primary</code>…), you need the Sass version:
+        rename <code>styles.css</code> to <code>styles.scss</code>, remove the
+        <code>.min.css</code> from <code>angular.json</code> and write
+        <code>$primary: #6f42c1; &#64;import 'bootstrap/scss/bootstrap';</code>. Only if you really
+        need it.
+    </p>
+</section>
+
+<section class="card card-body mb-3">
+    <h3>7. (Optional) The JavaScript parts</h3>
+    <p>Dropdowns, modals, collapse, tooltips… need JavaScript. Two ways:</p>
+    <ul>
+        <li>
+            <strong>a. ng-bootstrap</strong> (recommended in Angular): installs ng-bootstrap plus
+            <code>&#64;popperjs/core</code> and <code>&#64;angular/localize</code>. Then import what
+            you need (e.g. <code>NgbDropdownModule</code>) in the component's <code>imports</code>.
+        </li>
+        <li>
+            <strong>b. Bootstrap's own JS bundle</strong> in <code>angular.json</code>: the
+            <code>data-bs-toggle="..."</code> attributes then work. Simpler, but it touches the DOM
+            behind Angular's back.
+        </li>
+    </ul>
+    <app-code-snippet [code]="snippets.javascript" />
+    <p class="mt-3 mb-0">This cheat sheet uses <strong>CSS only</strong>.</p>
+</section>
+
+<section class="card card-body mb-3">
+    <h3>8. How this cheat sheet uses it</h3>
+    <p>
+        Rule: <strong>few classes in the templates, the rest in <code>src/styles.css</code></strong
+        >.
+    </p>
+    <ul class="mb-0">
+        <li>
+            <code>app.html</code> has the navbar and
+            <code>&lt;main class="container py-4"&gt;</code> once, so no page needs its own
+            container.
+        </li>
+        <li>
+            Each section of a page is a <code>&lt;section class="card card-body mb-3"&gt;</code>.
+        </li>
+        <li>
+            Plain <code>&lt;button&gt;</code>, <code>&lt;input&gt;</code>,
+            <code>&lt;select&gt;</code> get a Bootstrap look from <code>styles.css</code>: buttons
+            only with <strong>no class</strong> (<code>button:not([class])</code>), inputs unless
+            they already have a Bootstrap class (<code>input:not(.form-control)</code>), because
+            Angular adds <code>ng-valid</code>, <code>ng-touched</code>… to them.
+        </li>
+        <li>
+            <code>h2</code> / <code>h3</code> / <code>h4</code> inside <code>&lt;main&gt;</code> are
+            styled in <code>styles.css</code>.
+        </li>
+        <li>
+            Form pages use the real Bootstrap form classes, because that's worth having as an
+            example.
+        </li>
+    </ul>
+</section>
+
+<section class="card card-body mb-3">
+    <h3>Gotchas</h3>
+    <ul class="mb-0">
+        <li>
+            <code>input-group</code> is a Bootstrap class (puts its children on one row). Don't use
+            it for your own "label + input", use <code>mb-3</code>.
+        </li>
+        <li>
+            Same for <code>form</code>, <code>card</code>, <code>container</code>, <code>row</code>,
+            <code>col</code>, <code>active</code>, <code>disabled</code>… pick other names for your
+            own classes.
+        </li>
+        <li>
+            Component styles (<code>styleUrl</code>) are scoped: they can't restyle Bootstrap
+            elsewhere. Global overrides go in <code>src/styles.css</code>.
+        </li>
+        <li>
+            Changed <code>angular.json</code> and nothing happened? Restart <code>ng serve</code>.
+        </li>
+    </ul>
+</section>

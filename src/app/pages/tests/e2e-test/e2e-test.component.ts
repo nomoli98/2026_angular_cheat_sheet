@@ -7,11 +7,11 @@ import tests from './snippets/tests.md';
 import run from './snippets/run.md';
 
 @Component({
-  imports: [CodeSnippetComponent, LoginFormComponent],
-  selector: 'app-e2e-test',
-  templateUrl: './e2e-test.component.html',
+    imports: [CodeSnippetComponent, LoginFormComponent],
+    selector: 'app-e2e-test',
+    templateUrl: './e2e-test.component.html',
 })
 export class E2eTestComponent {
-  // page snippets
-  protected readonly snippets = { setup, config, tests, run };
+    // page snippets
+    protected readonly snippets = { setup, config, tests, run };
 }

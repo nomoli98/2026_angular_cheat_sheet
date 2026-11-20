@@ -1,16 +1,18 @@
 ```ts admin.guard.ts
 // core/guards/admin.guard.ts
 export const adminGuard: CanActivateFn = (_route, state) => {
-  const user = inject(AuthService).currentUser();
-  if (isAdmin(user)) return true; // ✅ open
+    const user = inject(AuthService).currentUser();
+    if (isAdmin(user)) return true; // ✅ open
 
-  const router = inject(Router);
-  if (!user) {
-    // logged out → login
-    return router.createUrlTree(['/auth/auth-service'], { queryParams: { returnUrl: state.url } });
-  }
-  // not admin → explain why
-  return router.createUrlTree(['/auth/authorization'], { queryParams: { forbidden: state.url } });
+    const router = inject(Router);
+    if (!user) {
+        // logged out → login
+        return router.createUrlTree(['/auth/auth-service'], {
+            queryParams: { returnUrl: state.url },
+        });
+    }
+    // not admin → explain why
+    return router.createUrlTree(['/auth/authorization'], { queryParams: { forbidden: state.url } });
 };
 ```
 
@@ -40,13 +42,14 @@ readonly forbidden = input<string>();
 
 ```ts admin.guard.spec.ts
 const runGuard = () =>
-  TestBed.runInInjectionContext(() =>
-    adminGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),
-  );
+    TestBed.runInInjectionContext(() =>
+        adminGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),
+    );
 
 it('sends a simple user to the authorization page', () => {
-  currentUser.set(alice);
-  expect((runGuard() as UrlTree).toString())
-    .toBe('/auth/authorization?forbidden=%2Fauth%2Fauthorization%2Fadmin-area');
+    currentUser.set(alice);
+    expect((runGuard() as UrlTree).toString()).toBe(
+        '/auth/authorization?forbidden=%2Fauth%2Fauthorization%2Fadmin-area',
+    );
 });
 ```

@@ -49,23 +49,26 @@ export class ReactiveValidatorsComponent {
 
 ```html reactive-validators.component.html
 <form [formGroup]="builtInForm">
-  @let name = builtInForm.controls.name;
-  <input class="form-control" formControlName="name"
-         [class.is-invalid]="name.invalid && name.touched" />
+    @let name = builtInForm.controls.name;
+    <input
+        class="form-control"
+        formControlName="name"
+        [class.is-invalid]="name.invalid && name.touched"
+    />
 
-  @if (name.touched) {
-    @if (name.hasError('required')) { <div class="invalid-feedback">Name is required</div> }
+    @if (name.touched) { @if (name.hasError('required')) {
+    <div class="invalid-feedback">Name is required</div>
+    }
     <!-- lowercase key! -->
     @if (name.hasError('minlength')) {
-      <div class="invalid-feedback">At least {{ name.getError('minlength').requiredLength }} characters</div>
-    }
-  }
-
-  @let height = builtInForm.controls.height;
-  <input type="number" class="form-control" formControlName="height" />
-  @if (height.touched && height.hasError('min')) {
+    <div class="invalid-feedback">
+        At least {{ name.getError('minlength').requiredLength }} characters
+    </div>
+    } } @let height = builtInForm.controls.height;
+    <input type="number" class="form-control" formControlName="height" />
+    @if (height.touched && height.hasError('min')) {
     <div class="invalid-feedback">Minimum {{ height.getError('min').min }} cm</div>
-  }
+    }
 </form>
 ```
 
@@ -73,13 +76,13 @@ export class ReactiveValidatorsComponent {
 
 ⚠️ The key is not always the validator's name (lowercase!).
 
-| Validator | Error key | Error value |
-| --------- | --------- | ----------- |
-| `Validators.required` / `requiredTrue` | `required` | `true` |
-| `Validators.email` | `email` | `true` |
-| `Validators.minLength(n)` / `maxLength(n)` | **`minlength`** / **`maxlength`** | `{ requiredLength, actualLength }` |
-| `Validators.min(n)` / `max(n)` | `min` / `max` | `{ min, actual }` / `{ max, actual }` |
-| `Validators.pattern(re)` | `pattern` | `{ requiredPattern, actualValue }` |
+| Validator                                  | Error key                         | Error value                           |
+| ------------------------------------------ | --------------------------------- | ------------------------------------- |
+| `Validators.required` / `requiredTrue`     | `required`                        | `true`                                |
+| `Validators.email`                         | `email`                           | `true`                                |
+| `Validators.minLength(n)` / `maxLength(n)` | **`minlength`** / **`maxlength`** | `{ requiredLength, actualLength }`    |
+| `Validators.min(n)` / `max(n)`             | `min` / `max`                     | `{ min, actual }` / `{ max, actual }` |
+| `Validators.pattern(re)`                   | `pattern`                         | `{ requiredPattern, actualValue }`    |
 
 ---
 
@@ -91,87 +94,80 @@ A factory function that returns a `ValidatorFn`. Parameters go to the factory: `
 import { ValidatorFn } from '@angular/forms';
 
 interface StrongPasswordErrors {
-  lowercase?: boolean;
-  uppercase?: boolean;
-  number?: boolean;
-  specialChar?: boolean;
-  minlength?: boolean;
+    lowercase?: boolean;
+    uppercase?: boolean;
+    number?: boolean;
+    specialChar?: boolean;
+    minlength?: boolean;
 }
 
 // factory → ValidatorFn
 export function strongPasswordValidator(): ValidatorFn {
-  return (control) => {
-    const value: string = control.value;
-    const result: StrongPasswordErrors = {};
+    return (control) => {
+        const value: string = control.value;
+        const result: StrongPasswordErrors = {};
 
-    if (!/[a-z]/.test(value)) result.lowercase = true;
-    if (!/[A-Z]/.test(value)) result.uppercase = true;
-    if (!/[0-9]/.test(value)) result.number = true;
-    if (!/[\W_]/.test(value)) result.specialChar = true;
-    if (value.length < 8) result.minlength = true;
+        if (!/[a-z]/.test(value)) result.lowercase = true;
+        if (!/[A-Z]/.test(value)) result.uppercase = true;
+        if (!/[0-9]/.test(value)) result.number = true;
+        if (!/[\W_]/.test(value)) result.specialChar = true;
+        if (value.length < 8) result.minlength = true;
 
-    // null = valid
-    return Object.keys(result).length > 0 ? result : null;
-  };
+        // null = valid
+        return Object.keys(result).length > 0 ? result : null;
+    };
 }
 ```
 
 ```ts birthdate.validator.ts
 // with parameters
 export function birthdateValidator(minAge?: number, maxAge?: number): ValidatorFn {
-  return (control) => {
-    const value: string | null = control.value;
-    if (!value) return null; // empty: required's job
+    return (control) => {
+        const value: string | null = control.value;
+        if (!value) return null; // empty: required's job
 
-    const userBirthdate = parseDate(value); // 'YYYY-MM-DD' → local Date
-    if (!userBirthdate) return { invalidDate: true };
+        const userBirthdate = parseDate(value); // 'YYYY-MM-DD' → local Date
+        if (!userBirthdate) return { invalidDate: true };
 
-    const result: BirthdateErrors = {};
-    if (minAge && yearsAgo(minAge) < userBirthdate) {
-      result.minAge = true;
-      result.minAgeValue = minAge; // data for template
-    }
-    if (maxAge && yearsAgo(maxAge) > userBirthdate) {
-      result.maxAge = true;
-      result.maxAgeValue = maxAge;
-    }
-    return Object.keys(result).length > 0 ? result : null;
-  };
+        const result: BirthdateErrors = {};
+        if (minAge && yearsAgo(minAge) < userBirthdate) {
+            result.minAge = true;
+            result.minAgeValue = minAge; // data for template
+        }
+        if (maxAge && yearsAgo(maxAge) > userBirthdate) {
+            result.maxAge = true;
+            result.maxAgeValue = maxAge;
+        }
+        return Object.keys(result).length > 0 ? result : null;
+    };
 }
 ```
 
 ```ts reactive-validators.component.ts
 customForm = new FormGroup({
-  password: new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.required, strongPasswordValidator()],
-  }),
-  birthdate: new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.required, birthdateValidator(18, 120)],
-  }),
+    password: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, strongPasswordValidator()],
+    }),
+    birthdate: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, birthdateValidator(18, 120)],
+    }),
 });
 ```
 
 ```html reactive-validators.component.html
-@let password = customForm.controls.password;
-@if (password.touched && password.invalid) {
-  <div class="invalid-feedback">
-    @if (password.hasError('required')) { Password is required }
-    @else {
-      Missing:
-      @if (password.hasError('lowercase')) { a lowercase · }
-      @if (password.hasError('uppercase')) { an uppercase · }
-      @if (password.hasError('number')) { a digit · }
-      @if (password.hasError('specialChar')) { a symbol · }
-      @if (password.hasError('minlength')) { 8 characters }
-    }
-  </div>
-}
-
-@let birthdate = customForm.controls.birthdate;
-@if (birthdate.touched && birthdate.hasError('minAge')) {
-  <div class="invalid-feedback">You must be at least {{ birthdate.getError('minAgeValue') }}</div>
+@let password = customForm.controls.password; @if (password.touched && password.invalid) {
+<div class="invalid-feedback">
+    @if (password.hasError('required')) { Password is required } @else { Missing: @if
+    (password.hasError('lowercase')) { a lowercase · } @if (password.hasError('uppercase')) { an
+    uppercase · } @if (password.hasError('number')) { a digit · } @if
+    (password.hasError('specialChar')) { a symbol · } @if (password.hasError('minlength')) { 8
+    characters } }
+</div>
+} @let birthdate = customForm.controls.birthdate; @if (birthdate.touched &&
+birthdate.hasError('minAge')) {
+<div class="invalid-feedback">You must be at least {{ birthdate.getError('minAgeValue') }}</div>
 }
 ```
 
@@ -188,22 +184,25 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 // goes on the group
 export function matchFieldsValidator(field: string, confirmField: string): ValidatorFn {
-  return (group: AbstractControl): ValidationErrors | null => {
-    const value = group.get(field)?.value;
-    const confirm = group.get(confirmField)?.value;
-    if (!confirm) return null; // empty: required's job
-    return value === confirm ? null : { fieldsMismatch: true };
-  };
+    return (group: AbstractControl): ValidationErrors | null => {
+        const value = group.get(field)?.value;
+        const confirm = group.get(confirmField)?.value;
+        if (!confirm) return null; // empty: required's job
+        return value === confirm ? null : { fieldsMismatch: true };
+    };
 }
 ```
 
 ```ts reactive-validators.component.ts
 crossForm = new FormGroup(
-  {
-    password: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    confirmPassword: new FormControl('', { nonNullable: true, validators: Validators.required }),
-  },
-  { validators: matchFieldsValidator('password', 'confirmPassword') }, // group validator
+    {
+        password: new FormControl('', { nonNullable: true, validators: Validators.required }),
+        confirmPassword: new FormControl('', {
+            nonNullable: true,
+            validators: Validators.required,
+        }),
+    },
+    { validators: matchFieldsValidator('password', 'confirmPassword') }, // group validator
 );
 ```
 
@@ -212,13 +211,17 @@ crossForm = new FormGroup(
 <!-- error on the GROUP -->
 @let mismatch = confirm.touched && crossForm.hasError('fieldsMismatch');
 
-<input type="password" class="form-control" formControlName="confirmPassword"
-       [class.is-invalid]="(confirm.invalid && confirm.touched) || mismatch" />
+<input
+    type="password"
+    class="form-control"
+    formControlName="confirmPassword"
+    [class.is-invalid]="(confirm.invalid && confirm.touched) || mismatch"
+/>
 
 @if (confirm.touched && confirm.hasError('required')) {
-  <div class="invalid-feedback">Please confirm the password</div>
+<div class="invalid-feedback">Please confirm the password</div>
 } @else if (mismatch) {
-  <div class="invalid-feedback">Passwords don't match</div>
+<div class="invalid-feedback">Passwords don't match</div>
 }
 ```
 
@@ -238,40 +241,45 @@ import { UserService } from '@core/services/user.service';
 
 // returns an Observable
 export function emailTakenValidator(): AsyncValidatorFn {
-  const userService = inject(UserService); // injection context only
+    const userService = inject(UserService); // injection context only
 
-  return (control) => {
-    if (!control.value) return of(null);
+    return (control) => {
+        if (!control.value) return of(null);
 
-    return timer(400).pipe( // free debounce
-      switchMap(() => userService.emailExists(control.value)),
-      map((taken) => (taken ? { emailTaken: true } : null)),
-      catchError(() => of(null)), // API down = valid
-    );
-  };
+        return timer(400).pipe(
+            // free debounce
+            switchMap(() => userService.emailExists(control.value)),
+            map((taken) => (taken ? { emailTaken: true } : null)),
+            catchError(() => of(null)), // API down = valid
+        );
+    };
 }
 ```
 
 ```ts reactive-validators.component.ts
 asyncForm = new FormGroup({
-  email: new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.required, Validators.email],
-    asyncValidators: [emailTakenValidator()], // separate key
-  }),
+    email: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.email],
+        asyncValidators: [emailTakenValidator()], // separate key
+    }),
 });
 ```
 
 ```html reactive-validators.component.html
 @let email = asyncForm.controls.email;
-<input type="email" class="form-control" formControlName="email"
-       [class.is-invalid]="email.invalid && email.touched" />
+<input
+    type="email"
+    class="form-control"
+    formControlName="email"
+    [class.is-invalid]="email.invalid && email.touched"
+/>
 
 <!-- while waiting -->
-@if (email.pending) { <div class="form-text">Checking the email...</div> }
-
-@if (email.touched && email.hasError('emailTaken')) {
-  <div class="invalid-feedback">This email is already taken</div>
+@if (email.pending) {
+<div class="form-text">Checking the email...</div>
+} @if (email.touched && email.hasError('emailTaken')) {
+<div class="invalid-feedback">This email is already taken</div>
 }
 ```
 
@@ -284,7 +292,7 @@ asyncForm = new FormGroup({
 ```ts
 ctrl.addValidators(Validators.max(220));
 ctrl.removeValidators(Validators.required); // same reference only
-ctrl.updateValueAndValidity();             // re-run validators
+ctrl.updateValueAndValidity(); // re-run validators
 ```
 
 > ⚠️ `removeValidators` compares references: it works with `Validators.required`, not with `Validators.max(220)` (each call makes a new function). Keep it in a variable to remove it later.

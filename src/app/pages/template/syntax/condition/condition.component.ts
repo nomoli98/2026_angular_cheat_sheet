@@ -5,17 +5,16 @@ import ifElse from './snippets/if-else.md';
 import switchSnippet from './snippets/switch.md';
 
 @Component({
-  selector: 'app-condition',
-  standalone: true,
-  imports: [CommonModule, CodeSnippetComponent],
-  templateUrl: './condition.component.html'
+    selector: 'app-condition',
+    standalone: true,
+    imports: [CommonModule, CodeSnippetComponent],
+    templateUrl: './condition.component.html',
 })
 export class ConditionComponent {
+    protected firstOption = signal(true);
+    protected secondOption = signal(false);
+    switchOptions = 'A';
 
-  protected firstOption = signal(true)
-  protected secondOption = signal(false)
-  switchOptions = 'A';
-
-  // page snippets
-  protected readonly snippets = { ifElse, switch: switchSnippet };
+    // page snippets
+    protected readonly snippets = { ifElse, switch: switchSnippet };
 }

@@ -1,21 +1,23 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>AngularCheatSheet</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <!-- theme before first paint: no white flash (same rules as ThemeService) -->
-  <script>
-    try {
-      var saved = localStorage.getItem('theme');
-      var dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
-    } catch (e) {}
-  </script>
-</head>
-<body>
-  <app-root></app-root>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <title>AngularCheatSheet</title>
+        <base href="/" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" type="image/x-icon" href="favicon.ico" />
+        <!-- theme before first paint: no white flash (same rules as ThemeService) -->
+        <script>
+            try {
+                var saved = localStorage.getItem('theme');
+                var dark = saved
+                    ? saved === 'dark'
+                    : matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
+            } catch (e) {}
+        </script>
+    </head>
+    <body>
+        <app-root></app-root>
+    </body>
 </html>

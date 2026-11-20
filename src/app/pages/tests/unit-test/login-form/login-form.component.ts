@@ -3,34 +3,34 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { AuthService } from '@core/services/auth.service';
 
 @Component({
-  selector: 'app-login-form',
-  imports: [ReactiveFormsModule],
-  templateUrl: './login-form.component.html',
+    selector: 'app-login-form',
+    imports: [ReactiveFormsModule],
+    templateUrl: './login-form.component.html',
 })
 export class LoginFormComponent {
-  protected readonly auth = inject(AuthService);
+    protected readonly auth = inject(AuthService);
 
-  error = signal(false);
+    error = signal(false);
 
-  loginForm = new FormGroup({
-    email: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.email],
-    }),
-    password: new FormControl('', { nonNullable: true, validators: Validators.required }),
-  });
-
-  onSubmit() {
-    this.error.set(false);
-    // getRawValue() = a LoginRequest
-    this.auth.login(this.loginForm.getRawValue()).subscribe({
-      // next: the service already filled currentUser
-      error: () => this.error.set(true), // wrong email/password or API down
+    loginForm = new FormGroup({
+        email: new FormControl('', {
+            nonNullable: true,
+            validators: [Validators.required, Validators.email],
+        }),
+        password: new FormControl('', { nonNullable: true, validators: Validators.required }),
     });
-  }
 
-  logout() {
-    this.auth.logout();
-    this.loginForm.reset();
-  }
+    onSubmit() {
+        this.error.set(false);
+        // getRawValue() = a LoginRequest
+        this.auth.login(this.loginForm.getRawValue()).subscribe({
+            // next: the service already filled currentUser
+            error: () => this.error.set(true), // wrong email/password or API down
+        });
+    }
+
+    logout() {
+        this.auth.logout();
+        this.loginForm.reset();
+    }
 }

@@ -4,19 +4,19 @@
 
 Two kinds of tests, two tools. **New to tests?** Start with the step by step of each doc: [unit test](./unit-test/UNIT_TEST.md#1-step-by-step-write-a-test) · [e2e test](./e2e-test/E2E_TEST.md#4-step-by-step-write-a-test).
 
-| Folder | Kind | Tool | Command | Doc |
-|---|---|---|---|---|
-| `unit-test/` | **Unit**: one component or service, alone | Vitest (built into Angular) | `ng test` | [UNIT_TEST.md](./unit-test/UNIT_TEST.md) |
-| `e2e-test/` | **End-to-end**: the whole app in a real browser, like a user | Playwright | `npm run e2e` | [E2E_TEST.md](./e2e-test/E2E_TEST.md) |
+| Folder       | Kind                                                         | Tool                        | Command       | Doc                                      |
+| ------------ | ------------------------------------------------------------ | --------------------------- | ------------- | ---------------------------------------- |
+| `unit-test/` | **Unit**: one component or service, alone                    | Vitest (built into Angular) | `ng test`     | [UNIT_TEST.md](./unit-test/UNIT_TEST.md) |
+| `e2e-test/`  | **End-to-end**: the whole app in a real browser, like a user | Playwright                  | `npm run e2e` | [E2E_TEST.md](./e2e-test/E2E_TEST.md)    |
 
 ## The demo pages
 
 All lazy-loaded from `tests.routes.ts` under `/tests/...`:
 
-| URL | Shows |
-|---|---|
+| URL                | Shows                                                                                                |
+| ------------------ | ---------------------------------------------------------------------------------------------------- |
 | `/tests/unit-test` | A counter, a greeting (`input()` / `output()`), a service and a login form, each with its `.spec.ts` |
-| `/tests/e2e-test` | The login form + how to install, configure, write and run Playwright tests |
+| `/tests/e2e-test`  | The login form + how to install, configure, write and run Playwright tests                           |
 
 ## Where the files are
 
@@ -47,14 +47,14 @@ All lazy-loaded from `tests.routes.ts` under `/tests/...`:
 
 ## Same task, two tools
 
-| Task | Unit test (Vitest) | E2E (Playwright) |
-|---|---|---|
-| Imports | none (`describe`, `it`, `expect`, `vi` are global) | `import { test, expect } from '@playwright/test'` |
-| One test | `it('...', () => {})` | `test('...', async ({ page }) => {})` |
-| Before each test | `beforeEach(...)` | `test.beforeEach(...)` |
-| Show the thing | `TestBed.createComponent(X)` | `await page.goto('/url')` |
-| Find an element | `html.querySelector('#email')` | `page.getByLabel('Email')` |
-| Click | `button.click()` | `await page.getByRole('button', { name: 'Log in' }).click()` |
-| Type | `input.value = 'x'; input.dispatchEvent(new Event('input'))` | `await page.getByLabel('Email').fill('x')` |
-| Wait for the screen | `await fixture.whenStable()` | nothing: `expect` waits by itself |
-| Check text | `expect(el.textContent).toContain('Bob')` | `await expect(locator).toContainText('Bob')` |
+| Task                | Unit test (Vitest)                                           | E2E (Playwright)                                             |
+| ------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Imports             | none (`describe`, `it`, `expect`, `vi` are global)           | `import { test, expect } from '@playwright/test'`            |
+| One test            | `it('...', () => {})`                                        | `test('...', async ({ page }) => {})`                        |
+| Before each test    | `beforeEach(...)`                                            | `test.beforeEach(...)`                                       |
+| Show the thing      | `TestBed.createComponent(X)`                                 | `await page.goto('/url')`                                    |
+| Find an element     | `html.querySelector('#email')`                               | `page.getByLabel('Email')`                                   |
+| Click               | `button.click()`                                             | `await page.getByRole('button', { name: 'Log in' }).click()` |
+| Type                | `input.value = 'x'; input.dispatchEvent(new Event('input'))` | `await page.getByLabel('Email').fill('x')`                   |
+| Wait for the screen | `await fixture.whenStable()`                                 | nothing: `expect` waits by itself                            |
+| Check text          | `expect(el.textContent).toContain('Bob')`                    | `await expect(locator).toContainText('Bob')`                 |

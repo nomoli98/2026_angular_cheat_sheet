@@ -10,13 +10,13 @@ import authService from './snippets/auth-service.md';
 import loginForm from './snippets/login-form.md';
 
 @Component({
-  imports: [CodeSnippetComponent, CounterComponent, GreetingComponent, LoginFormComponent],
-  selector: 'app-unit-test',
-  templateUrl: './unit-test.component.html',
+    imports: [CodeSnippetComponent, CounterComponent, GreetingComponent, LoginFormComponent],
+    selector: 'app-unit-test',
+    templateUrl: './unit-test.component.html',
 })
 export class UnitTestComponent {
-  // page snippets
-  protected readonly snippets = { run, counter, greeting, authService, loginForm };
+    // page snippets
+    protected readonly snippets = { run, counter, greeting, authService, loginForm };
 
-  lastGreeting = signal('');
+    lastGreeting = signal('');
 }
