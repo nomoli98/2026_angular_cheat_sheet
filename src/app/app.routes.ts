@@ -44,7 +44,7 @@ export const routes: Routes = [
     loadChildren: () => import('./pages/services/service.routes').then((r) => r.routes),
   },
   {
-    // 404: matches every URL nobody else matched. ALWAYS LAST.
+    // 404: ALWAYS LAST
     path: '**',
     loadComponent: () =>
       import('./pages/routers/not-found/not-found.component').then((m) => m.NotFoundComponent),

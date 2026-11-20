@@ -24,7 +24,7 @@ describe('adminGuard', () => {
   const currentUser = signal<UserResponse | null>(null);
   const url = '/auth/authorization/admin-area';
 
-  // A guard uses inject() → run it inside an injection context
+  // inject() → needs an injection context
   const runGuard = () =>
     TestBed.runInInjectionContext(() =>
       adminGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),

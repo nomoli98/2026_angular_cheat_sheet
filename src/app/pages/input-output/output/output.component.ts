@@ -10,7 +10,7 @@ import outputCode from './snippets/output.md';
   styleUrl: './output.component.css'
 })
 export class OutputComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { outputCode };
 
   output = signal<string>('');

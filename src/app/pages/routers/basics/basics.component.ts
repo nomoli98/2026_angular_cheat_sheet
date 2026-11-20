@@ -12,7 +12,7 @@ import redirect from './snippets/redirect.md';
   templateUrl: './basics.component.html',
 })
 export class BasicsComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { declare, links, params, redirect };
 
   private router = inject(Router);

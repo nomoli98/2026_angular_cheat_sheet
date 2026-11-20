@@ -6,7 +6,7 @@ import { GenderEnum } from '@core/enums/gender.enum';
 import { SubscriptionEnum } from '@core/enums/subscription.enum';
 import { RoleEnum } from '@core/enums/role.enum';
 
-// The worked example of UNIT_TEST.md ("Step by step: write a test")
+// worked example of UNIT_TEST.md
 
 const alice: UserResponse = {
   id: 2,
@@ -23,8 +23,7 @@ describe('GetMeComponent', () => {
   let fixture: ComponentFixture<GetMeComponent>;
   let html: HTMLElement;
 
-  // A fake controller: only the method the component uses.
-  // getMe() returns a Promise → mockResolvedValue (success) / mockRejectedValue (error)
+  // fake controller: mockResolvedValue / mockRejectedValue
   const fakeController = { getMe: vi.fn() };
 
   beforeEach(async () => {

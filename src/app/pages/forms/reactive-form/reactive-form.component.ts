@@ -16,7 +16,7 @@ import { emailTakenValidator } from '@core/validators/reactive-form/email-taken.
   templateUrl: './reactive-form.component.html',
 })
 export class ReactiveFormComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { reactiveForm };
 
   private readonly _formBuilder = inject(FormBuilder);
@@ -30,7 +30,7 @@ export class ReactiveFormComponent {
       asyncValidators: [emailTakenValidator()],
     }),
     password: new FormControl('', [Validators.required, strongPasswordValidator()]),
-    // birthdate is a 'YYYY-MM-DD' string: <input type="date"> reads and writes that format directly
+    // 'YYYY-MM-DD', what <input type="date"> uses
     birthdate: new FormControl('', [Validators.required, birthdateValidator(0, 135)]),
     height: new FormControl(50, [Validators.min(50), Validators.max(275)]),
     gender: new FormControl(GenderEnum.OTHER, [Validators.required, enumValidator(GenderEnum)]),
@@ -55,7 +55,7 @@ export class ReactiveFormComponent {
         subscription: this.formRegister.value.subscription!,
         agreeToTerms: this.formRegister.value.agreeToTerms!,
       };
-      //Call to your service here
+      // call your service here
       console.log(user);
     }
   }

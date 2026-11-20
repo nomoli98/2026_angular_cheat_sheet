@@ -16,6 +16,6 @@ export class ConditionComponent {
   protected secondOption = signal(false)
   switchOptions = 'A';
 
-  // The code shown under each section (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { ifElse, switch: switchSnippet };
 }

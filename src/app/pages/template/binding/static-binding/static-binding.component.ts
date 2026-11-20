@@ -21,7 +21,7 @@ import propertiesBinding from './snippets/properties-binding.md';
   `,
 })
 export class StaticBindingComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { dataBinding, propertiesBinding };
 
   value = 'Readonly value';

@@ -1,17 +1,4 @@
-// A tiny AUTH server, like a real backend would have (see src/app/pages/auth/token/TOKEN.md).
-// It runs next to json-server: json-server keeps the data, this server does the security.
-//
-//   Angular ──▶ auth-server (localhost:3001) ──▶ json-server (localhost:3000) ──▶ db.json
-//               bcrypt + JWT                     /securePeople
-//
-// POST /token/register  { name, email, password, ... }  → 201 { token, user }
-// POST /token/login     { email, password }              → 200 { token, user }
-// GET  /token/me        Authorization: Bearer <token>    → 200 user, or 401
-// GET  /token/users     Authorization: Bearer <token>    → 200 users (ADMIN only), 401 or 403
-// GET  /health                                           → 200 (Playwright waits for it)
-//
-// Plain Node (no Express) so every step is visible. Start it with `npm run api:auth`
-// (`npm run dev` starts it with the others).
+// Auth server (bcrypt + JWT) in front of json-server, see TOKEN.md
 
 const http = require('http');
 const bcrypt = require('bcryptjs');
@@ -19,9 +6,9 @@ const jwt = require('jsonwebtoken');
 
 const PORT = 3001;
 const DATA_URL = process.env.DATA_URL ?? 'http://localhost:3000/securePeople';
-// ⚠️ DEMO secret. A real one is long, random, and comes from an environment variable.
+// ⚠️ demo secret: a real one comes from an env variable
 const JWT_SECRET = process.env.JWT_SECRET ?? 'demo-secret-change-me';
-const JWT_EXPIRES_IN = 60 * 60; // 1 hour, in seconds
+const JWT_EXPIRES_IN = 60 * 60; // 1 hour
 const BCRYPT_ROUNDS = 10;
 
 // ---------- the routes ----------
@@ -30,7 +17,7 @@ async function register(body) {
   const [taken] = await data(`?email=${encodeURIComponent(body.email ?? '')}`);
   if (taken) return [409, { message: 'email already taken' }];
 
-  // The SERVER hashes: the browser only ever sends the password, over HTTPS in a real app
+  // the server hashes, never the browser
   const password = await bcrypt.hash(String(body.password ?? ''), BCRYPT_ROUNDS);
   const user = await data('', { method: 'POST', body: { ...body, password, role: 'user' } });
   return [201, { token: sign(user), user: withoutPassword(user) }];
@@ -41,7 +28,7 @@ async function login(body) {
   const ok = user && (await bcrypt.compare(String(body.password ?? ''), user.password));
   if (!ok) return [401, { message: 'bad credentials' }];
 
-  // DEMO: the explain page can ask for a short token (5 to 3600 s) to see it expire
+  // demo: short token, to watch it expire
   const seconds = Number(body.expiresInSeconds);
   const expiresIn = seconds >= 5 && seconds <= 3600 ? seconds : JWT_EXPIRES_IN;
   return [200, { token: sign(user, expiresIn), user: withoutPassword(user) }];
@@ -54,27 +41,25 @@ async function me(headers) {
   return [200, withoutPassword(user)];
 }
 
-// ADMIN only: the AUTHORIZATION check, done by the server (the one that really protects the data)
+// admin only: the real authorization check
 async function users(headers) {
-  const [user, error] = await authenticate(headers); // 1. WHO are you? (401 if we don't know)
+  const [user, error] = await authenticate(headers); // 401: who are you?
   if (error) return error;
-  if (user.role !== 'admin') return [403, { message: 'forbidden' }]; // 2. ALLOWED? (403 if not)
+  if (user.role !== 'admin') return [403, { message: 'forbidden' }]; // 403: allowed?
   const all = await data('');
   return [200, all.map(withoutPassword)];
 }
 
 // ---------- authentication: who is calling? ----------
 
-// Returns [user, null] when the token is good, or [null, [401, {...}]] when it isn't.
-// The role comes from the DATABASE, not from the token: if an admin is demoted,
-// it counts right away (the token keeps the old role until it expires).
+// [user, null] or [null, 401]. Role read from the DB, not the token
 async function authenticate(headers) {
   const auth = headers['authorization'] ?? '';
   if (!auth.startsWith('Bearer ')) return [null, [401, { message: 'no token' }]];
 
   let payload;
   try {
-    // verify() checks the SIGNATURE (nobody changed it) and the EXPIRY (exp)
+    // checks signature + expiry
     payload = jwt.verify(auth.slice('Bearer '.length), JWT_SECRET);
   } catch (err) {
     const message = err.name === 'TokenExpiredError' ? 'token expired' : 'invalid token';
@@ -88,7 +73,7 @@ async function authenticate(headers) {
 
 // ---------- helpers ----------
 
-// What goes INSIDE the token: readable by anyone (it's only base64), so no secrets in it
+// readable by anyone: no secrets
 function sign(user, expiresIn = JWT_EXPIRES_IN) {
   const payload = { sub: String(user.id), name: user.name, email: user.email, role: user.role };
   return jwt.sign(payload, JWT_SECRET, { expiresIn });
@@ -98,7 +83,7 @@ function withoutPassword({ password, ...user }) {
   return user;
 }
 
-// Talk to json-server (Node 18+ has fetch)
+// talk to json-server
 async function data(path, { method = 'GET', body } = {}) {
   const res = await fetch(DATA_URL + path, {
     method,
@@ -126,11 +111,11 @@ function readBody(req) {
 // ---------- the server ----------
 
 const server = http.createServer(async (req, res) => {
-  // CORS: Angular (localhost:4200) calls another port. The Authorization header must be allowed.
+  // CORS: allow the Authorization header
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  if (req.method === 'OPTIONS') return res.writeHead(204).end(); // the browser's "preflight"
+  if (req.method === 'OPTIONS') return res.writeHead(204).end(); // preflight
 
   const send = ([status, json]) => {
     res.writeHead(status, { 'Content-Type': 'application/json' });
@@ -146,7 +131,7 @@ const server = http.createServer(async (req, res) => {
     if (route === 'GET /health') return send([200, { ok: true }]);
     send([404, { message: 'not found' }]);
   } catch (err) {
-    // usually: json-server isn't running
+    // json-server not running?
     send([502, { message: `data server error: ${err.message}` }]);
   }
 });

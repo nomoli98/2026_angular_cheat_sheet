@@ -1,8 +1,8 @@
 ```html input.component.html
-<!-- Give both inputs -->
+<!-- both inputs -->
 <app-child-component [inputString]="String()" [inputUser]="User()" />
 
-<!-- Only the required one: inputUser uses its default value -->
+<!-- required only → default user -->
 <app-child-component [inputString]="String()" />
 ```
 
@@ -61,10 +61,10 @@ import { RegisterRequest } from '@core/requests/register.request';
   templateUrl: './child-component.component.html',
 })
 export class ChildComponentComponent {
-  // if the input is ABSOLUTELY necessary to make the component work add required.
+  // required
   inputString = input.required<string>();
 
-  //Otherwise, you can leave the required out and give a default value, to fill the gaps in case there is no user passed to the component.
+  // optional: default value
   inputUser = input<RegisterRequest>({
     name: 'Default',
     email: 'default@email.fake',

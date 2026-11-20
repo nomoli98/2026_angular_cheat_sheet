@@ -28,7 +28,7 @@ export class AuthService {
             ? throwError(() => new Error('email already taken'))
             : this._userService.create(request),
         ),
-        tap((user) => this._currentUser.set(user)), // the new user is logged in right away
+        tap((user) => this._currentUser.set(user)), // logged in
       );
   }
 
@@ -39,7 +39,7 @@ export class AuthService {
         if (!user || user.password !== request.password) throw new Error('bad credentials');
         return UserMapper(user);
       }),
-      tap((user) => this._currentUser.set(user)), // remember who is logged in
+      tap((user) => this._currentUser.set(user)),
     );
   }
 

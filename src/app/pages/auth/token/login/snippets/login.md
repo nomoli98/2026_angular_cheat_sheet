@@ -2,12 +2,12 @@
 // core/services/token-auth.service.ts
 login(request: LoginRequest): Observable<UserResponse> {
   return this._http.post<AuthResponse>(`${this._url}/login`, request).pipe(
-    tap((res) => this._setToken(res.token)), // keep it: signal + localStorage
+    tap((res) => this._setToken(res.token)), // signal + localStorage
     map((res) => res.user),
   );
 }
 
-// WHO is logged in = what the token says (no extra request)
+// read from the token
 readonly payload = computed(() => decodeToken(this._token()));
 readonly currentUser = computed(() => {
   const p = this.payload();
@@ -15,7 +15,7 @@ readonly currentUser = computed(() => {
 });
 
 logout(): void {
-  this._setToken(null); // that's all: the server keeps nothing (the token just expires)
+  this._setToken(null); // the server keeps nothing
 }
 ```
 
@@ -35,7 +35,7 @@ function sign(user, expiresIn = 3600) {
 ```
 
 ```ts login.component.ts
-// Same component as the other Login pages, only these change:
+// only these change:
 protected readonly _authController = inject(TokenAuthController);
 protected readonly _currentUser = inject(TokenAuthService).currentUser;
 ```

@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-// The token version (see src/app/pages/auth/token/TOKEN.md). Needs the auth server:
-// playwright.config.ts starts it (npm run api:auth).
+// needs the auth server (started by playwright.config.ts)
 
 test('a token login survives a refresh', async ({ page }) => {
   await page.goto('/auth/token/login');
@@ -9,7 +8,7 @@ test('a token login survives a refresh', async ({ page }) => {
   await page.getByRole('button', { name: 'Log in', exact: true }).click();
   await expect(page.locator('main').getByText('Logged in as Bob Martin')).toBeVisible();
 
-  await page.reload(); // the token is in localStorage
+  await page.reload(); // token in localStorage
 
   await expect(page.locator('main').getByText('Logged in as Bob Martin')).toBeVisible();
 });

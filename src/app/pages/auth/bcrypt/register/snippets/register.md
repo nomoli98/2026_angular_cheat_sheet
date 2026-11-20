@@ -1,29 +1,28 @@
 ```ts bcrypt-auth.service.ts
-// core/services/bcrypt-auth.service.ts: the ONLY difference with AuthService
+// core/services/bcrypt-auth.service.ts
 import { hash } from 'bcryptjs';
 
-export const BCRYPT_ROUNDS = 10; // cost: 2^10 rounds
+export const BCRYPT_ROUNDS = 10; // 2^10 rounds
 
 register(request: RegisterRequest): Observable<UserResponse> {
   return this._http.get<UserEntity[]>(this._url, { params: { email: request.email } }).pipe(
-    // 1. email taken → error. Free → hash the password.
-    //    switchMap accepts an async function: its Promise becomes the next value
+    // 1. email free? → hash (async)
     switchMap(async (users) => {
       if (users.length > 0) throw new Error('email already taken');
       return hash(request.password, BCRYPT_ROUNDS); // '$2b$10$<salt><hash>'
     }),
-    // 2. store the HASH instead of the password
+    // 2. store the hash
     switchMap((passwordHash) =>
       this._http.post<UserEntity>(this._url, { ...request, password: passwordHash, role: RoleEnum.USER }),
     ),
-    map((user) => UserMapper(user)), // the hash never leaves the service
+    map((user) => UserMapper(user)), // the hash stays here
     tap((user) => this._currentUser.set(user)),
   );
 }
 ```
 
 ```ts register.component.ts
-// Same component as the normal Register page, only the controller changes:
+// only the controller changes:
 protected readonly _authController = inject(BcryptAuthController);
 
 async onSubmit(event: Event) {

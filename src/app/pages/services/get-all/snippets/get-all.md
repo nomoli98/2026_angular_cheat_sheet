@@ -1,10 +1,10 @@
 ```html get-all.component.html
-<!-- tell a simple user why the button does nothing -->
+<!-- explain why -->
 @if (!_isAdmin()) {
 <div class="alert alert-warning">Only an admin can do this.</div>
 }
 
-<!-- [disabled]: a simple user can't even click -->
+<!-- can't click -->
 <button type="button" (click)="onClick()" [disabled]="!_isAdmin()">Get All Users</button>
 
 <!-- 'unauthorized' / 'forbidden' / HTTP error -->
@@ -12,7 +12,7 @@
 <div class="alert alert-danger">{{ error }}</div>
 }
 
-<!-- hide the data if the user stops being admin (logout, toggle...) -->
+<!-- hide when not admin -->
 @if (_isAdmin()) {
 <ul>
   @for (u of _users(); track u.id) {
@@ -38,25 +38,24 @@ export class GetAllComponent {
   protected readonly _users = signal<UserResponse[]>([]);
   protected readonly _error = signal<string | null>(null);
 
-  // Who is logged in, and are they admin? Re-computed when the user changes (navbar toggle)
+  // re-runs on user change
   private readonly _authService = inject(AuthService);
   protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
 
   async onClick() {
     this._error.set(null);
 
-    // 1. Check in the component: not admin → don't even call the controller
+    // 1. component check
     if (!this._isAdmin()) {
       this._error.set('forbidden: only an admin can see the list of users');
       return;
     }
 
     try {
-      // 2. The controller checks AGAIN (can't be skipped), then calls the service.
-      //    It returns a Promise → await it
+      // 2. controller checks again
       this._users.set(await this._userController.getAll());
     } catch (err) {
-      // 'unauthorized' (nobody logged in), 'forbidden' (not admin) or an HTTP error
+      // 'unauthorized' / 'forbidden' / HTTP
       this._error.set((err as Error).message);
     }
   }
@@ -72,8 +71,8 @@ export class UserController {
 
   // admin only
   async getAll(): Promise<UserResponse[]> {
-    const user = this._authService.currentUser(); // 1. who is asking?
-    if (!isAdmin(user)) deny(user); // 2. not allowed → throw 'unauthorized' / 'forbidden'
+    const user = this._authService.currentUser(); // 1. who?
+    if (!isAdmin(user)) deny(user); // 2. allowed?
     return firstValueFrom(this._userService.getAll()); // 3. Observable → Promise
   }
 }
@@ -87,7 +86,7 @@ export class UserService {
   private readonly _url = `${environment.apiUrl}/people`;
   private readonly _mapper = UserMapper;
 
-  // GET /people → UserEntity[] (with passwords) → UserResponse[] (without)
+  // UserEntity[] → UserResponse[]
   getAll(): Observable<UserResponse[]> {
     return this._http
       .get<UserEntity[]>(this._url)

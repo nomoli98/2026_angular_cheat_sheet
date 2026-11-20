@@ -12,7 +12,7 @@ import { environment } from '@env/environment';
 
 const url = `${environment.apiUrl}/people`;
 
-// What the fake API would send back for Bob
+// fake API answer
 const bob: UserEntity = {
   id: 1,
   name: 'Bob Martin',
@@ -34,12 +34,12 @@ describe('AuthService', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()], // fake backend
     });
-    service = TestBed.inject(AuthService); // like inject(AuthService) in a component
+    service = TestBed.inject(AuthService);
     httpTesting = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
-    httpTesting.verify(); // no request left unanswered
+    httpTesting.verify(); // all requests answered
   });
 
   it('logs in with the right email and password', async () => {
@@ -47,7 +47,7 @@ describe('AuthService', () => {
       service.login({ email: 'bob@email.bob', password: 'BobIsTheBest99#' }),
     );
 
-    // The service asked GET /people?email=bob@email.bob → we answer [bob]
+    // GET ?email= → [bob]
     const req = httpTesting.expectOne(
       (r) => r.url === url && r.params.get('email') === 'bob@email.bob',
     );
@@ -71,7 +71,7 @@ describe('AuthService', () => {
   it('refuses an unknown email', async () => {
     const result = firstValueFrom(service.login({ email: 'nobody@mail.com', password: 'x' }));
 
-    httpTesting.expectOne((r) => r.url === url).flush([]); // json-server found nobody
+    httpTesting.expectOne((r) => r.url === url).flush([]); // nobody found
 
     await expect(result).rejects.toThrow('bad credentials');
   });
@@ -89,18 +89,18 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    const { id: _id, role: _role, ...newBob } = bob; // a RegisterRequest (no id, no role)
+    const { id: _id, role: _role, ...newBob } = bob; // no id, no role
 
     it('creates the user when the email is free', async () => {
       const result = firstValueFrom(service.register(newBob));
 
-      // 1. the check: GET /people?email=... → [] (free)
+      // 1. email free
       httpTesting
         .expectOne((r) => r.method === 'GET' && r.params.get('email') === bob.email)
         .flush([]);
-      // 2. the creation: POST /people
+      // 2. POST /people
       const req = httpTesting.expectOne((r) => r.method === 'POST' && r.url === url);
-      expect(req.request.body).toEqual({ ...newBob, role: RoleEnum.USER }); // new accounts are users
+      expect(req.request.body).toEqual({ ...newBob, role: RoleEnum.USER }); // always a user
       req.flush(bob);
 
       expect((await result).name).toBe('Bob Martin');
@@ -158,7 +158,7 @@ export class AuthService {
         if (!user || user.password !== request.password) throw new Error('bad credentials');
         return UserMapper(user);
       }),
-      tap((user) => this._currentUser.set(user)), // remember who is logged in
+      tap((user) => this._currentUser.set(user)),
     );
   }
 

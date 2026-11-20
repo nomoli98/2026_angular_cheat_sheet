@@ -6,7 +6,7 @@ import { LoginRequest } from '@core/requests/login.request';
 import { RegisterRequest } from '@core/requests/register.request';
 import { deny, isAdmin } from '@core/controllers/permissions';
 
-// Same as BcryptAuthController, for the token version. The pages only see Promises.
+// AuthController, token version
 @Service()
 export class TokenAuthController {
   private readonly _authService = inject(TokenAuthService);
@@ -21,14 +21,13 @@ export class TokenAuthController {
     return firstValueFrom(this._authService.register(request));
   }
 
-  // logged in only. The SERVER checks the token too (that's the real check)
+  // logged in only (the server checks the token too)
   async me(): Promise<UserResponse> {
     if (!this._authService.currentUser()) deny(null);
     return firstValueFrom(this._authService.me());
   }
 
-  // admin only. Checked HERE (no useless request) and AGAIN by the server (the real check):
-  // try it with the role switched off here → the server still answers 403
+  // admin only: checked here AND by the server (403)
   async getUsers(skipFrontCheck = false): Promise<UserResponse[]> {
     const user = this._authService.currentUser();
     if (!skipFrontCheck && !isAdmin(user)) deny(user);

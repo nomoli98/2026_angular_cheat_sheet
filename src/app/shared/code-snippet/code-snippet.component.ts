@@ -7,7 +7,7 @@ import css from 'highlight.js/lib/languages/css';
 import json from 'highlight.js/lib/languages/json';
 import bash from 'highlight.js/lib/languages/bash';
 
-// Only register the languages we use, so the bundle stays small.
+// only the languages we use (smaller bundle)
 hljs.registerLanguage('html', xml);
 hljs.registerLanguage('typescript', typescript);
 hljs.registerLanguage('ts', typescript);
@@ -23,18 +23,7 @@ interface SnippetTab {
   highlighted: string;
 }
 
-/**
- * Shows the code blocks of a snippet .md file as tabs, with a Copy button.
- *
- * The .md file contains fenced code blocks. The text after the language
- * becomes the tab name:
- *
- *   ```html condition.component.html
- *   ...
- *   ```
- *
- * Usage: <app-code-snippet [code]="snippets.ifElse" />
- */
+/** A snippet .md as tabs + Copy. Tab name = text after the language (```html file.html). */
 @Component({
   selector: 'app-code-snippet',
   templateUrl: './code-snippet.component.html',

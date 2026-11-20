@@ -28,14 +28,14 @@ const EMPTY: RegisterRequest = {
   templateUrl: './register.component.html',
 })
 export class TokenRegisterComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { register };
 
   protected readonly GenderEnum = GenderEnum;
   protected readonly _authController = inject(TokenAuthController);
   protected readonly _created = signal<UserResponse | null>(null);
   protected readonly _error = signal<string | null>(null);
-  protected readonly _busy = signal(false); // true while waiting for the API
+  protected readonly _busy = signal(false); // waiting for the API
 
   protected readonly _model = signal<RegisterRequest>({ ...EMPTY });
 
@@ -62,12 +62,12 @@ export class TokenRegisterComponent {
     this._created.set(null);
     this._busy.set(true);
     try {
-      // the SERVER hashes the password, creates the account and answers a token: logged in
+      // the server hashes, creates, returns a token
       this._created.set(await this._authController.register(this._form().value()));
       this._model.set({ ...EMPTY });
-      this._form().reset(); // back to "untouched": no red fields on the empty form
+      this._form().reset(); // untouched: no red fields
     } catch (err) {
-      // 'email already taken' → 'This email is already taken', or an HTTP error
+      // 'email already taken' or an HTTP error
       this._error.set(errorMessage(err));
     } finally {
       this._busy.set(false);

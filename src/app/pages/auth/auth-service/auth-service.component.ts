@@ -13,18 +13,18 @@ import toggle from './snippets/toggle.md';
   templateUrl: './auth-service.component.html',
 })
 export class AuthServiceComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { authService, guard, toggle };
 
   protected readonly auth = inject(AuthService);
   protected readonly toggle = inject(AuthToggleService);
   private readonly _router = inject(Router);
 
-  // ?returnUrl=/service/get-all, filled by the guard (withComponentInputBinding → input())
+  // ?returnUrl=..., set by the guard
   readonly returnUrl = input<string>();
 
   constructor() {
-    // As soon as someone is logged in, go back to the page the guard blocked
+    // logged in → back to the blocked page
     effect(() => {
       const url = this.returnUrl();
       if (this.auth.currentUser() && url) this._router.navigateByUrl(url);

@@ -12,6 +12,6 @@ import run from './snippets/run.md';
   templateUrl: './e2e-test.component.html',
 })
 export class E2eTestComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { setup, config, tests, run };
 }

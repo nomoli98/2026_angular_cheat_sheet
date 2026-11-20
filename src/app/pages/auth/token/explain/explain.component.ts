@@ -26,20 +26,20 @@ interface CallResult {
   templateUrl: './explain.component.html',
 })
 export class TokenExplainComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { server, angular };
 
   private readonly _http = inject(HttpClient);
   private readonly _controller = inject(TokenAuthController);
   protected readonly _auth = inject(TokenAuthService);
 
-  // The 3 parts of the token: header.payload.signature
+  // header.payload.signature
   protected readonly _parts = computed(() => {
     const [header = '', payload = '', signature = ''] = (this._auth.token() ?? '').split('.');
     return { header, payload, signature };
   });
 
-  // A clock, so the countdown moves (exp is in SECONDS)
+  // clock for the countdown (exp in s)
   private readonly _now = signal(Date.now());
   protected readonly _secondsLeft = computed(() => {
     const exp = this._auth.payload()?.exp;
@@ -51,7 +51,7 @@ export class TokenExplainComponent {
 
   constructor() {
     const timer = setInterval(() => this._now.set(Date.now()), 1000);
-    inject(DestroyRef).onDestroy(() => clearInterval(timer)); // stop it when the page closes
+    inject(DestroyRef).onDestroy(() => clearInterval(timer)); // stop on destroy
   }
 
   async onLogin(expiresInSeconds?: number) {
@@ -68,19 +68,19 @@ export class TokenExplainComponent {
     this._calls.set([]);
   }
 
-  // 1. The normal way: the interceptor adds the token
+  // 1. normal: the interceptor adds the token
   async callWithToken() {
     await this._call('with your token', () => this._controller.me());
   }
 
-  // 2. No token at all (SKIP_TOKEN tells the interceptor to leave this request alone)
+  // 2. no token (SKIP_TOKEN)
   async callWithoutToken() {
     await this._call('without a token', () =>
       firstValueFrom(this._http.get(this._meUrl, { context: this._skip() })),
     );
   }
 
-  // 3. Change the payload (role: admin!) but keep the old signature → the server sees it
+  // 3. edited payload, old signature
   async callWithTamperedToken() {
     const { header, payload, signature } = this._parts();
     const data = { ...this._auth.payload(), name: 'Hacker', role: 'admin' };

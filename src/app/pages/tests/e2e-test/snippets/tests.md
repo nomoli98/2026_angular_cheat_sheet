@@ -1,10 +1,8 @@
 ```ts login.spec.ts
 import { test, expect } from '@playwright/test';
 
-// Runs before each test: open the demo page
 test.beforeEach(async ({ page }) => {
-  // The auth toggle (navbar) logs Bob in by default: start logged OUT to test the form.
-  // addInitScript runs before the app starts, so the toggle reads 'off'.
+  // start logged out
   await page.addInitScript(() => localStorage.setItem('auth-toggle', 'off'));
   await page.goto('/tests/e2e-test');
 });
@@ -14,13 +12,12 @@ test('the button is disabled while the form is empty', async ({ page }) => {
 });
 
 test('Bob can log in and log out', async ({ page }) => {
-  // Fill the form like a user: find the field by its <label>
+  // find by <label>
   await page.getByLabel('Email').fill('bob@email.bob');
   await page.getByLabel('Password').fill('BobIsTheBest99#');
   await page.getByRole('button', { name: 'Log in' }).click();
 
-  // exact: true → only the element whose WHOLE text is this
-  // (the code snippet on the page also contains 'Welcome, Bob Martin!')
+  // exact: whole text only
   await expect(page.getByText('Welcome, Bob Martin!', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Log out' }).click();

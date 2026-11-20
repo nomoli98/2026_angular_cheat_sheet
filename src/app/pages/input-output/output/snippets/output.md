@@ -23,7 +23,7 @@ export class ChildComponentComponent {
 ```
 
 ```html output.component.html
-<!-- $event = the value given to emit() -->
+<!-- $event = emitted value -->
 <app-child-component (outputValue)="onClick($event)" />
 <p class="boom">{{ output() }}</p>
 ```

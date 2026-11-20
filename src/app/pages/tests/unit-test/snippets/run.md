@@ -1,10 +1,10 @@
 ```bash terminal
-# Run all the unit tests once
+# run once
 ng test --watch=false
 
-# Keep running, re-test when you save a file
+# watch mode
 ng test
 
-# Only one file
+# one file
 ng test --include src/app/pages/tests/unit-test/counter/counter.component.spec.ts
 ```

@@ -1,5 +1,4 @@
-// Lets TypeScript import .md files as text (see "loader" in angular.json).
-// Used for the code snippets shown on the demo pages.
+// import .md files as text (page snippets)
 declare module '*.md' {
   const content: string;
   export default content;

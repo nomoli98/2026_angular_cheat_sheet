@@ -6,7 +6,7 @@ import { LoginRequest } from '@core/requests/login.request';
 import { RegisterRequest } from '@core/requests/register.request';
 import { deny, isLoggedIn } from '@core/controllers/permissions';
 
-// Same as AuthController, for the bcrypt version. The pages only see Promises.
+// AuthController, bcrypt version
 @Service()
 export class BcryptAuthController {
   private readonly _authService = inject(BcryptAuthService);

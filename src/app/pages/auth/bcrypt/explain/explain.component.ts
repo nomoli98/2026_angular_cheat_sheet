@@ -20,7 +20,7 @@ interface HashResult {
   templateUrl: './explain.component.html',
 })
 export class BcryptExplainComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { hash: hashSnippet, compare: compareSnippet };
 
   private readonly _http = inject(HttpClient);
@@ -38,7 +38,7 @@ export class BcryptExplainComponent {
     const value = await hash(this._password(), this._rounds());
     const ms = Math.round(performance.now() - start);
     this._hashes.update((list) => [{ value, ms }, ...list].slice(0, 3));
-    this._checkHash.set(value); // ready for section 2
+    this._checkHash.set(value); // for section 2
     this._busy.set(false);
   }
 
@@ -65,11 +65,11 @@ export class BcryptExplainComponent {
       const ok = await compare(this._checkPassword(), this._checkHash());
       this._match.set({ ok, ms: Math.round(performance.now() - start) });
     } catch {
-      this._match.set({ ok: false, ms: 0 }); // not a bcrypt hash at all
+      this._match.set({ ok: false, ms: 0 }); // not a bcrypt hash
     }
   }
 
-  // 3. What db.json stores (DEMO: reads json-server directly, password included)
+  // 3. db.json content (demo: password included)
   protected readonly _stored = signal<{ plain: string; hashed: string } | null>(null);
 
   async onShowStored() {

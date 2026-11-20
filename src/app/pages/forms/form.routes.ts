@@ -18,4 +18,25 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./template-form/template-form.component').then((m) => m.TemplateFormComponent),
   },
+  {
+    path: 'reactive-validators',
+    loadComponent: () =>
+      import('./reactive-validators/reactive-validators.component').then(
+        (m) => m.ReactiveValidatorsComponent,
+      ),
+  },
+  {
+    path: 'template-validators',
+    loadComponent: () =>
+      import('./template-validators/template-validators.component').then(
+        (m) => m.TemplateValidatorsComponent,
+      ),
+  },
+  {
+    path: 'signal-validators',
+    loadComponent: () =>
+      import('./signal-validators/signal-validators.component').then(
+        (m) => m.SignalValidatorsComponent,
+      ),
+  },
 ];

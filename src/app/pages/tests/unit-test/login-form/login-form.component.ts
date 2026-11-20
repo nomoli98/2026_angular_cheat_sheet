@@ -22,10 +22,10 @@ export class LoginFormComponent {
 
   onSubmit() {
     this.error.set(false);
-    // getRawValue() = { email, password } = a LoginRequest
+    // getRawValue() = a LoginRequest
     this.auth.login(this.loginForm.getRawValue()).subscribe({
-      // next: nothing to do, the service already filled auth.currentUser()
-      error: () => this.error.set(true), // wrong email/password (or API down)
+      // next: the service already filled currentUser
+      error: () => this.error.set(true), // wrong email/password or API down
     });
   }
 

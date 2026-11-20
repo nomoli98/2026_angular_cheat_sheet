@@ -8,7 +8,6 @@
 ```
 
 ```bash reset
-# fake-api/db.seed.json = same content, never touched by the API.
-# Copy it over db.json to get the original data back:
+# reset: copy the seed over db.json
 npm run api:reset
 ```

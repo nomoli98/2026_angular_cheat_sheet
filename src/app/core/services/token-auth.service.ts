@@ -7,23 +7,23 @@ import { RegisterRequest } from '@core/requests/register.request';
 import { LoginRequest } from '@core/requests/login.request';
 import { RoleEnum } from '@core/enums/role.enum';
 
-// What the auth server answers to /token/login and /token/register
+// answer of /token/login and /token/register
 export interface AuthResponse {
   token: string;
   user: UserResponse;
 }
 
-// What is INSIDE the token (the middle part). Anybody can read it: it's only base64.
+// the token payload: readable by anyone
 export interface TokenPayload {
-  sub: string; // "subject" = the user id
+  sub: string; // user id
   name: string;
   email: string;
   role: RoleEnum;
-  iat: number; // issued at (seconds since 1970)
-  exp: number; // expires at (seconds since 1970)
+  iat: number; // issued at (s)
+  exp: number; // expires at (s)
 }
 
-// The logged-in user, as far as the token knows
+// the user, read from the token
 export interface TokenUser {
   id: number;
   name: string;
@@ -33,16 +33,13 @@ export interface TokenUser {
 
 const STORAGE_KEY = 'token';
 
-// SAME job as BcryptAuthService (register, login, logout, who is logged in), but:
-// - the SERVER (fake-api/auth-server.js) checks the bcrypt hash, not the browser
-// - the server answers a signed JWT; we keep it in localStorage → still logged in after a refresh
-// - tokenInterceptor adds it to every request to the auth server (Authorization: Bearer ...)
+// like BcryptAuthService, but the server checks + signs a JWT (kept in localStorage)
 @Service()
 export class TokenAuthService {
   private readonly _http = inject(HttpClient);
   private readonly _url = `${environment.authUrl}/token`;
 
-  // Read once when the service is created (= on page load): a valid saved token logs you back in
+  // on load: a valid saved token logs you back in
   private readonly _token = signal<string | null>(readValidToken());
   readonly token = this._token.asReadonly();
 
@@ -59,7 +56,7 @@ export class TokenAuthService {
     );
   }
 
-  // expiresInSeconds: DEMO only, to see a token expire on the explain page
+  // expiresInSeconds: demo only
   login(request: LoginRequest, expiresInSeconds?: number): Observable<UserResponse> {
     return this._http
       .post<AuthResponse>(`${this._url}/login`, { ...request, expiresInSeconds })
@@ -69,12 +66,12 @@ export class TokenAuthService {
       );
   }
 
-  // A PROTECTED route: the interceptor adds the token, the server checks it
+  // protected: needs the token
   me(): Observable<UserResponse> {
     return this._http.get<UserResponse>(`${this._url}/me`);
   }
 
-  // ADMIN only, checked by the SERVER: 401 (no/bad token) or 403 (not admin)
+  // admin only: 401 or 403 from the server
   getUsers(): Observable<UserResponse[]> {
     return this._http.get<UserResponse[]>(`${this._url}/users`);
   }
@@ -89,12 +86,12 @@ export class TokenAuthService {
       if (token) localStorage.setItem(STORAGE_KEY, token);
       else localStorage.removeItem(STORAGE_KEY);
     } catch {
-      // localStorage blocked (private mode...): the login still works until a refresh
+      // localStorage blocked: works until a refresh
     }
   }
 }
 
-// header.payload.signature → JSON.parse(base64url-decode(payload)). No secret needed to READ.
+// decode the payload: no secret needed
 export function decodeToken(token: string | null): TokenPayload | null {
   if (!token) return null;
   try {
@@ -107,10 +104,10 @@ export function decodeToken(token: string | null): TokenPayload | null {
 }
 
 export function isExpired(payload: TokenPayload | null, now = Date.now()): boolean {
-  return !payload || payload.exp * 1000 <= now; // exp is in SECONDS, Date.now() in ms
+  return !payload || payload.exp * 1000 <= now; // exp in s, Date.now() in ms
 }
 
-// The saved token, only if it's still valid (an expired one is thrown away)
+// the saved token, if not expired
 function readValidToken(): string | null {
   try {
     const token = localStorage.getItem(STORAGE_KEY);

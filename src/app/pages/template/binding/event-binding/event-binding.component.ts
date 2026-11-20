@@ -10,7 +10,7 @@ import nativeEvents from './snippets/native-events.md';
   templateUrl: './event-binding.component.html',
 })
 export class EventBindingComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { nativeEvents };
 
   value = signal('initial value');

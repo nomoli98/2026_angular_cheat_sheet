@@ -1,4 +1,3 @@
-// strong-password.ts
 import { SchemaPath, validate, ValidationError } from '@angular/forms/signals';
 
 export function strongPassword(path: SchemaPath<string>) {

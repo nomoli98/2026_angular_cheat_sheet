@@ -9,7 +9,7 @@
 </nav>
 
 <main class="container py-4">
-  <!-- hidden on the index: same path, whatever the ?tab= is (queryParams: 'ignored') -->
+  <!-- hidden on the index, whatever the ?tab= -->
   <a routerLink="/" routerLinkActive="d-none"
      [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored' }"
      class="d-inline-block mb-3 link-secondary text-decoration-none">← Back to index</a>

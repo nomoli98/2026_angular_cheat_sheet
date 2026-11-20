@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from '@core/guards/admin.guard';
 
-// NOT protected: you need these pages to log in (protecting them would loop forever)
+// NOT protected: you log in here (else infinite loop)
 export const routes: Routes = [
   {
-    // the page the guard sends you to
+    // where the guard sends you
     path: 'auth-service',
     loadComponent: () =>
       import('./auth-service/auth-service.component').then((m) => m.AuthServiceComponent),
@@ -17,9 +17,9 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('./login/login.component').then((m) => m.LoginComponent),
   },
-  // Roles: who can do what (see authorization/AUTHORIZATION.md)
+  // roles (AUTHORIZATION.md)
   {
-    // not protected: adminGuard sends simple users here (?forbidden=...)
+    // not protected: adminGuard redirects here
     path: 'authorization',
     loadComponent: () =>
       import('./authorization/authorization.component').then((m) => m.AuthorizationComponent),
@@ -27,11 +27,11 @@ export const routes: Routes = [
   {
     path: 'authorization/admin-area',
     canActivate: [adminGuard], // admins only
-    runGuardsAndResolvers: 'always', // re-run when the Admin toggle reloads the same URL
+    runGuardsAndResolvers: 'always', // re-run on the Admin toggle
     loadComponent: () =>
       import('./authorization/admin-area/admin-area.component').then((m) => m.AdminAreaComponent),
   },
-  // Same job, password stored as a bcrypt hash (see bcrypt/BCRYPT.md)
+  // bcrypt version (BCRYPT.md)
   {
     path: 'bcrypt/explain',
     loadComponent: () =>
@@ -47,7 +47,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./bcrypt/login/login.component').then((m) => m.BcryptLoginComponent),
   },
-  // Same job again, with a JWT made by the auth server (see token/TOKEN.md)
+  // token version (TOKEN.md)
   {
     path: 'token/explain',
     loadComponent: () =>

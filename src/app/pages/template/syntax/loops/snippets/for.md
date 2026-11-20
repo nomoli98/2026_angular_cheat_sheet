@@ -1,12 +1,12 @@
 ```html loops.component.html
-<!-- track a unique property (the default choice) -->
+<!-- track a unique id -->
 <ul>
   @for (item of items; track item.id) {
     <li>{{ item.name }}</li>
   }
 </ul>
 
-<!-- track $index: only for lists that never change order or size -->
+<!-- $index: static lists only -->
 <ul>
   @for (item of items; track $index) {
     <li>{{ item.name }}</li>

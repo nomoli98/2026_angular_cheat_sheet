@@ -1,5 +1,5 @@
 ```html sub-outlet.component.html
-<!-- A named outlet: only routes with outlet: 'panel' go here -->
+<!-- named: outlet 'panel' only -->
 <router-outlet name="panel" />
 
 <button (click)="openPanel()">Open child 3 (TS)</button>
@@ -17,7 +17,7 @@ import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/route
 })
 export class SubOutletComponent {
   private router = inject(Router);
-  private route = inject(ActivatedRoute); // = the /router/sub-outlet route
+  private route = inject(ActivatedRoute); // /router/sub-outlet
 
   openPanel() {
     this.router.navigate([{ outlets: { panel: ['3'] } }], { relativeTo: this.route });

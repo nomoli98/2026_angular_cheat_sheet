@@ -1,6 +1,6 @@
 ```ts token-auth.service.ts
 // core/services/token-auth.service.ts
-// No bcrypt in Angular anymore: the SERVER hashes. We just send the form and keep the token.
+// the server hashes
 register(request: RegisterRequest): Observable<UserResponse> {
   return this._http.post<AuthResponse>(`${this._url}/register`, request).pipe(
     tap((res) => this._setToken(res.token)), // signal + localStorage
@@ -22,6 +22,6 @@ async function register(body) {
 ```
 
 ```ts register.component.ts
-// Same component as the other Register pages, only the controller changes:
+// only the controller changes:
 protected readonly _authController = inject(TokenAuthController);
 ```

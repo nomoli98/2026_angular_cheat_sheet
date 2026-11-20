@@ -13,7 +13,7 @@ import { birthdate } from '@core/validators/signal-form/birthdate.validator';
   templateUrl: './signal-form.component.html',
 })
 export class SignalFormComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { signalForm };
 
   protected readonly GenderEnum = GenderEnum;
@@ -35,24 +35,21 @@ export class SignalFormComponent {
     email(field.email, { message: 'Email must be an valid email' });
 
     required(field.password, { message: 'Password is required' });
-    //You can make your own validations!
+    // custom validators
     strongPassword(field.password);
 
-    // birthdate is a 'YYYY-MM-DD' string ('' when empty), so required() works on it like any text field
+    // 'YYYY-MM-DD' string ('' = empty)
     required(field.birthdate, { message: 'Birthdate is required' });
-    //And you can even add parameters!
+    // with parameters
     birthdate(field.birthdate, { minAge: 18, maxAge: 120 });
 
-    // you can impose ranges
+    // ranges
     min(field.height, 50, { message: 'Height must be above 50cm' });
     max(field.height, 275, { message: 'Height must be below 275cm' });
 
     required(field.gender, { message: 'Gender is required' });
 
-    // null or undefined means the value is valid.
-    // An error object with a kind (and usually a message) means it’s invalid.
-    // The validate() function creates custom validation rules.
-    // It receives a validator function that accesses the field context and returns one of those two things.
+    // validate(): return undefined (valid) or { kind, message } (invalid)
     validate(field.gender, ({ value }) => {
       if (!value()) return undefined;
       const GENDERS = Object.values(GenderEnum) as string[];
@@ -92,7 +89,7 @@ export class SignalFormComponent {
     event.preventDefault();
     if (this.registerForm().invalid()) return;
 
-    //put the service here call
+    // call your service here
     console.log('It works! ' + this.registerForm().value().name);
 
     this.resetForm();
@@ -112,15 +109,15 @@ export class SignalFormComponent {
     this.registerForm().reset();
   }
 
-  // helper function to be sure that the radio btn toggle correctly
+  // lets a radio be unchecked
   toggleSubscription(value: 'free' | 'premium', event: MouseEvent) {
     const field = this.registerForm.subscription();
     const input = event.target as HTMLInputElement;
 
     if (field.value() === value) {
-      // Second click on the selected radio: clear it
+      // second click: clear it
       field.value.set('free');
-      input.checked = false; // force the DOM, since the browser just re-checked it
+      input.checked = false; // the browser re-checked it
     } else {
       field.value.set(value);
     }

@@ -13,7 +13,7 @@ import { RegisterRequest } from '@core/requests/register.request';
   templateUrl: './input.component.html',
 })
 export class InputComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { inputCode };
 
   String = signal<string>('Parent given value');

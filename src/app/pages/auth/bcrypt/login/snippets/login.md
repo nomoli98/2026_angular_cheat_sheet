@@ -4,11 +4,10 @@ import { compare } from 'bcryptjs';
 
 login(request: LoginRequest): Observable<UserResponse> {
   return this._http.get<UserEntity[]>(this._url, { params: { email: request.email } }).pipe(
-    // compare() reads the salt inside the stored hash, hashes the typed password
-    // with it, and checks both hashes are the same. You can't "decrypt" a hash.
+    // salt read from the hash
     switchMap(async ([user]) => {
       if (!user || !(await compare(request.password, user.password))) {
-        throw new Error('bad credentials'); // same error: don't tell which one was wrong
+        throw new Error('bad credentials'); // same error for both
       }
       return UserMapper(user);
     }),
@@ -18,7 +17,7 @@ login(request: LoginRequest): Observable<UserResponse> {
 ```
 
 ```ts auth.service.ts
-// core/services/auth.service.ts: the plain version, for comparison
+// core/services/auth.service.ts (plain version)
 login(request: LoginRequest): Observable<UserResponse> {
   return this._http.get<UserEntity[]>(this._url, { params: { email: request.email } }).pipe(
     map((users) => {
@@ -32,7 +31,7 @@ login(request: LoginRequest): Observable<UserResponse> {
 ```
 
 ```ts login.component.ts
-// Same component as the normal Login page, only these change:
+// only these change:
 protected readonly _authController = inject(BcryptAuthController);
 protected readonly _currentUser = inject(BcryptAuthService).currentUser;
 ```

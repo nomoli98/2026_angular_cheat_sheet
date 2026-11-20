@@ -1,18 +1,18 @@
 ```html basics.component.html
-<!-- Absolute link: starts with / -->
-<!-- routerLinkActive adds the class "active" when this link is the current page -->
+<!-- absolute: starts with / -->
+<!-- routerLinkActive: class 'active' -->
 <a routerLink="/router/basics" routerLinkActive="active">This page (active)</a>
 
-<!-- exact: true → only active on exactly "/", not on every page -->
+<!-- exact: only on / -->
 <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
 
-<!-- Relative link: added to the current URL → /router/basics/user/1 -->
+<!-- relative → /router/basics/user/1 -->
 <a routerLink="user/1">user/1</a>
 
-<!-- Array with [ ]: when part of the URL is a variable -->
+<!-- array: variable parts -->
 <a [routerLink]="['user', 2]">user/2</a>
 
-<!-- Navigate from the TS -->
+<!-- from the TS -->
 <button (click)="goToSignalForm()">Go to signal form (TS)</button>
 ```
 
@@ -22,14 +22,14 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 
 @Component({
   selector: 'app-basics',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet], // 👈 without them, the links do nothing
+  imports: [RouterLink, RouterLinkActive, RouterOutlet], // 👈 required
   templateUrl: './basics.component.html',
 })
 export class BasicsComponent {
   private router = inject(Router);
 
   goToSignalForm() {
-    this.router.navigate(['/form', 'signal-form']); // array of pieces
+    this.router.navigate(['/form', 'signal-form']); // pieces
     // or: this.router.navigateByUrl('/form/signal-form'); // one full URL
   }
 

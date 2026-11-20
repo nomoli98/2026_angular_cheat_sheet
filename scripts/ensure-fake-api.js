@@ -1,12 +1,11 @@
-// Runs automatically before `npm run dev` (via the "predev" script).
-// Installs json-server@0.17.4 and concurrently if they are missing or on the wrong version.
+// predev: installs json-server@0.17.4 + concurrently if needed
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
 const wanted = {
-  'json-server': '0.17.4', // pinned: 1.0 beta works differently (see FAKE-API.md)
-  concurrently: null, // null = any version is fine
+  'json-server': '0.17.4', // pinned: 1.0 beta differs
+  concurrently: null, // any version
 };
 
 function installedVersion(pkg) {
@@ -29,7 +28,7 @@ if (missing.length === 0) {
   execSync(`npm install -D ${missing.join(' ')}`, { stdio: 'inherit' });
 }
 
-// Create db.json from the seed the first time (db.json is the live data).
+// first run: db.json from the seed
 const db = path.join('fake-api', 'db.json');
 const seed = path.join('fake-api', 'db.seed.json');
 if (!fs.existsSync(db) && fs.existsSync(seed)) {

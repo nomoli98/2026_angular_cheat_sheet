@@ -6,7 +6,7 @@ import { decodeToken, isExpired, TokenAuthService } from './token-auth.service';
 import { RoleEnum } from '@core/enums/role.enum';
 import { environment } from '@env/environment';
 
-// A JWT-shaped token: the browser never checks the signature, so a fake one is fine here
+// the browser never checks the signature: a fake is fine
 function fakeToken(expInSeconds: number): string {
   const now = Math.floor(Date.now() / 1000);
   const payload = {
@@ -27,7 +27,7 @@ const bob = { id: 1, name: 'Bob Martin', email: 'bob@email.bob' };
 describe('TokenAuthService', () => {
   let httpTesting: HttpTestingController;
 
-  // localStorage is read when the service is CREATED → set it up first, then create
+  // read on creation → set localStorage first
   function create(): TokenAuthService {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],

@@ -1,11 +1,10 @@
 ```html template-form.component.html
-<!-- #form="ngForm" gives us access to the whole form (valid, invalid...) -->
-<!-- Bootstrap: .form-label + .form-control, .is-invalid turns the field red,
-     .invalid-feedback shows the message (only when the input before it is .is-invalid) -->
+<!-- #form: the whole form -->
+<!-- Bootstrap: .is-invalid + .invalid-feedback -->
 <form #form="ngForm" (ngSubmit)="onSubmit(form)" class="card card-body">
 
   <!-- NAME -->
-  <!-- #name="ngModel" gives us access to this field (invalid, touched...) -->
+  <!-- #name: this field -->
   <div class="mb-3">
     <label for="name" class="form-label">Name</label>
     <input type="text" id="name" name="name" placeholder="name123" class="form-control"
@@ -29,7 +28,7 @@
     }
   </div>
 
-  <!-- PASSWORD: custom validator "appStrongPassword" -->
+  <!-- PASSWORD: appStrongPassword -->
   <div class="mb-3">
     <label for="password" class="form-label">Password</label>
     <input type="password" id="password" name="password" placeholder="Password123" class="form-control"
@@ -41,7 +40,7 @@
     }
   </div>
 
-  <!-- BIRTHDATE: custom validator "appBirthdate" (age between 0 and 135) -->
+  <!-- BIRTHDATE: appBirthdate -->
   <div class="mb-3">
     <label for="birthdate" class="form-label">Birthdate</label>
     <input type="date" id="birthdate" name="birthdate" class="form-control"
@@ -65,8 +64,8 @@
     }
   </div>
 
-  <!-- GENDER: custom validator "appInEnum" (value must be in GenderEnum) -->
-  <!-- <select> uses .form-select instead of .form-control -->
+  <!-- GENDER: appInEnum -->
+  <!-- .form-select -->
   <div class="mb-3">
     <label for="gender" class="form-label">Gender</label>
     <select id="gender" name="gender" class="form-select"
@@ -83,9 +82,9 @@
     }
   </div>
 
-  <!-- SUBSCRIPTION: custom validator "appInList" -->
-  <!-- Both radios share the same name, so they are one field -->
-  <!-- Radios and checkboxes: .form-check wrapper + .form-check-input + .form-check-label -->
+  <!-- SUBSCRIPTION: appInList -->
+  <!-- same name = one field -->
+  <!-- .form-check -->
   <div class="mb-3">
     <div class="form-check">
       <input type="radio" name="subscription" value="free" id="free" class="form-check-input"
@@ -100,12 +99,12 @@
       <label for="premium" class="form-check-label">Premium</label>
     </div>
     @if (subscription.invalid && subscription.touched) {
-      <!-- d-block: the message isn't right after an .is-invalid input, so force it visible -->
+      <!-- d-block: force visible -->
       <div class="invalid-feedback d-block">Choose a Subscription</div>
     }
   </div>
 
-  <!-- TERMS: "required" on a checkbox means it must be checked -->
+  <!-- TERMS: required = checked -->
   <div class="mb-3 form-check">
     <input type="checkbox" name="agreeToTerms" id="agreeToTerms" class="form-check-input"
            [(ngModel)]="user.agreeToTerms" #agreeToTerms="ngModel"
@@ -149,12 +148,12 @@ import { GenderEnum } from '@core/enums/gender.enum';
 export class TemplateFormComponent {
   loading = signal<boolean>(false);
 
-  // The form data. [(ngModel)] in the HTML keeps these values in sync with the inputs.
+  // [(ngModel)] keeps it in sync
   user = {
     name: '',
     email: '',
     password: '',
-    birthdate: '', // 'YYYY-MM-DD' string, the format <input type="date"> uses
+    birthdate: '', // 'YYYY-MM-DD'
     height: 50,
     gender: GenderEnum.OTHER,
     subscription: 'free',
@@ -162,7 +161,7 @@ export class TemplateFormComponent {
   };
 
   onSubmit(form: NgForm) {
-    // Show the error messages on every field
+    // show every error
     form.control.markAllAsTouched();
 
     if (form.invalid) {
@@ -170,7 +169,7 @@ export class TemplateFormComponent {
     }
 
     this.loading.set(true);
-    // Call your service here
+    // call your service
     console.log(this.user);
   }
 

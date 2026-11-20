@@ -3,12 +3,9 @@ import { DestroyRef, effect, inject, Service, signal } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
 export type Theme = 'light' | 'dark';
-const STORAGE_KEY = 'theme'; // 'light' | 'dark' in localStorage, missing = follow the system
+const STORAGE_KEY = 'theme'; // missing = system
 
-// Light / dark mode with Bootstrap 5.3: everything is driven by ONE attribute,
-// <html data-bs-theme="dark">. Bootstrap's CSS variables (--bs-body-bg...) change with it.
-// - nothing saved → follow the system (prefers-color-scheme), and keep following it
-// - the user flips the switch → that choice is saved in localStorage and wins
+// Bootstrap 5.3: <html data-bs-theme>
 @Service()
 export class ThemeService {
   private readonly _document = inject(DOCUMENT);
@@ -19,17 +16,16 @@ export class ThemeService {
   private readonly _theme = signal<Theme>(this._read() ?? this._systemTheme());
   private readonly _followsSystem = signal(this._read() === null);
 
-  readonly theme = this._theme.asReadonly(); // 'light' | 'dark'
-  readonly followsSystem = this._followsSystem.asReadonly(); // true = nothing saved yet
+  readonly theme = this._theme.asReadonly();
+  readonly followsSystem = this._followsSystem.asReadonly(); // true = nothing saved
 
   constructor() {
-    // Every time theme() changes → write it on <html>
+    // write it on <html>
     effect(() => {
       this._document.documentElement.setAttribute('data-bs-theme', this._theme());
     });
 
-    // The system setting changes (e.g. the OS goes dark at night) →
-    // follow it, but only if the user never chose a theme himself
+    // OS change: follow unless chosen
     const onSystemChange = () => {
       if (this._followsSystem()) this._theme.set(this._systemTheme());
     };
@@ -47,7 +43,7 @@ export class ThemeService {
     this.set(this._theme() === 'dark' ? 'light' : 'dark');
   }
 
-  // Forget the user's choice and follow the system again
+  // forget the choice
   followSystem(): void {
     try {
       localStorage.removeItem(STORAGE_KEY);
@@ -62,7 +58,7 @@ export class ThemeService {
     return this._media?.matches ? 'dark' : 'light';
   }
 
-  // localStorage can be missing or blocked (private mode...): never crash for it
+  // may be blocked
   private _read(): Theme | null {
     try {
       const value = localStorage.getItem(STORAGE_KEY);

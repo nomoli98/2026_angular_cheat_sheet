@@ -1,8 +1,7 @@
 ```html index.html
 <head>
   ...
-  <!-- Set the theme BEFORE the page is drawn, so a dark-mode user never sees a white flash
-       while Angular loads. ThemeService takes over after that (same rules). -->
+  <!-- before first paint: no white flash -->
   <script>
     try {
       var saved = localStorage.getItem('theme');
@@ -14,12 +13,12 @@
 ```
 
 ```css styles.css
-/* Your own colors: use Bootstrap's variables, they change with the theme */
+/* Bootstrap variables follow the theme */
 body {
   background-color: var(--bs-tertiary-bg);
 }
 
-/* Need a color that Bootstrap doesn't have? Write one per theme */
+/* custom color: one per theme */
 .my-box {
   background: #f8f9fa;
 }

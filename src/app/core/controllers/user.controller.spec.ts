@@ -30,11 +30,11 @@ const alice: UserResponse = {
 describe('UserController', () => {
   let controller: UserController;
 
-  // Fake AuthService: the test decides who is logged in
+  // fake AuthService: the test picks the user
   const currentUser = signal<UserResponse | null>(null);
   const fakeAuthService = { currentUser };
 
-  // Fake UserService: answers right away with of(...)
+  // fake UserService: answers with of(...)
   const fakeUserService = {
     getAll: vi.fn().mockReturnValue(of([bob, alice])),
     getOne: vi.fn().mockReturnValue(of(alice)),

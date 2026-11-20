@@ -11,13 +11,13 @@ import twoWayBinding from './snippets/two-way-binding.md';
   templateUrl: './two-way-binding.component.html',
 })
 export class TwoWayBindingComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { twoWayBinding };
 
   inputValue = '';
 
   modelCount = model<number>(0);
-  // model() makes count a two-way bindable input
+  // model(): two-way input
   updateCount(amount: number): void {
     this.modelCount.update((currentCount) => currentCount + amount);
   }

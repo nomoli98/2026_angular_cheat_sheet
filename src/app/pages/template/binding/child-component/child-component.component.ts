@@ -8,6 +8,6 @@ import { CommonModule } from '@angular/common';
   templateUrl: './child-component.component.html',
 })
 export class ChildComponentComponent {
-  // Always give input() a type, otherwise the value is `unknown`
+  // type input(), else it's unknown
   value = input.required<string>();
 }

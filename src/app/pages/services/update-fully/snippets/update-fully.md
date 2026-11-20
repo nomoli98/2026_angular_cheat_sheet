@@ -1,10 +1,10 @@
 ```html update-fully.component.html
 <form (submit)="onSubmit($event)">
-  <!-- WHICH user -->
+  <!-- which user -->
   <input type="number" [formField]="_form.id" />
   <button type="button" (click)="onLoad()" [disabled]="!_isAdmin()">Load current values</button>
 
-  <!-- ALL the fields (PUT replaces everything) -->
+  <!-- all fields (PUT) -->
   <input type="text" [formField]="_form.name" />
   <input type="email" [formField]="_form.email" />
   <input type="password" [formField]="_form.password" />
@@ -26,7 +26,7 @@
 ```
 
 ```ts update-fully.component.ts
-// The form = WHICH user (id) + ALL the fields of a RegisterRequest
+// id + RegisterRequest
 type UpdateFullyModel = { id: number } & RegisterRequest;
 
 @Component({
@@ -39,7 +39,7 @@ export class UpdateFullyComponent {
   protected readonly _updated = signal<UserResponse | null>(null);
   protected readonly _error = signal<string | null>(null);
 
-  // Who is logged in, and are they admin? Re-computed when the user changes (navbar toggle)
+  // re-runs on user change
   private readonly _authService = inject(AuthService);
   protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
 
@@ -48,7 +48,7 @@ export class UpdateFullyComponent {
     height: 170, gender: GenderEnum.OTHER, subscription: 'free', agreeToTerms: true,
   });
 
-  // PUT replaces EVERYTHING → every field is required
+  // PUT: all required
   protected readonly _form = form(this._model, (field) => {
     min(field.id, 1, { message: 'Id starts at 1' });
     required(field.name, { message: 'Name is required' });
@@ -58,9 +58,9 @@ export class UpdateFullyComponent {
     // ...same rules as the register form
   });
 
-  // Fill the form with the current values: set() the model signal, the inputs follow
+  // fill: set() the model
   async onLoad() {
-    // 1. Check in the component: not admin → don't even call the controller
+    // 1. component check
     if (!this._isAdmin()) {
       this._error.set('forbidden: only an admin can read a user');
       return;
@@ -69,7 +69,7 @@ export class UpdateFullyComponent {
       await this._userController.getOne(this._form.id().value());
     this._model.set({
       id, name, email, birthdate, height, gender, subscription,
-      password: '', // never sent back by the API → type a new one
+      password: '', // never sent back
       agreeToTerms: true,
     });
   }
@@ -77,13 +77,13 @@ export class UpdateFullyComponent {
   async onSubmit(event: Event) {
     event.preventDefault();
     if (this._form().invalid()) return;
-    // 1. Check in the component: not admin → don't even call the controller
+    // 1. component check
     if (!this._isAdmin()) {
       this._error.set('forbidden: only an admin can update a user');
       return;
     }
 
-    // rest syntax: take `id` out, everything else goes in `request`
+    // take `id` out
     const { id, ...request } = this._form().value();
     try {
       this._updated.set(await this._userController.updateFully(id, request));
@@ -106,8 +106,7 @@ async updateFully(id: number, request: RegisterRequest): Promise<UserResponse> {
 
 ```ts user.service.ts
 // core/services/user.service.ts
-// PUT replaces EVERYTHING, and RegisterRequest has no role → keep the current one,
-// otherwise the role would be deleted.
+// PUT: keep the current role
 updateFully(id: number, request: RegisterRequest): Observable<UserResponse> {
   return this._http.get<UserEntity[]>(this._url, { params: { id } }).pipe(
     switchMap(([current]) =>

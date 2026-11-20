@@ -3,15 +3,15 @@ import { CounterComponent } from './counter.component';
 
 describe('CounterComponent', () => {
   let fixture: ComponentFixture<CounterComponent>;
-  let component: CounterComponent; // the class (the .ts)
-  let html: HTMLElement; // the rendered page (the .html)
+  let component: CounterComponent; // the class
+  let html: HTMLElement; // the rendered HTML
 
-  // Runs before EACH test, so every test starts with a fresh component
+  // before each test: a fresh component
   beforeEach(async () => {
     fixture = TestBed.createComponent(CounterComponent);
     component = fixture.componentInstance;
     html = fixture.nativeElement;
-    await fixture.whenStable(); // wait for the HTML to be drawn
+    await fixture.whenStable(); // HTML drawn
   });
 
   it('should create', () => {
@@ -22,19 +22,19 @@ describe('CounterComponent', () => {
     expect(html.querySelector('p')?.textContent).toContain('Count: 0');
   });
 
-  // Test the class directly: call a method, check the signal
+  // test the class
   it('increment() adds 1', () => {
     component.increment();
 
     expect(component.count()).toBe(1);
   });
 
-  // Test like a user: click the button, check the screen
+  // test like a user
   it('clicking +1 shows the new count', async () => {
-    const button = html.querySelector('button') as HTMLButtonElement; // the first button
+    const button = html.querySelector('button') as HTMLButtonElement; // first button
 
     button.click();
-    await fixture.whenStable(); // ⚠️ let Angular update the HTML
+    await fixture.whenStable(); // ⚠️ let Angular update
 
     expect(html.querySelector('p')?.textContent).toContain('Count: 1');
   });

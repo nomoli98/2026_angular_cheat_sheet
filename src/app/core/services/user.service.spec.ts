@@ -40,7 +40,7 @@ describe('UserService', () => {
     httpTesting.verify();
   });
 
-  // The "does the user exist?" request: GET /people?id=...
+  // GET /people?id=...
   const existsRequest = (id: number) =>
     httpTesting.expectOne(
       (r) => r.method === 'GET' && r.url === url && r.params.get('id') === `${id}`,
@@ -119,13 +119,13 @@ describe('UserService', () => {
     });
 
     it('updateFully() keeps the current role (PUT would delete it)', async () => {
-      const { id: _id, role: _role, ...request } = bob; // a RegisterRequest has no role
+      const { id: _id, role: _role, ...request } = bob; // RegisterRequest has no role
       const result = firstValueFrom(service.updateFully(1, { ...request, height: 200 }));
 
       existsRequest(1).flush([bob]); // bob is admin
       const req = httpTesting.expectOne(`${url}/1`);
       expect(req.request.method).toBe('PUT');
-      expect(req.request.body.role).toBe(RoleEnum.ADMIN); // 👈 still admin
+      expect(req.request.body.role).toBe(RoleEnum.ADMIN); // still admin
       req.flush({ ...bob, height: 200 });
 
       expect((await result).role).toBe(RoleEnum.ADMIN);

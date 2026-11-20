@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ThemeService } from './theme.service';
 
 describe('ThemeService', () => {
-  // jsdom has no matchMedia: fake it, so the test decides the "system" theme
+  // jsdom has no matchMedia: fake it
   let systemDark = false;
   let onSystemChange: (() => void) | undefined;
 
@@ -10,7 +10,7 @@ describe('ThemeService', () => {
 
   function createService(): ThemeService {
     const service = TestBed.inject(ThemeService);
-    TestBed.tick(); // run the effect that writes data-bs-theme on <html>
+    TestBed.tick(); // runs the effect
     return service;
   }
 

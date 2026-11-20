@@ -3,10 +3,10 @@ import { authGuard } from '@core/guards/auth.guard';
 
 export const routes: Routes = [
   {
-    // Every page in `children` is protected: the guard runs before any of them opens
+    // protects every child
     path: '',
     canActivate: [authGuard],
-    // re-run the guard on EVERY navigation, even to the same URL (when the toggle turns off)
+    // re-run even on the same URL (toggle off)
     runGuardsAndResolvers: 'always',
     children: [
       {

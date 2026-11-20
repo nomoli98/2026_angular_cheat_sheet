@@ -1,6 +1,5 @@
 ```html reactive-form.component.html
-<!-- Bootstrap: .form-label + .form-control, .is-invalid turns the field red,
-     .invalid-feedback shows the message (only when the input before it is .is-invalid) -->
+<!-- Bootstrap: .is-invalid + .invalid-feedback -->
 <form [formGroup]="formRegister" (ngSubmit)="onSubmit()" class="card card-body">
 
   <div class="mb-3">
@@ -63,7 +62,7 @@
 
   <div class="mb-3">
     <label for="gender" class="form-label">Gender</label>
-    <!-- <select> uses .form-select instead of .form-control -->
+    <!-- .form-select -->
     <select name="gender" id="gender" class="form-select" formControlName="gender"
             [class.is-invalid]="formRegister.get('gender')?.invalid && formRegister.get('gender')?.touched">
       <option value="">Choose a gender...</option>
@@ -76,7 +75,7 @@
     }
   </div>
 
-  <!-- Radios and checkboxes: .form-check wrapper + .form-check-input + .form-check-label -->
+  <!-- .form-check -->
   <div class="mb-3">
     <div class="form-check">
       <input type="radio" value="free" id="free" class="form-check-input" formControlName="subscription" />
@@ -87,7 +86,7 @@
       <label for="premium" class="form-check-label">Premium</label>
     </div>
     @if (formRegister.get('subscription')?.invalid && formRegister.get('subscription')?.touched) {
-      <!-- d-block: the message isn't right after an .is-invalid input, so force it visible -->
+      <!-- d-block: force visible -->
       <div class="invalid-feedback d-block">Choose a Subscription</div>
     }
   </div>
@@ -135,10 +134,10 @@ export class ReactiveFormComponent {
     name: new FormControl('', Validators.required),
     email: new FormControl('', {
       validators: [Validators.required, Validators.email],
-      asyncValidators: [emailTakenValidator()], // asks the API if the email is taken
+      asyncValidators: [emailTakenValidator()], // email taken?
     }),
     password: new FormControl('', [Validators.required, strongPasswordValidator()]),
-    // birthdate is a 'YYYY-MM-DD' string: <input type="date"> reads and writes that format directly
+    // 'YYYY-MM-DD'
     birthdate: new FormControl('', [Validators.required, birthdateValidator(0, 135)]),
     height: new FormControl(50, [Validators.min(50), Validators.max(275)]),
     gender: new FormControl(GenderEnum.OTHER, [Validators.required, enumValidator(GenderEnum)]),
@@ -163,7 +162,7 @@ export class ReactiveFormComponent {
         subscription: this.formRegister.value.subscription!,
         agreeToTerms: this.formRegister.value.agreeToTerms!,
       };
-      //Call to you service here
+      // call your service
       console.log(user);
     }
   }

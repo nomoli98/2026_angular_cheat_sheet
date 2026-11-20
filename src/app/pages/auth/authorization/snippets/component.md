@@ -3,7 +3,7 @@ export class GetAllComponent {
   private readonly _userController = inject(UserController);
   private readonly _authService = inject(AuthService);
 
-  // re-computed every time currentUser() changes (login, logout, Admin toggle)
+  // re-runs on user change
   protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
   protected readonly _users = signal<UserResponse[]>([]);
   protected readonly _error = signal<string | null>(null);
@@ -11,17 +11,17 @@ export class GetAllComponent {
   async onClick() {
     this._error.set(null);
 
-    // 1. the component checks: not admin → no call at all
+    // 1. component check
     if (!this._isAdmin()) {
       this._error.set('forbidden: only an admin can see the list of users');
       return;
     }
 
     try {
-      // 2. the controller checks AGAIN (can't be skipped), then calls the service
+      // 2. controller checks again
       this._users.set(await this._userController.getAll());
     } catch (err) {
-      this._error.set((err as Error).message); // 'unauthorized' / 'forbidden' / HTTP error
+      this._error.set((err as Error).message); // 'unauthorized' / 'forbidden'
     }
   }
 }
@@ -36,14 +36,14 @@ export class GetAllComponent {
 <!-- can't click -->
 <button (click)="onClick()" [disabled]="!_isAdmin()">Get All Users</button>
 
-<!-- hide the data when the user stops being admin -->
+<!-- hide when not admin -->
 @if (_isAdmin()) {
 @for (u of _users(); track u.id) {
 <li>{{ u.name }}</li>
 }
 }
 
-<!-- 3 cases: admin / simple user / nobody -->
+<!-- admin / user / nobody -->
 @if (_isAdmin()) {
 <admin-panel />
 } @else if (currentUser()) {
@@ -54,7 +54,7 @@ export class GetAllComponent {
 ```
 
 ```ts auth-toggle.service.ts
-// shared/auth-toggle/auth-toggle.service.ts: the "Admin" switch in the navbar
+// shared/auth-toggle/auth-toggle.service.ts
 const ACCOUNTS: Record<RoleEnum, LoginRequest> = {
   [RoleEnum.ADMIN]: { email: 'bob@email.bob', password: 'BobIsTheBest99#' },
   [RoleEnum.USER]: { email: 'alice.dupont@mail.com', password: 'AliceIsTheBest99#' },
@@ -62,11 +62,11 @@ const ACCOUNTS: Record<RoleEnum, LoginRequest> = {
 
 async setRole(role: RoleEnum): Promise<void> {
   this._role.set(role);
-  this._save('auth-role', role); // survives a refresh
-  if (!this.isOn()) return;      // logged out: just remember it
+  this._save('auth-role', role); // saved
+  if (!this.isOn()) return; // logged out: remember
 
-  await firstValueFrom(this._auth.login(ACCOUNTS[role])); // a REAL login, as Bob or Alice
-  // re-run the guards of the current page (adminGuard kicks Alice out)
+  await firstValueFrom(this._auth.login(ACCOUNTS[role])); // real login
+  // re-run guards
   await this._router.navigateByUrl(this._router.url, { onSameUrlNavigation: 'reload' });
 }
 ```

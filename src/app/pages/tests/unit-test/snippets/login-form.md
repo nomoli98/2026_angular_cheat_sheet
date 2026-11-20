@@ -12,13 +12,13 @@ import { SubscriptionEnum } from '@core/enums/subscription.enum';
 import { RoleEnum } from '@core/enums/role.enum';
 import { environment } from '@env/environment';
 
-// Small helper: type a value in an <input>, like a user would
+// type like a user
 function type(input: HTMLInputElement, value: string) {
   input.value = value;
-  input.dispatchEvent(new Event('input')); // tells the form "the value changed"
+  input.dispatchEvent(new Event('input')); // 'value changed'
 }
 
-// What the fake API would send back for Bob
+// fake API answer
 const bob: UserEntity = {
   id: 1,
   name: 'Bob Martin',
@@ -36,14 +36,12 @@ describe('LoginFormComponent', () => {
   let fixture: ComponentFixture<LoginFormComponent>;
   let html: HTMLElement;
 
-  // Shortcuts to find the elements
+  // shortcuts
   const email = () => html.querySelector('#email') as HTMLInputElement;
   const password = () => html.querySelector('#password') as HTMLInputElement;
   const button = () => html.querySelector('button') as HTMLButtonElement;
 
-  // ── With the REAL AuthService, but a FAKE backend ──────────
-  // provideHttpClientTesting(): no request leaves the test.
-  // HttpTestingController catches them and the TEST decides the answer.
+  // ── real AuthService, fake backend ──
   describe('with the real service', () => {
     let httpTesting: HttpTestingController;
 
@@ -58,10 +56,10 @@ describe('LoginFormComponent', () => {
     });
 
     afterEach(() => {
-      httpTesting.verify(); // fails if a request was sent but never answered
+      httpTesting.verify(); // all requests answered
     });
 
-    // Fill the form, click, and answer the GET /people?email=... request
+    // fill, click, answer
     async function loginAs(typedEmail: string, typedPassword: string, apiAnswer: UserEntity[]) {
       type(email(), typedEmail);
       type(password(), typedPassword);
@@ -73,7 +71,7 @@ describe('LoginFormComponent', () => {
         (r) => r.url === `${environment.apiUrl}/people` && r.params.get('email') === typedEmail,
       );
       expect(req.request.method).toBe('GET');
-      req.flush(apiAnswer); // 👈 the "server" answers
+      req.flush(apiAnswer); // 👈 the server answers
       await fixture.whenStable();
     }
 
@@ -108,27 +106,26 @@ describe('LoginFormComponent', () => {
     });
 
     it('shows an error with an unknown email', async () => {
-      await loginAs('nobody@mail.com', 'whatever', []); // json-server found nobody
+      await loginAs('nobody@mail.com', 'whatever', []); // nobody found
 
       expect(html.textContent).toContain('Wrong email or password');
     });
   });
 
-  // ── With a FAKE AuthService (a "mock") ─────────────────────
-  // Use a fake when you only want to test the component, not the service.
+  // ── fake AuthService (mock) ──
   describe('with a fake service', () => {
     const fakeAuth = {
       currentUser: signal(null),
-      // always says "wrong password": an Observable that errors right away
+      // always 'wrong password'
       login: vi.fn().mockReturnValue(throwError(() => new Error('bad credentials'))),
       logout: vi.fn(),
     };
 
     beforeEach(async () => {
-      vi.clearAllMocks(); // the spies forget the calls from the previous test
+      vi.clearAllMocks(); // forget old calls
 
       TestBed.configureTestingModule({
-        // "When the component asks for AuthService, give it fakeAuth instead"
+        // fakeAuth instead of AuthService
         providers: [{ provide: AuthService, useValue: fakeAuth }],
       });
       fixture = TestBed.createComponent(LoginFormComponent);
@@ -185,10 +182,10 @@ export class LoginFormComponent {
 
   onSubmit() {
     this.error.set(false);
-    // getRawValue() = { email, password } = a LoginRequest
+    // = a LoginRequest
     this.auth.login(this.loginForm.getRawValue()).subscribe({
-      // next: nothing to do, the service already filled auth.currentUser()
-      error: () => this.error.set(true), // wrong email/password (or API down)
+      // next: nothing to do
+      error: () => this.error.set(true), // wrong login or API down
     });
   }
 

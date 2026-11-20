@@ -4,7 +4,7 @@ export class TokenAuthService {
   private readonly _http = inject(HttpClient);
   private readonly _url = `${environment.authUrl}/token`;
 
-  // read once on page load: a saved, not-expired token = still logged in
+  // on load: saved token
   private readonly _token = signal<string | null>(readValidToken());
   readonly token = this._token.asReadonly();
 
@@ -22,7 +22,7 @@ export class TokenAuthService {
   }
 
   me(): Observable<UserResponse> {
-    return this._http.get<UserResponse>(`${this._url}/me`); // no header here: the interceptor adds it
+    return this._http.get<UserResponse>(`${this._url}/me`); // the interceptor adds the token
   }
 
   logout(): void {
@@ -36,7 +36,7 @@ export class TokenAuthService {
   }
 }
 
-// header.payload.signature → read the payload (base64url). No secret needed to READ.
+// read the payload (no secret)
 export function decodeToken(token: string | null): TokenPayload | null {
   if (!token) return null;
   try {
@@ -50,22 +50,22 @@ export function decodeToken(token: string | null): TokenPayload | null {
 ```
 
 ```ts token.interceptor.ts
-// core/interceptors/token.interceptor.ts: runs for EVERY HttpClient request
+// core/interceptors/token.interceptor.ts
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(TokenAuthService);
   const token = auth.token();
 
-  // only to OUR auth server: never send the token to another site
+  // our server only
   if (!token || !req.url.startsWith(environment.authUrl) || req.context.get(SKIP_TOKEN)) {
     return next(req);
   }
 
-  // requests are immutable → clone() with the header
+  // immutable → clone()
   const withToken = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
 
   return next(withToken).pipe(
     catchError((err) => {
-      // 401 = the server doesn't accept our token anymore (expired, invalid) → log out
+      // 401 → logout
       if (err instanceof HttpErrorResponse && err.status === 401 && !req.url.endsWith('/login')) {
         auth.logout();
       }
@@ -88,7 +88,7 @@ export const appConfig: ApplicationConfig = {
 
 ```ts environment.development.ts
 export const environment = {
-  apiUrl: 'http://localhost:3000', // json-server: the data
-  authUrl: 'http://localhost:3001', // auth-server.js: bcrypt + JWT
+  apiUrl: 'http://localhost:3000', // json-server
+  authUrl: 'http://localhost:3001', // auth-server.js
 };
 ```

@@ -32,7 +32,7 @@ const alice: UserResponse = {
 describe('AuthToggleService', () => {
   let toggle: AuthToggleService;
 
-  // Fake AuthService: login() fills currentUser like the real one
+  // fake login() fills currentUser
   const currentUser = signal<UserResponse | null>(null);
   const fakeAuth = {
     currentUser,
@@ -130,7 +130,7 @@ describe('AuthToggleService', () => {
       TestBed.configureTestingModule({
         providers: [provideRouter([]), { provide: AuthService, useValue: fakeAuth }],
       });
-      toggle = TestBed.inject(AuthToggleService); // reads localStorage when it is created
+      toggle = TestBed.inject(AuthToggleService); // reads localStorage on creation
 
       await toggle.init();
 

@@ -10,11 +10,11 @@ import namedOutlet from './snippets/named-outlet.md';
   templateUrl: './sub-outlet.component.html',
 })
 export class SubOutletComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { unnamedOutlet, namedOutlet };
 
   private router = inject(Router);
-  private route = inject(ActivatedRoute); // = the /router/sub-outlet route
+  private route = inject(ActivatedRoute); // /router/sub-outlet
 
   openPanel() {
     this.router.navigate([{ outlets: { panel: ['3'] } }], { relativeTo: this.route });

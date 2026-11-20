@@ -6,7 +6,6 @@ import { LoginRequest } from '@core/requests/login.request';
 import { RegisterRequest } from '@core/requests/register.request';
 import { deny, isLoggedIn } from '@core/controllers/permissions';
 
-// Login and register are PUBLIC: no check, the controller just calls the service.
 @Service()
 export class AuthController {
   private readonly _authService = inject(AuthService);

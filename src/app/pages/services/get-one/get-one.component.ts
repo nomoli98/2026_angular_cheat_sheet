@@ -14,18 +14,18 @@ import getOne from './snippets/get-one.md';
   templateUrl: './get-one.component.html',
 })
 export class GetOneComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { getOne };
 
   protected readonly _userController = inject(UserController);
-  protected readonly _user = signal<UserResponse | null>(null); // null = nothing loaded yet
+  protected readonly _user = signal<UserResponse | null>(null); // null = not loaded
   protected readonly _error = signal<string | null>(null);
 
-  // Who is logged in, and are they admin? computed() re-runs when the navbar toggle changes the user
+  // re-computed when the toggle changes the user
   private readonly _authService = inject(AuthService);
   protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
 
-  // Which user? A tiny signal form with just the id
+  // a signal form with just the id
   protected readonly _idForm = form(signal({ id: 2 }), (field) => {
     required(field.id, { message: 'Id is required' });
     min(field.id, 1, { message: 'Id starts at 1' });
@@ -37,17 +37,17 @@ export class GetOneComponent {
 
     this._error.set(null);
     this._user.set(null);
-    // 1. Check the role in the component first: not admin → don't even call the controller
+    // 1. not admin → skip the controller
     if (!this._isAdmin()) {
       this._error.set('forbidden: only an admin can read a user');
       return;
     }
 
     try {
-      // 2. The controller checks again, then calls the service
+      // 2. the controller checks again
       this._user.set(await this._userController.getOne(this._idForm.id().value()));
     } catch (err) {
-      // 'unauthorized', 'forbidden' (not admin), or 404 → 'Not found'
+      // 'unauthorized', 'forbidden' or 404
       this._error.set(errorMessage(err));
     }
   }

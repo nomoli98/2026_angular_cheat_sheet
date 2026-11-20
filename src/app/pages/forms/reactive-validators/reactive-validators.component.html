@@ -1,0 +1,186 @@
+<h2>Reactive Forms · Validators</h2>
+
+<p>
+  Every rule lives in the <code>.ts</code>, next to the <code>FormControl</code>. Type in the
+  fields: the <code>errors</code> line shows what Angular sees. Full guide:
+  <code>REACTIVE_VALIDATORS.md</code>.
+</p>
+
+<!-- 1. BUILT-IN -->
+<section class="card card-body mb-3">
+  <h3>1. Built-in validators</h3>
+  <p>
+    <code>Validators.required</code>, <code>minLength</code>, <code>maxLength</code>,
+    <code>min</code>, <code>max</code>, <code>email</code>, <code>pattern</code>, and
+    <code>requiredTrue</code> for a checkbox.
+  </p>
+
+  <form [formGroup]="builtInForm" class="mb-3">
+    @let name = builtInForm.controls.name;
+    <div class="mb-3">
+      <label for="rv-name" class="form-label">Name (2 to 50 characters)</label>
+      <input id="rv-name" class="form-control" formControlName="name"
+             [class.is-invalid]="name.invalid && name.touched" />
+      @if (name.touched) {
+        @if (name.hasError('required')) { <div class="invalid-feedback">Name is required</div> }
+        @if (name.hasError('minlength')) {
+          <div class="invalid-feedback">At least {{ name.getError('minlength').requiredLength }} characters</div>
+        }
+        @if (name.hasError('maxlength')) {
+          <div class="invalid-feedback">At most {{ name.getError('maxlength').requiredLength }} characters</div>
+        }
+      }
+      <div class="form-text"><code>errors: {{ name.errors | json }}</code></div>
+    </div>
+
+    @let height = builtInForm.controls.height;
+    <div class="mb-3">
+      <label for="rv-height" class="form-label">Height (50 to 275 cm)</label>
+      <input id="rv-height" type="number" class="form-control" formControlName="height"
+             [class.is-invalid]="height.invalid && height.touched" />
+      @if (height.touched) {
+        @if (height.hasError('required')) { <div class="invalid-feedback">Height is required</div> }
+        @if (height.hasError('min')) { <div class="invalid-feedback">Minimum {{ height.getError('min').min }} cm</div> }
+        @if (height.hasError('max')) { <div class="invalid-feedback">Maximum {{ height.getError('max').max }} cm</div> }
+      }
+      <div class="form-text"><code>errors: {{ height.errors | json }}</code></div>
+    </div>
+
+    @let terms = builtInForm.controls.agreeToTerms;
+    <div class="form-check">
+      <input id="rv-terms" type="checkbox" class="form-check-input" formControlName="agreeToTerms"
+             [class.is-invalid]="terms.invalid && terms.touched" />
+      <label for="rv-terms" class="form-check-label">I agree to the terms</label>
+      @if (terms.touched && terms.hasError('required')) {
+        <div class="invalid-feedback">You must accept the terms</div>
+      }
+      <div class="form-text"><code>errors: {{ terms.errors | json }}</code></div>
+    </div>
+  </form>
+
+  <table class="table table-sm mb-3">
+    <thead><tr><th>Validator</th><th>Error key</th><th>Error value</th></tr></thead>
+    <tbody>
+      <tr><td><code>required</code> / <code>requiredTrue</code></td><td><code>required</code></td><td><code>true</code></td></tr>
+      <tr><td><code>email</code></td><td><code>email</code></td><td><code>true</code></td></tr>
+      <tr><td><code>minLength(n)</code> / <code>maxLength(n)</code></td><td>⚠️ <code>minlength</code> / <code>maxlength</code></td><td><code>{{ '{' }} requiredLength, actualLength {{ '}' }}</code></td></tr>
+      <tr><td><code>min(n)</code> / <code>max(n)</code></td><td><code>min</code> / <code>max</code></td><td><code>{{ '{' }} min, actual {{ '}' }}</code> / <code>{{ '{' }} max, actual {{ '}' }}</code></td></tr>
+      <tr><td><code>pattern(re)</code></td><td><code>pattern</code></td><td><code>{{ '{' }} requiredPattern, actualValue {{ '}' }}</code></td></tr>
+    </tbody>
+  </table>
+
+  <app-code-snippet [code]="snippets.builtIn" />
+</section>
+
+<!-- 2. CUSTOM -->
+<section class="card card-body mb-3">
+  <h3>2. Custom validator</h3>
+  <p>
+    A function that returns a <code>ValidatorFn</code>: <code>null</code> = valid, an object =
+    the errors. Wrap it in a factory to pass parameters, like
+    <code>birthdateValidator(18, 120)</code>.
+  </p>
+
+  <form [formGroup]="customForm" class="mb-3">
+    @let password = customForm.controls.password;
+    <div class="mb-3">
+      <label for="rv-password" class="form-label">Password</label>
+      <input id="rv-password" type="password" class="form-control" formControlName="password"
+             [class.is-invalid]="password.invalid && password.touched" />
+      @if (password.touched && password.invalid) {
+        <div class="invalid-feedback">
+          @if (password.hasError('required')) { Password is required }
+          @else {
+            Missing:
+            @if (password.hasError('lowercase')) { a lowercase · }
+            @if (password.hasError('uppercase')) { an uppercase · }
+            @if (password.hasError('number')) { a digit · }
+            @if (password.hasError('specialChar')) { a symbol · }
+            @if (password.hasError('minlength')) { 8 characters }
+          }
+        </div>
+      }
+      <div class="form-text"><code>errors: {{ password.errors | json }}</code></div>
+    </div>
+
+    @let birthdate = customForm.controls.birthdate;
+    <div>
+      <label for="rv-birthdate" class="form-label">Birthdate (18 to 120 years old)</label>
+      <input id="rv-birthdate" type="date" class="form-control" formControlName="birthdate"
+             [class.is-invalid]="birthdate.invalid && birthdate.touched" />
+      @if (birthdate.touched) {
+        @if (birthdate.hasError('required')) { <div class="invalid-feedback">Birthdate is required</div> }
+        @if (birthdate.hasError('invalidDate')) { <div class="invalid-feedback">Not a valid date</div> }
+        @if (birthdate.hasError('minAge')) {
+          <div class="invalid-feedback">You must be at least {{ birthdate.getError('minAgeValue') }}</div>
+        }
+        @if (birthdate.hasError('maxAge')) {
+          <div class="invalid-feedback">You must be at most {{ birthdate.getError('maxAgeValue') }}</div>
+        }
+      }
+      <div class="form-text"><code>errors: {{ birthdate.errors | json }}</code></div>
+    </div>
+  </form>
+
+  <app-code-snippet [code]="snippets.custom" />
+</section>
+
+<!-- 3. CROSS-FIELD -->
+<section class="card card-body mb-3">
+  <h3>3. Cross-field validator</h3>
+  <p>
+    A control's validator can't see the other controls. Put the validator on the
+    <strong>group</strong>: the error lands on the group, so read it with
+    <code>crossForm.hasError('fieldsMismatch')</code>.
+  </p>
+
+  <form [formGroup]="crossForm" class="mb-3">
+    <div class="mb-3">
+      <label for="rv-pw" class="form-label">Password</label>
+      <input id="rv-pw" type="password" class="form-control" formControlName="password" />
+    </div>
+
+    @let confirm = crossForm.controls.confirmPassword;
+    @let mismatch = confirm.touched && crossForm.hasError('fieldsMismatch');
+    <div>
+      <label for="rv-confirm" class="form-label">Confirm password</label>
+      <input id="rv-confirm" type="password" class="form-control" formControlName="confirmPassword"
+             [class.is-invalid]="(confirm.invalid && confirm.touched) || mismatch" />
+      @if (confirm.touched && confirm.hasError('required')) {
+        <div class="invalid-feedback">Please confirm the password</div>
+      } @else if (mismatch) {
+        <div class="invalid-feedback">Passwords don't match</div>
+      }
+      <div class="form-text"><code>group errors: {{ crossForm.errors | json }}</code></div>
+    </div>
+  </form>
+
+  <app-code-snippet [code]="snippets.crossField" />
+</section>
+
+<!-- 4. ASYNC -->
+<section class="card card-body mb-3">
+  <h3>4. Async validator</h3>
+  <p>
+    Returns an <strong>Observable</strong>. It only runs when the sync validators pass, and
+    <code>pending</code> is <code>true</code> while it waits. Needs the fake API
+    (<code>npm run dev</code>). Try <code>bob&#64;email.bob</code>.
+  </p>
+
+  <form [formGroup]="asyncForm" class="mb-3">
+    @let email = asyncForm.controls.email;
+    <label for="rv-email" class="form-label">Email</label>
+    <input id="rv-email" type="email" class="form-control" formControlName="email"
+           [class.is-invalid]="email.invalid && email.touched"
+           [class.is-valid]="email.valid && email.touched" />
+    @if (email.pending) { <div class="form-text">Checking the email...</div> }
+    @if (email.touched) {
+      @if (email.hasError('required')) { <div class="invalid-feedback">Email is required</div> }
+      @if (email.hasError('email')) { <div class="invalid-feedback">Not a valid email</div> }
+      @if (email.hasError('emailTaken')) { <div class="invalid-feedback">This email is already taken</div> }
+    }
+    <div class="form-text"><code>status: {{ email.status }} · errors: {{ email.errors | json }}</code></div>
+  </form>
+
+  <app-code-snippet [code]="snippets.async" />
+</section>

@@ -3,10 +3,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 
-// Route guard: runs BEFORE Angular opens the page.
-// - logged in → true: the page opens
-// - not logged in → a UrlTree: Angular goes to the auth page instead,
-//   with ?returnUrl=... so we can come back here after logging in
+// logged in → open, else → login + ?returnUrl
 export const authGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthService);
   if (auth.currentUser()) return true;
@@ -19,7 +16,7 @@ export const authGuard: CanActivateFn = (_route, state) => {
 
 ```ts auth.routes.ts
 // pages/auth/auth.routes.ts → /auth/...
-// NOT protected: the page the guard sends you to (protecting it would loop forever)
+// NOT protected (loop)
 export const routes: Routes = [
   {
     path: 'auth-service',
@@ -33,10 +30,10 @@ export const routes: Routes = [
 // pages/services/service.routes.ts → /service/...
 export const routes: Routes = [
   {
-    // Every page in `children` is protected: the guard runs before any of them opens
+    // protects every child
     path: '',
     canActivate: [authGuard],
-    // re-run the guard on EVERY navigation, even to the same URL (when the toggle turns off)
+    // re-run on same URL
     runGuardsAndResolvers: 'always',
     children: [
       {
@@ -53,11 +50,11 @@ export class AuthServiceComponent {
   protected readonly auth = inject(AuthService);
   private readonly _router = inject(Router);
 
-  // ?returnUrl=/service/get-all, given by the guard (withComponentInputBinding → input())
+  // ?returnUrl, set by the guard
   readonly returnUrl = input<string>();
 
   constructor() {
-    // As soon as someone is logged in, go back to the page the guard blocked
+    // logged in → go back
     effect(() => {
       const url = this.returnUrl();
       if (this.auth.currentUser() && url) this._router.navigateByUrl(url);

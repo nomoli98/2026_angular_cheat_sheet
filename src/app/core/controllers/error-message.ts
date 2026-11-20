@@ -1,10 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
 
-// Turns any error (from the services or from HttpClient) into a text the user can read.
+// any error → readable text
 export function errorMessage(error: unknown): string {
   if (error instanceof HttpErrorResponse) {
     if (error.status === 0) return 'The server is not reachable. Is the API running?';
-    // An API that explains itself answers { "message": "..." } (the auth server does)
+    // API message, e.g. from the auth server
     const message: unknown = error.error?.message;
     if (typeof message === 'string') return errorMessage(new Error(message));
     if (error.status === 404) return 'Not found';

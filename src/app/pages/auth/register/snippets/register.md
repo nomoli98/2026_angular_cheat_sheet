@@ -9,11 +9,11 @@
   <select [formField]="_form.subscription">...</select>
   <input type="checkbox" [formField]="_form.agreeToTerms" />
 
-  <!-- disabled while invalid OR while waiting for the API (no double submit) -->
+  <!-- no double submit -->
   <button type="submit" [disabled]="_form().invalid() || _busy()">Register</button>
 </form>
 
-<!-- 'This email is already taken' / HTTP error -->
+<!-- 'email already taken' / HTTP error -->
 @if (_error(); as error) {
 <div class="alert alert-danger">{{ error }}</div>
 }
@@ -46,7 +46,7 @@ export class RegisterComponent {
     email(field.email, { message: 'Email must be a valid email' });
     strongPassword(field.password);
     birthdate(field.birthdate, { minAge: 18, maxAge: 120 });
-    // ...same rules as the Signal Forms page
+    // ...signal form rules
   });
 
   async onSubmit(event: Event) {
@@ -57,12 +57,12 @@ export class RegisterComponent {
     this._busy.set(true);
     try {
       this._created.set(await this._authController.register(this._form().value()));
-      this._model.set({ ...EMPTY }); // empty the fields
-      this._form().reset(); // back to "untouched": no red fields
+      this._model.set({ ...EMPTY }); // clear
+      this._form().reset(); // no red fields
     } catch (err) {
       this._error.set(errorMessage(err));
     } finally {
-      this._busy.set(false); // runs on success AND on error
+      this._busy.set(false); // success AND error
     }
   }
 }
@@ -70,7 +70,7 @@ export class RegisterComponent {
 
 ```ts auth.controller.ts
 // core/controllers/auth.controller.ts
-// public: no permission check
+// public
 async register(request: RegisterRequest): Promise<UserResponse> {
   return firstValueFrom(this._authService.register(request));
 }
@@ -80,14 +80,13 @@ async register(request: RegisterRequest): Promise<UserResponse> {
 // core/services/auth.service.ts
 register(request: RegisterRequest): Observable<UserResponse> {
   return this._userService.emailExists(request.email).pipe(
-    // 1. email taken → error, nothing is created
-    // 2. free → POST /people (UserService.create always sets role: 'user')
+    // email taken → error, else POST (role: user)
     switchMap((taken) =>
       taken
         ? throwError(() => new Error('email already taken'))
         : this._userService.create(request),
     ),
-    // 3. remember the new user: they are logged in
+    // logged in
     tap((user) => this._currentUser.set(user)),
   );
 }

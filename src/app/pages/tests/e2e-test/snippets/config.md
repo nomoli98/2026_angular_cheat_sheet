@@ -3,21 +3,20 @@ import { defineConfig, devices } from '@playwright/test';
 
 // Docs: https://playwright.dev/docs/test-configuration
 export default defineConfig({
-  // Where the e2e tests are (NOT in src/, so `ng test` doesn't run them)
+  // not in src/
   testDir: './e2e',
 
   use: {
-    // page.goto('/tests/e2e-test') → http://localhost:4200/tests/e2e-test
+    // page.goto base URL
     baseURL: 'http://localhost:4200',
-    // Record what happened when a test fails (open it with: npx playwright show-trace)
+    // trace on failure
     trace: 'retain-on-failure',
   },
 
-  // The browsers to test in. Add firefox / webkit here if you want.
+  // browsers
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 
-  // Starts the fake API and `ng serve` before the tests, and stops them after.
-  // If one is already running (e.g. `npm run dev`), Playwright uses it instead.
+  // starts or reuses servers
   webServer: [
     {
       command: 'npm run api',

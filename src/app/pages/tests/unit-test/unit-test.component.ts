@@ -15,7 +15,7 @@ import loginForm from './snippets/login-form.md';
   templateUrl: './unit-test.component.html',
 })
 export class UnitTestComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { run, counter, greeting, authService, loginForm };
 
   lastGreeting = signal('');

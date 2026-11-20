@@ -12,30 +12,30 @@ import getAll from './snippets/get-all.md';
   templateUrl: './get-all.component.html',
 })
 export class GetAllComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { getAll };
 
   protected readonly _userController = inject(UserController);
   protected readonly _users = signal<UserResponse[]>([]);
   protected readonly _error = signal<string | null>(null);
 
-  // Who is logged in, and are they admin? computed() re-runs when the navbar toggle changes the user
+  // re-computed when the toggle changes the user
   private readonly _authService = inject(AuthService);
   protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
 
   async onClick() {
     this._error.set(null);
-    // 1. Check the role in the component first: not admin → don't even call the controller
+    // 1. not admin → skip the controller
     if (!this._isAdmin()) {
       this._error.set('forbidden: only an admin can see the list of users');
       return;
     }
 
     try {
-      // 2. The controller checks AGAIN (the check that can't be skipped), then calls the service
+      // 2. the controller checks again
       this._users.set(await this._userController.getAll());
     } catch (err) {
-      // 'unauthorized' (nobody logged in), 'forbidden' (not admin) or an HTTP error
+      // 'unauthorized', 'forbidden' or HTTP error
       this._error.set((err as Error).message);
     }
   }

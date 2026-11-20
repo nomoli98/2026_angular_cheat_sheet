@@ -12,10 +12,10 @@ import { RoleEnum } from '@core/enums/role.enum';
 export class UserService {
   private readonly _http = inject(HttpClient);
   private readonly _url = `${environment.apiUrl}/people`;
-  private readonly _mapper = UserMapper; // a plain function, not a service → no inject()
+  private readonly _mapper = UserMapper; // a function → no inject()
 
   create(request: RegisterRequest): Observable<UserResponse> {
-    // Every new account is a simple user. Only db.json makes admins.
+    // new accounts are always users
     return this._http
       .post<UserEntity>(this._url, { ...request, role: RoleEnum.USER })
       .pipe(map((user) => this._mapper(user)));
@@ -45,8 +45,7 @@ export class UserService {
       .pipe(map((users) => users.length > 0));
   }
 
-  // PUT replaces EVERYTHING, and RegisterRequest has no role → we keep the current one,
-  // otherwise the role would be deleted. The check request gives us the user anyway.
+  // PUT replaces everything: keep the current role
   updateFully(id: number, request: RegisterRequest): Observable<UserResponse> {
     return this._http.get<UserEntity[]>(this._url, { params: { id } }).pipe(
       switchMap(([current]) =>

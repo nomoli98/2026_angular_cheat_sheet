@@ -6,7 +6,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./sub-outlet/sub-outlet.component').then((m) => m.SubOutletComponent),
     children: [
-      //A. to an unnamed router-outlet
+      // A. unnamed router-outlet
       { path: '', redirectTo: '1', pathMatch: 'full' },
       {
         path: '1',
@@ -18,7 +18,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./children/child-two/child-two.component').then((m) => m.ChildTwoComponent),
       },
-      //B. to a named router-outlet
+      // B. named router-outlet
       {
         path: '3',
         outlet: 'panel',

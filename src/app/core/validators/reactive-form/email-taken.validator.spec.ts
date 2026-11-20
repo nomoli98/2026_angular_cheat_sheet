@@ -5,23 +5,23 @@ import { UserService } from '@core/services/user.service';
 import { emailTakenValidator } from './email-taken.validator';
 
 describe('emailTakenValidator', () => {
-  // Fake UserService: emailExists() answers what the test says
+  // fake emailExists()
   const fakeUserService = { emailExists: vi.fn() };
 
-  // Runs the validator on a value and gives back its result
+  // runs the validator on a value
   function validate(value: string): Promise<ValidationErrors | null> {
-    // inject() inside the validator needs an injection context
+    // inject() needs an injection context
     const validator = TestBed.runInInjectionContext(() => emailTakenValidator());
     const result$ = validator(new FormControl(value)) as Observable<ValidationErrors | null>;
 
     return new Promise((resolve) => {
       result$.subscribe(resolve);
-      vi.advanceTimersByTime(400); // skip the 400 ms wait
+      vi.advanceTimersByTime(400); // skip the wait
     });
   }
 
   beforeEach(() => {
-    vi.useFakeTimers(); // we control time: no real 400 ms wait
+    vi.useFakeTimers(); // no real wait
     vi.clearAllMocks();
     TestBed.configureTestingModule({
       providers: [{ provide: UserService, useValue: fakeUserService }],

@@ -10,8 +10,7 @@ describe('GreetingComponent', () => {
     fixture = TestBed.createComponent(GreetingComponent);
     html = fixture.nativeElement;
 
-    // INPUT: play the parent and give a value to name
-    // (it's input.required, so do it BEFORE whenStable or you get NG0950)
+    // input.required: set it BEFORE whenStable
     fixture.componentRef.setInput('name', 'Bob');
     await fixture.whenStable();
   });
@@ -27,9 +26,9 @@ describe('GreetingComponent', () => {
     expect(html.querySelector('p')?.textContent).toContain('Hello Alice');
   });
 
-  // OUTPUT: listen to it like the parent would, with a "spy" function
+  // output: listen with a spy
   it('emits a message when the button is clicked', () => {
-    const spy = vi.fn(); // a fake function that remembers how it was called
+    const spy = vi.fn(); // remembers its calls
     fixture.componentInstance.greet.subscribe(spy);
 
     html.querySelector('button')!.click();
@@ -47,8 +46,8 @@ import { Component, input, output } from '@angular/core';
   templateUrl: './greeting.component.html',
 })
 export class GreetingComponent {
-  name = input.required<string>(); // the parent gives it
-  greet = output<string>(); // we send it back to the parent
+  name = input.required<string>(); // from the parent
+  greet = output<string>(); // to the parent
 
   sayHi() {
     this.greet.emit(`Hi ${this.name()}!`);

@@ -26,7 +26,7 @@ interface Rule {
   allowed: (user: Who) => boolean;
 }
 
-// The SAME rules as UserController (core/controllers/user.controller.ts)
+// same rules as UserController
 const RULES: Rule[] = [
   { method: 'getAll()', who: 'admin', allowed: isAdmin },
   { method: 'getOne(id)', who: 'admin', allowed: isAdmin },
@@ -54,7 +54,7 @@ const TOKEN_ACCOUNTS = {
   templateUrl: './authorization.component.html',
 })
 export class AuthorizationComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { roles, controller, component, guard, server };
   protected readonly RoleEnum = RoleEnum;
 
@@ -64,7 +64,7 @@ export class AuthorizationComponent {
   protected readonly _tokenAuth = inject(TokenAuthService);
   protected readonly toggle = inject(AuthToggleService);
 
-  // ?forbidden=/auth/authorization/admin-area → adminGuard sent a simple user here
+  // ?forbidden=... set by adminGuard
   readonly forbidden = input<string>();
 
   // ---------- 1. who am I, and what may I do?
@@ -74,12 +74,12 @@ export class AuthorizationComponent {
     RULES.map((rule) => {
       const user = this._user();
       const allowed = rule.allowed(user);
-      // the error deny() would throw
+      // what deny() would throw
       return { ...rule, allowed, error: allowed ? '' : user ? 'forbidden' : 'unauthorized' };
     }),
   );
 
-  // ---------- 2. call the controller directly (NO check in the component) → see its answer
+  // ---------- 2. controller only (no component check)
   protected readonly _calls = signal<CallResult[]>([]);
 
   async tryController(method: 'getAll' | 'getOne' | 'getMe') {
@@ -116,7 +116,7 @@ export class AuthorizationComponent {
     this._tokenAuth.logout();
   }
 
-  // skipFrontCheck = true → ask the server even when Angular knows it's a 'no'
+  // skipFrontCheck: ask the server anyway
   async callServer(skipFrontCheck: boolean) {
     const label = skipFrontCheck ? 'GET /token/users (front check skipped)' : 'GET /token/users';
     try {
@@ -127,7 +127,7 @@ export class AuthorizationComponent {
         text: `200 OK: ${users.map((u) => u.name).join(', ')}`,
       });
     } catch (err) {
-      // HttpErrorResponse = the SERVER said no. Error = Angular said no before sending anything.
+      // HttpErrorResponse = the server said no, Error = Angular did
       const text =
         err instanceof HttpErrorResponse && err.status !== 0
           ? `${err.status} from the server: ${errorMessage(err)}`
@@ -137,6 +137,6 @@ export class AuthorizationComponent {
   }
 
   private _addCall(list: typeof this._calls, call: CallResult) {
-    list.update((calls) => [call, ...calls].slice(0, 6)); // newest first, keep 6
+    list.update((calls) => [call, ...calls].slice(0, 6)); // newest first, max 6
   }
 }

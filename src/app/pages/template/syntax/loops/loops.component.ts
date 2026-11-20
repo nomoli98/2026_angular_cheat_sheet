@@ -10,7 +10,7 @@ import forLoop from './snippets/for.md';
   templateUrl: './loops.component.html'
 })
 export class LoopsComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { forLoop };
 
   protected items = [

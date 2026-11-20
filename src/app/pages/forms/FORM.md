@@ -35,6 +35,16 @@ Each folder has its own step-by-step README.
 | Show all errors | `form.control.markAllAsTouched()` | `form.markAllAsTouched()` | `field().markAsTouched()` |
 | Reset | `form.resetForm()` | `form.reset()` | `model.set(initial)` + `registerForm().reset()` |
 
+## Validators, one page per kind
+
+Built-in, custom, cross-field and async validators, each with a live demo:
+
+| Page | Guide |
+|---|---|
+| `/form/reactive-validators` | [`reactive-validators/REACTIVE_VALIDATORS.md`](./reactive-validators/REACTIVE_VALIDATORS.md) |
+| `/form/template-validators` | [`template-validators/TEMPLATE_VALIDATORS.md`](./template-validators/TEMPLATE_VALIDATORS.md) |
+| `/form/signal-validators` | [`signal-validators/SIGNAL_VALIDATORS.md`](./signal-validators/SIGNAL_VALIDATORS.md) |
+
 ## Shared files used by the three forms
 
 - `core/requests/register.request.ts`: `RegisterRequest`, the shape of the data the forms send (`birthdate` is a `'YYYY-MM-DD'` string)

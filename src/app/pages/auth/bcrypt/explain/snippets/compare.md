@@ -4,9 +4,8 @@ import { compare } from 'bcryptjs';
 const ok = await compare('BobIsTheBest99#', storedHash); // true
 const ko = await compare('wrong', storedHash);           // false
 
-// ❌ never: hash the typed password again and compare the strings
-//    (new salt → always a different hash → always false)
-(await hash(typed, 10)) === storedHash; // false, even with the right password
+// ❌ never (new salt each time)
+(await hash(typed, 10)) === storedHash; // always false
 ```
 
 ```ts in a service

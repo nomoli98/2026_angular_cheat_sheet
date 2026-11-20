@@ -31,7 +31,7 @@
     </div>
     <div>
       <label for="rounds" class="form-label">Cost</label>
-      <!-- [selected] on the option: a [value] on the <select> is set before the @for options exist -->
+      <!-- [selected] per option: a [value] on <select> runs before the options exist -->
       <select id="rounds" class="form-select" (change)="_rounds.set(+value($event))">
         @for (r of ROUNDS; track r) {
           <option [value]="r" [selected]="r === _rounds()">{{ r }} (2^{{ r }} rounds)</option>

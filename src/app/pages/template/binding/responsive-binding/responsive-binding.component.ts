@@ -16,7 +16,7 @@ import signals from './snippets/signals.md';
   `,
 })
 export class ResponsiveBindingComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { conditionalBinding, signals };
 
   protected clicked = false;

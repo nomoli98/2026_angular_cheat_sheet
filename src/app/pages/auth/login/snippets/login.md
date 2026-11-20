@@ -1,5 +1,5 @@
 ```html login.component.html
-<!-- WHO is logged in: just read the signal -->
+<!-- who is logged in -->
 @if (_currentUser(); as user) {
 <p>Logged in as {{ user.name }} ({{ user.role }})</p>
 <button type="button" (click)="onLogout()">Log out</button>
@@ -27,13 +27,13 @@
 })
 export class LoginComponent {
   protected readonly _authController = inject(AuthController);
-  // read-only: WHO is logged in (the controller does the login/logout)
+  // read-only
   protected readonly _currentUser = inject(AuthService).currentUser;
   protected readonly _error = signal<string | null>(null);
   protected readonly _busy = signal(false);
 
   protected readonly _model = signal<LoginRequest>({ email: '', password: '' });
-  // no strongPassword() on login: only check it's filled, the API says if it's right
+  // login: required only
   protected readonly _form = form(this._model, (field) => {
     required(field.email);
     email(field.email);
@@ -48,7 +48,7 @@ export class LoginComponent {
     try {
       await this._authController.login(this._form().value()); // fills currentUser
     } catch (err) {
-      this._error.set(errorMessage(err)); // 'bad credentials' → 'Wrong email or password'
+      this._error.set(errorMessage(err)); // 'Wrong email or password'
     } finally {
       this._busy.set(false);
     }
@@ -70,7 +70,7 @@ async login(request: LoginRequest): Promise<UserResponse> {
 // logged in only
 async logout(): Promise<void> {
   const user = this._authService.currentUser();
-  if (!isLoggedIn(user)) deny(user); // nobody → 'unauthorized'
+  if (!isLoggedIn(user)) deny(user); // 'unauthorized'
   this._authService.logout();
 }
 ```
@@ -78,17 +78,17 @@ async logout(): Promise<void> {
 ```ts auth.service.ts
 // core/services/auth.service.ts
 private readonly _currentUser = signal<UserResponse | null>(null);
-readonly currentUser = this._currentUser.asReadonly(); // others can READ, not set
+readonly currentUser = this._currentUser.asReadonly(); // read-only outside
 
 login(request: LoginRequest): Observable<UserResponse> {
   return this._http.get<UserEntity[]>(this._url, { params: { email: request.email } }).pipe(
     map((users) => {
       const user = users[0];
-      // same error for "unknown email" and "wrong password": don't tell which one
+      // same error for both
       if (!user || user.password !== request.password) throw new Error('bad credentials');
-      return UserMapper(user); // removes the password
+      return UserMapper(user); // drops the password
     }),
-    tap((user) => this._currentUser.set(user)), // remember who is logged in
+    tap((user) => this._currentUser.set(user)),
   );
 }
 

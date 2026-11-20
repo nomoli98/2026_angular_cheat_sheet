@@ -8,7 +8,7 @@ import { errorMessage } from '@core/controllers/error-message';
 import { CodeSnippetComponent } from '@shared/code-snippet/code-snippet.component';
 import login from './snippets/login.md';
 
-// Demo accounts from fake-api/db.seed.json (same passwords, stored as hashes in securePeople)
+// demo accounts (db.seed.json)
 const ACCOUNTS = {
   bob: { email: 'bob@email.bob', password: 'BobIsTheBest99#' }, // admin
   alice: { email: 'alice.dupont@mail.com', password: 'AliceIsTheBest99#' }, // user
@@ -20,17 +20,17 @@ const ACCOUNTS = {
   templateUrl: './login.component.html',
 })
 export class BcryptLoginComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { login };
 
   protected readonly _authController = inject(BcryptAuthController);
-  // read-only: WHO is logged in (the controller does the login/logout)
+  // read-only: who is logged in
   protected readonly _currentUser = inject(BcryptAuthService).currentUser;
   protected readonly _error = signal<string | null>(null);
   protected readonly _busy = signal(false);
 
   protected readonly _model = signal<LoginRequest>({ email: '', password: '' });
-  // no strongPassword() here: on login we only check it's filled, the API says if it's right
+  // login: only 'required', the API checks the password
   protected readonly _form = form(this._model, (field) => {
     required(field.email, { message: 'Email is required' });
     email(field.email, { message: 'Email must be a valid email' });
@@ -52,7 +52,7 @@ export class BcryptLoginComponent {
       this._model.set({ email: '', password: '' });
       this._form().reset();
     } catch (err) {
-      // 'bad credentials' → 'Wrong email or password', or 'The server is not reachable...'
+      // 'bad credentials' → 'Wrong email or password'
       this._error.set(errorMessage(err));
     } finally {
       this._busy.set(false);
@@ -64,7 +64,7 @@ export class BcryptLoginComponent {
     try {
       await this._authController.logout(); // empties currentUser
     } catch (err) {
-      this._error.set(errorMessage(err)); // 'unauthorized': nobody was logged in
+      this._error.set(errorMessage(err)); // nobody logged in
     }
   }
 }

@@ -1,11 +1,7 @@
 import { Directive, Input } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 
-/**
- * Checks that the age (calculated from the birthdate) is between minAge and maxAge.
- *
- * Usage: <input type="date" name="birthdate" [(ngModel)]="..." appBirthdate [minAge]="0" [maxAge]="135" />
- */
+/** Age between minAge and maxAge: <input type="date" appBirthdate [minAge]="0" [maxAge]="135" /> */
 @Directive({
   selector: '[appBirthdate]',
   providers: [{ provide: NG_VALIDATORS, useExisting: BirthdateDirective, multi: true }],
@@ -15,30 +11,27 @@ export class BirthdateDirective implements Validator {
   @Input() maxAge = 135;
 
   validate(control: AbstractControl): ValidationErrors | null {
-    // Empty field: let "required" handle it
+    // empty: required handles it
     if (!control.value) {
       return null;
     }
 
-    // The value is a 'YYYY-MM-DD' string (what <input type="date"> gives).
-    // Build a local date from its parts: new Date('YYYY-MM-DD') would read it as UTC midnight,
-    // which can be the day before in your timezone.
+    // 'YYYY-MM-DD' → local date (new Date(str) would be UTC)
     const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(control.value);
     if (!match) {
       return { birthdate: true };
     }
     const birthdate = new Date(+match[1], +match[2] - 1, +match[3]);
     if (birthdate.getMonth() !== +match[2] - 1) {
-      return { birthdate: true }; // not a real date, e.g. '2001-02-30'
+      return { birthdate: true }; // not a real date
     }
     const today = new Date();
 
-    // A birthdate in the future is not valid
+    // no future dates
     if (birthdate > today) {
       return { birthdate: true };
     }
 
-    // Calculate the age
     let age = today.getFullYear() - birthdate.getFullYear();
     const birthdayNotPassedYet =
       today.getMonth() < birthdate.getMonth() ||
@@ -49,9 +42,9 @@ export class BirthdateDirective implements Validator {
     }
 
     if (age < this.minAge || age > this.maxAge) {
-      return { birthdate: true }; // invalid
+      return { birthdate: true };
     }
 
-    return null; // valid
+    return null;
   }
 }

@@ -3,7 +3,7 @@
 <input type="text" [(ngModel)]="inputValue" />
 <p>{{ inputValue }}</p>
 
-<!-- model(): a two-way bindable input -->
+<!-- model() -->
 <button (click)="updateCount(-1)">-</button>
 <span>{{ modelCount() }}</span>
 <button (click)="updateCount(+1)">+</button>
@@ -26,7 +26,7 @@ import { FormsModule } from '@angular/forms';
 export class TwoWayBindingComponent {
   inputValue = '';
 
-  // model() makes count a two-way bindable input
+  // two-way input
   modelCount = model<number>(0);
 
   updateCount(amount: number): void {

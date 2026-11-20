@@ -18,7 +18,7 @@ describe('tokenInterceptor', () => {
     token.set('abc.def.ghi');
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(withInterceptors([tokenInterceptor])), // 👈 the interceptor under test
+        provideHttpClient(withInterceptors([tokenInterceptor])), // under test
         provideHttpClientTesting(),
         { provide: TokenAuthService, useValue: fakeAuth },
       ],

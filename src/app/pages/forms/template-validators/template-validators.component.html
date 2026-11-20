@@ -1,0 +1,160 @@
+<h2>Template Forms · Validators</h2>
+
+<p>
+  Every rule is an <strong>HTML attribute</strong> on the input. A custom rule needs a
+  <strong>directive</strong>. Type in the fields: the <code>errors</code> line shows what Angular
+  sees. Full guide: <code>TEMPLATE_VALIDATORS.md</code>.
+</p>
+
+<!-- 1. BUILT-IN -->
+<section class="card card-body mb-3">
+  <h3>1. Built-in attributes</h3>
+  <p>
+    <code>required</code>, <code>minlength</code>, <code>maxlength</code>, <code>email</code>,
+    <code>pattern</code>, and <code>min</code> / <code>max</code> on <code>type="number"</code>.
+    On a checkbox, <code>required</code> means "must be checked".
+  </p>
+
+  <form #builtInForm="ngForm" class="mb-3">
+    <div class="mb-3">
+      <label for="tv-name" class="form-label">Name (2 to 50 characters)</label>
+      <input id="tv-name" name="name" class="form-control" [(ngModel)]="builtIn.name" #nameCtrl="ngModel"
+             required minlength="2" maxlength="50"
+             [class.is-invalid]="nameCtrl.invalid && nameCtrl.touched" />
+      @if (nameCtrl.touched) {
+        @if (nameCtrl.errors?.['required']) { <div class="invalid-feedback">Name is required</div> }
+        @if (nameCtrl.errors?.['minlength']) {
+          <div class="invalid-feedback">At least {{ nameCtrl.errors?.['minlength'].requiredLength }} characters</div>
+        }
+      }
+      <div class="form-text"><code>errors: {{ nameCtrl.errors | json }}</code></div>
+    </div>
+
+    <div class="mb-3">
+      <label for="tv-height" class="form-label">Height (50 to 275 cm)</label>
+      <input id="tv-height" name="height" type="number" class="form-control" [(ngModel)]="builtIn.height"
+             #heightCtrl="ngModel" required min="50" max="275"
+             [class.is-invalid]="heightCtrl.invalid && heightCtrl.touched" />
+      @if (heightCtrl.touched) {
+        @if (heightCtrl.errors?.['min']) { <div class="invalid-feedback">Minimum 50 cm</div> }
+        @if (heightCtrl.errors?.['max']) { <div class="invalid-feedback">Maximum 275 cm</div> }
+      }
+      <div class="form-text"><code>errors: {{ heightCtrl.errors | json }}</code></div>
+    </div>
+
+    <div class="form-check">
+      <input id="tv-terms" name="agreeToTerms" type="checkbox" class="form-check-input"
+             [(ngModel)]="builtIn.agreeToTerms" #termsCtrl="ngModel" required
+             [class.is-invalid]="termsCtrl.invalid && termsCtrl.touched" />
+      <label for="tv-terms" class="form-check-label">I agree to the terms</label>
+      @if (termsCtrl.touched && termsCtrl.errors?.['required']) {
+        <div class="invalid-feedback">You must accept the terms</div>
+      }
+      <div class="form-text"><code>errors: {{ termsCtrl.errors | json }}</code></div>
+    </div>
+  </form>
+
+  <app-code-snippet [code]="snippets.builtIn" />
+</section>
+
+<!-- 2. CUSTOM -->
+<section class="card card-body mb-3">
+  <h3>2. Custom validator (directive)</h3>
+  <p>
+    A directive that implements <code>Validator</code> and registers itself in
+    <code>NG_VALIDATORS</code>. Parameters are directive inputs:
+    <code>appBirthdate [minAge]="18" [maxAge]="120"</code>.
+  </p>
+
+  <form #customForm="ngForm" class="mb-3">
+    <div class="mb-3">
+      <label for="tv-password" class="form-label">Password</label>
+      <input id="tv-password" name="password" type="password" class="form-control"
+             [(ngModel)]="custom.password" #passwordCtrl="ngModel" required appStrongPassword
+             [class.is-invalid]="passwordCtrl.invalid && passwordCtrl.touched" />
+      @if (passwordCtrl.touched) {
+        @if (passwordCtrl.errors?.['required']) { <div class="invalid-feedback">Password is required</div> }
+        @if (passwordCtrl.errors?.['strongPassword']) {
+          <div class="invalid-feedback">8+ characters, an uppercase, a lowercase and a digit</div>
+        }
+      }
+      <div class="form-text"><code>errors: {{ passwordCtrl.errors | json }}</code></div>
+    </div>
+
+    <div>
+      <label for="tv-birthdate" class="form-label">Birthdate (18 to 120 years old)</label>
+      <input id="tv-birthdate" name="birthdate" type="date" class="form-control"
+             [(ngModel)]="custom.birthdate" #birthdateCtrl="ngModel"
+             required appBirthdate [minAge]="18" [maxAge]="120"
+             [class.is-invalid]="birthdateCtrl.invalid && birthdateCtrl.touched" />
+      @if (birthdateCtrl.touched) {
+        @if (birthdateCtrl.errors?.['required']) { <div class="invalid-feedback">Birthdate is required</div> }
+        @if (birthdateCtrl.errors?.['birthdate']) { <div class="invalid-feedback">You must be 18 to 120 years old</div> }
+      }
+      <div class="form-text"><code>errors: {{ birthdateCtrl.errors | json }}</code></div>
+    </div>
+  </form>
+
+  <app-code-snippet [code]="snippets.custom" />
+</section>
+
+<!-- 3. CROSS-FIELD -->
+<section class="card card-body mb-3">
+  <h3>3. Cross-field validator</h3>
+  <p>
+    Put the directive on the <strong>&lt;form&gt;</strong>: <code>ngForm</code> picks it up and
+    gives it the whole group. The error lands on the form:
+    <code>crossForm.hasError('fieldsMismatch')</code>.
+  </p>
+
+  <form #crossForm="ngForm" [appMatchFields]="['password', 'confirmPassword']" class="mb-3">
+    <div class="mb-3">
+      <label for="tv-pw" class="form-label">Password</label>
+      <input id="tv-pw" name="password" type="password" class="form-control"
+             [(ngModel)]="cross.password" required />
+    </div>
+
+    <div>
+      <label for="tv-confirm" class="form-label">Confirm password</label>
+      <input id="tv-confirm" name="confirmPassword" type="password" class="form-control"
+             [(ngModel)]="cross.confirmPassword" #confirmCtrl="ngModel" required
+             [class.is-invalid]="confirmCtrl.touched && (confirmCtrl.invalid || crossForm.hasError('fieldsMismatch'))" />
+      @if (confirmCtrl.touched && confirmCtrl.errors?.['required']) {
+        <div class="invalid-feedback">Please confirm the password</div>
+      } @else if (confirmCtrl.touched && crossForm.hasError('fieldsMismatch')) {
+        <div class="invalid-feedback">Passwords don't match</div>
+      }
+      <div class="form-text"><code>form errors: {{ crossForm.errors | json }}</code></div>
+    </div>
+  </form>
+
+  <app-code-snippet [code]="snippets.crossField" />
+</section>
+
+<!-- 4. ASYNC -->
+<section class="card card-body mb-3">
+  <h3>4. Async validator (directive)</h3>
+  <p>
+    Same as a custom directive, but registered in <code>NG_ASYNC_VALIDATORS</code> and
+    <code>validate()</code> returns an Observable. It reuses the reactive
+    <code>emailTakenValidator()</code>. Needs the fake API (<code>npm run dev</code>). Try
+    <code>bob&#64;email.bob</code>.
+  </p>
+
+  <form #asyncForm="ngForm" class="mb-3">
+    <label for="tv-email" class="form-label">Email</label>
+    <input id="tv-email" name="email" type="email" class="form-control" [(ngModel)]="async.email"
+           #emailCtrl="ngModel" required email appEmailTaken
+           [class.is-invalid]="emailCtrl.invalid && emailCtrl.touched"
+           [class.is-valid]="emailCtrl.valid && emailCtrl.touched" />
+    @if (emailCtrl.pending) { <div class="form-text">Checking the email...</div> }
+    @if (emailCtrl.touched) {
+      @if (emailCtrl.errors?.['required']) { <div class="invalid-feedback">Email is required</div> }
+      @if (emailCtrl.errors?.['email']) { <div class="invalid-feedback">Not a valid email</div> }
+      @if (emailCtrl.errors?.['emailTaken']) { <div class="invalid-feedback">This email is already taken</div> }
+    }
+    <div class="form-text"><code>status: {{ emailCtrl.status }} · errors: {{ emailCtrl.errors | json }}</code></div>
+  </form>
+
+  <app-code-snippet [code]="snippets.async" />
+</section>

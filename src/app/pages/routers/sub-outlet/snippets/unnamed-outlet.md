@@ -1,5 +1,5 @@
 ```html sub-outlet.component.html
-<!-- The child route is displayed here -->
+<!-- child route here -->
 <router-outlet />
 
 <button routerLink="/router/sub-outlet/1">show child one</button>
@@ -17,7 +17,7 @@ import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/route
 })
 export class SubOutletComponent {
   private router = inject(Router);
-  private route = inject(ActivatedRoute); // = the /router/sub-outlet route
+  private route = inject(ActivatedRoute); // /router/sub-outlet
 
   openPanel() {
     this.router.navigate([{ outlets: { panel: ['3'] } }], { relativeTo: this.route });
@@ -57,7 +57,7 @@ export const routes: Routes = [
 
 ```ts app.routes.example.ts
 {
-  // Nested router-outlet: /router/sub-outlet loads its own routes file
+  // nested routes file
   path: 'sub-outlet',
   loadChildren: () => import('./sub-outlet.routes.example').then((r) => r.routes),
 },

@@ -21,17 +21,17 @@ import { GenderEnum } from '@core/enums/gender.enum';
   templateUrl: './template-form.component.html',
 })
 export class TemplateFormComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { templateForm };
 
   loading = signal<boolean>(false);
 
-  // The form data. [(ngModel)] in the HTML keeps these values in sync with the inputs.
+  // [(ngModel)] keeps these in sync
   user = {
     name: '',
     email: '',
     password: '',
-    birthdate: '', // 'YYYY-MM-DD' string, the format <input type="date"> uses
+    birthdate: '', // 'YYYY-MM-DD'
     height: 50,
     gender: GenderEnum.OTHER,
     subscription: 'free',
@@ -39,7 +39,7 @@ export class TemplateFormComponent {
   };
 
   onSubmit(form: NgForm) {
-    // Show the error messages on every field
+    // show every error
     form.control.markAllAsTouched();
 
     if (form.invalid) {
@@ -47,7 +47,7 @@ export class TemplateFormComponent {
     }
 
     this.loading.set(true);
-    // Call your service here
+    // call your service here
     console.log(this.user);
   }
 

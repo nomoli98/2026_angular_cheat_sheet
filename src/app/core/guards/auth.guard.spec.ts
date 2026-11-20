@@ -22,7 +22,7 @@ const bob: UserResponse = {
 describe('authGuard', () => {
   const currentUser = signal<UserResponse | null>(null);
 
-  // A guard is a function that uses inject() → run it inside an injection context
+  // inject() → needs an injection context
   const runGuard = (url: string) =>
     TestBed.runInInjectionContext(() =>
       authGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),

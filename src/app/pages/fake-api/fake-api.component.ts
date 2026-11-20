@@ -11,6 +11,6 @@ import angular from './snippets/angular.md';
   templateUrl: './fake-api.component.html',
 })
 export class FakeApiComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { install, db, scripts, angular };
 }

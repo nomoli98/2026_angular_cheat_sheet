@@ -2,14 +2,14 @@
 // core/guards/admin.guard.ts
 export const adminGuard: CanActivateFn = (_route, state) => {
   const user = inject(AuthService).currentUser();
-  if (isAdmin(user)) return true; // ✅ open the page
+  if (isAdmin(user)) return true; // ✅ open
 
   const router = inject(Router);
   if (!user) {
-    // nobody logged in → log in first, then come back
+    // logged out → login
     return router.createUrlTree(['/auth/auth-service'], { queryParams: { returnUrl: state.url } });
   }
-  // logged in, but not admin → somewhere that explains why
+  // not admin → explain why
   return router.createUrlTree(['/auth/authorization'], { queryParams: { forbidden: state.url } });
 };
 ```
@@ -19,23 +19,22 @@ export const adminGuard: CanActivateFn = (_route, state) => {
 {
   path: 'authorization/admin-area',
   canActivate: [adminGuard],
-  runGuardsAndResolvers: 'always', // re-run when the Admin toggle reloads the same URL
+  runGuardsAndResolvers: 'always', // re-run on toggle
   loadComponent: () => import('./authorization/admin-area/admin-area.component')
     .then((m) => m.AdminAreaComponent),
 },
 
-// Protect a whole group: put it on the parent
+// protect a whole group
 {
   path: 'admin',
-  canActivate: [authGuard, adminGuard], // run in order: logged in? then admin?
+  canActivate: [authGuard, adminGuard], // in order
   runGuardsAndResolvers: 'always',
   children: [ /* every admin page */ ],
 },
 ```
 
 ```ts authorization.component.ts
-// The page the guard sends to reads ?forbidden=... as an input()
-// (withComponentInputBinding() in app.config.ts)
+// ?forbidden → input()
 readonly forbidden = input<string>();
 ```
 

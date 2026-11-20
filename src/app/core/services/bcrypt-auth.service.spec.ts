@@ -12,7 +12,7 @@ import { environment } from '@env/environment';
 
 const url = `${environment.apiUrl}/securePeople`;
 
-// Bob as /securePeople stores him: the password is a HASH (cost 4 = fast tests)
+// hashed with cost 4 = fast tests
 const bob: UserEntity = {
   id: 1,
   name: 'Bob Martin',
@@ -26,7 +26,7 @@ const bob: UserEntity = {
   role: RoleEnum.ADMIN,
 };
 
-// bcrypt is async: the service's request comes AFTER hash()/compare() finish
+// bcrypt is async: the request comes later
 const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 async function waitForRequest(httpTesting: HttpTestingController, method: string) {
   for (let i = 0; i < 200; i++) {
@@ -78,7 +78,7 @@ describe('BcryptAuthService', () => {
     const result = firstValueFrom(service.register(request));
 
     httpTesting.expectOne((r) => r.method === 'GET').flush([]); // email free
-    const post = await waitForRequest(httpTesting, 'POST'); // after hash() finished
+    const post = await waitForRequest(httpTesting, 'POST'); // after hash()
 
     const sent = post.request.body as UserEntity;
     expect(sent.password).toMatch(/^\$2[aby]\$10\$/); // bcrypt, cost 10

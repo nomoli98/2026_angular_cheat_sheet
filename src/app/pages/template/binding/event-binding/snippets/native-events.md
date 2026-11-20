@@ -1,9 +1,9 @@
 ```html event-binding.component.html
-<!-- Logic directly in the event -->
+<!-- logic in the event -->
 <p>{{ value() }}</p>
 <button (click)="value.set('New value')">Change value</button>
 
-<!-- Or call a method of the .ts file ($event = the native event) -->
+<!-- or a method ($event) -->
 <p>{{ pressedKey() }}</p>
 <input (keyup)="showPressedKey($event)" />
 ```

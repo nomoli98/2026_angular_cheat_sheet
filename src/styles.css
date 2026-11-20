@@ -1,14 +1,4 @@
-/*
- * Global styles, loaded AFTER bootstrap.min.css (see "styles" in angular.json).
- *
- * The goal: keep the demo pages' HTML readable. Instead of adding
- * class="btn btn-outline-primary" to every button, plain elements
- * (no class attribute) get a Bootstrap look here, using Bootstrap's
- * own CSS variables (--bs-...) so the colours stay in sync.
- *
- *  keeps the specificity at 0, so any real Bootstrap class
- * you add in a template (e.g. class="btn btn-danger") still wins.
- */
+/* Plain elements (no class) get a Bootstrap look; a real class still wins. */
 
 body {
   background-color: var(--bs-tertiary-bg);
@@ -83,8 +73,7 @@ main form {
   max-width: 32rem;
 }
 
-/* .card is a flex column, which stretches direct children to full width.
-   Keep buttons/inputs placed directly in a card at their natural size. */
+/* keep direct children of a .card at their natural size */
 main .card > :is(button, input, select, img) {
   align-self: flex-start;
 }

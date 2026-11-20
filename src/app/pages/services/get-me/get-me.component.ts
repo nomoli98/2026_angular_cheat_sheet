@@ -11,7 +11,7 @@ import getMe from './snippets/get-me.md';
   templateUrl: './get-me.component.html',
 })
 export class GetMeComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { getMe };
 
   protected readonly _userController = inject(UserController);
@@ -23,7 +23,7 @@ export class GetMeComponent {
     try {
       this._me.set(await this._userController.getMe());
     } catch (err) {
-      // only 'unauthorized' (nobody logged in) or an HTTP error: everybody may read themselves
+      // 'unauthorized' or HTTP error (anyone can read themselves)
       this._error.set(errorMessage(err));
     }
   }

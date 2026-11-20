@@ -1,6 +1,5 @@
 ```html signal-form.component.html
-<!-- Bootstrap: .form-label + .form-control, .is-invalid turns the field red,
-     .invalid-feedback shows the message (only when the input before it is .is-invalid) -->
+<!-- Bootstrap: .is-invalid + .invalid-feedback -->
 <form action="" (submit)="onSubmit($event)" class="card card-body">
 
   <div class="mb-3">
@@ -60,7 +59,7 @@
 
   <div class="mb-3">
     <label for="gender" class="form-label">Gender</label>
-    <!-- <select> uses .form-select instead of .form-control -->
+    <!-- .form-select -->
     <select id="gender" class="form-select" [formField]="registerForm.gender"
             [class.is-invalid]="registerForm.gender().touched() && registerForm.gender().invalid()">
       <option value="">Choose a gender...</option>
@@ -75,7 +74,7 @@
     }
   </div>
 
-  <!-- Radios and checkboxes: .form-check wrapper + .form-check-input + .form-check-label -->
+  <!-- .form-check -->
   <div class="mb-3">
     <div class="form-check">
       <input type="radio" value="free" id="free" class="form-check-input"
@@ -91,7 +90,7 @@
     </div>
     @if (registerForm.subscription().touched()) {
       @for (error of registerForm.subscription().errors(); track error.kind) {
-        <!-- d-block: the message isn't right after an .is-invalid input, so force it visible -->
+        <!-- d-block: force visible -->
         <div class="invalid-feedback d-block">{{ error.message }}</div>
       }
     }
@@ -137,7 +136,7 @@ export class SignalFormComponent {
     agreeToTerms: false,
   });
 
-  // You pass you model (userDate) into the form() to create a Field Tree to access the data
+  // model → field tree
   protected registerForm = form(this.EmptyForm, (field) => {
     required(field.name, { message: 'Name is required' });
 
@@ -145,24 +144,21 @@ export class SignalFormComponent {
     email(field.email, { message: 'Email must be an valid email' });
 
     required(field.password, { message: 'Password is required' });
-    //You can make your own validations!
+    // custom validators
     strongPassword(field.password);
 
-    // birthdate is a 'YYYY-MM-DD' string ('' when empty), so required() works on it like any text field
+    // 'YYYY-MM-DD' ('' = empty)
     required(field.birthdate, { message: 'Birthdate is required' });
-    //And you can even add parameters!
+    // with parameters
     birthdate(field.birthdate, { minAge: 18, maxAge: 120 });
 
-    // you can impose ranges
+    // ranges
     min(field.height, 50, { message: 'Height must be above 50cm' });
     max(field.height, 275, { message: 'Height must be below 275cm' });
 
     required(field.gender, { message: 'Gender is required' });
 
-    // null or undefined means the value is valid.
-    // An error object with a kind (and usually a message) means it’s invalid.
-    // The validate() function creates custom validation rules.
-    // It receives a validator function that accesses the field context and returns one of those two things.
+    // undefined = valid, { kind } = invalid
     validate(field.gender, ({ value }) => {
       if (!value()) return undefined;
       const GENDERS = Object.values(GenderEnum) as string[];
@@ -202,7 +198,7 @@ export class SignalFormComponent {
     event.preventDefault();
     if (this.registerForm().invalid()) return;
 
-    //put here the service call
+    // call your service
     console.log('It works! ' + this.registerForm().value().name);
 
     this.resetForm();
@@ -222,15 +218,15 @@ export class SignalFormComponent {
     this.registerForm().reset();
   }
 
-  // helper function to be sure that the radio btn toggle correctly
+  // uncheckable radio
   toggleSubscription(value: 'free' | 'premium', event: MouseEvent) {
     const field = this.registerForm.subscription();
     const input = event.target as HTMLInputElement;
 
     if (field.value() === value) {
-      // Second click on the selected radio: clear it
+      // 2nd click: clear
       field.value.set('free');
-      input.checked = false; // force the DOM, since the browser just re-checked it
+      input.checked = false; // the browser re-checked it
     } else {
       field.value.set(value);
     }

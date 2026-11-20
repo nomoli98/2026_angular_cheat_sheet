@@ -1,8 +1,8 @@
 ```html get-one.component.html
-<!-- (submit) + preventDefault() = no page reload -->
+<!-- no page reload -->
 <form (submit)="onSubmit($event)">
   <input type="number" [formField]="_idForm.id" />
-  <!-- disabled for a simple user -->
+  <!-- disabled for users -->
   <button type="submit" [disabled]="_idForm().invalid() || !_isAdmin()">Get One User</button>
 </form>
 
@@ -11,7 +11,7 @@
 <div class="alert alert-danger">{{ error }}</div>
 }
 
-<!-- `as u` = the value of the signal, only when it is not null -->
+<!-- `as u`: when not null -->
 @if (_isAdmin() && _user(); as u) {
 <p>{{ u.name }} ({{ u.email }})</p>
 }
@@ -33,15 +33,15 @@ import { isAdmin } from '@core/controllers/permissions';
 })
 export class GetOneComponent {
   protected readonly _userController = inject(UserController);
-  // null = nothing loaded yet (no need for a fake placeholder user)
+  // null = not loaded
   protected readonly _user = signal<UserResponse | null>(null);
   protected readonly _error = signal<string | null>(null);
 
-  // Who is logged in, and are they admin? Re-computed when the user changes (navbar toggle)
+  // re-runs on user change
   private readonly _authService = inject(AuthService);
   protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
 
-  // a signal form with just one field: the id
+  // id-only signal form
   protected readonly _idForm = form(signal({ id: 2 }), (field) => {
     required(field.id, { message: 'Id is required' });
     min(field.id, 1, { message: 'Id starts at 1' });
@@ -53,17 +53,17 @@ export class GetOneComponent {
 
     this._error.set(null);
     this._user.set(null);
-    // 1. Check in the component: not admin → don't even call the controller
+    // 1. component check
     if (!this._isAdmin()) {
       this._error.set('forbidden: only an admin can read a user');
       return;
     }
 
     try {
-      // 2. The controller checks again, then calls the service
+      // 2. controller checks again
       this._user.set(await this._userController.getOne(this._idForm.id().value()));
     } catch (err) {
-      // errorMessage() turns an Error / HttpErrorResponse into readable text
+      // error → readable text
       this._error.set(errorMessage(err));
     }
   }
@@ -82,7 +82,7 @@ async getOne(id: number): Promise<UserResponse> {
 
 ```ts user.service.ts
 // core/services/user.service.ts
-// GET /people/:id → UserEntity (with password) → UserResponse (without)
+// UserEntity → UserResponse
 getOne(id: number): Observable<UserResponse> {
   return this._http.get<UserEntity>(`${this._url}/${id}`).pipe(map((user) => this._mapper(user)));
 }

@@ -3,16 +3,16 @@
 <input [placeholder]="inputPlaceholder" />
 <button [disabled]="isDisabled">Disabled button</button>
 
-<!-- Components properties (the child has value = input.required<string>()) -->
+<!-- component input -->
 <app-child-component [value]="inputValue" />
 
-<!-- Attributes binding: use attr. for things that are not DOM properties -->
+<!-- attr. for attributes -->
 <p [attr.role]="pRole" [attr.aria-live]="live">Status: OK</p>
 
-<!-- Text interpolation in properties and attributes -->
+<!-- interpolation -->
 <img src="" alt="Profile photo of {{ firstName }}" />
 
-<!-- Style property binding -->
+<!-- style binding -->
 <p [class.underlined]="isUnderlined">Give a condition for a style class.</p>
 <p [class]="listClasses">Or just pass a list of classes</p>
 ```
@@ -59,7 +59,7 @@ import { Component, input } from '@angular/core';
   templateUrl: './child-component.component.html',
 })
 export class ChildComponentComponent {
-  // Always give input() a type, otherwise the value is `unknown`
+  // always type input()
   value = input.required<string>();
 }
 ```

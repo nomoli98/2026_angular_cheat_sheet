@@ -11,7 +11,7 @@ import noFlash from './snippets/no-flash.md';
   templateUrl: './theme.component.html',
 })
 export class ThemeComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { service, toggle, noFlash };
 
   protected readonly theme = inject(ThemeService);

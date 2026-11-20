@@ -13,15 +13,15 @@ import deleteSnippet from './snippets/delete.md';
   templateUrl: './delete.component.html',
 })
 export class DeleteComponent {
-  // The code shown on the page (see the snippets/ folder)
+  // page snippets
   protected readonly snippets = { delete: deleteSnippet };
 
   protected readonly _userController = inject(UserController);
-  protected readonly _confirming = signal(false); // first click asks, second click deletes
+  protected readonly _confirming = signal(false); // 1st click asks, 2nd deletes
   protected readonly _deletedId = signal<number | null>(null);
   protected readonly _error = signal<string | null>(null);
 
-  // Who is logged in, and are they admin? computed() re-runs when the navbar toggle changes the user
+  // re-computed when the toggle changes the user
   private readonly _authService = inject(AuthService);
   protected readonly _isAdmin = computed(() => isAdmin(this._authService.currentUser()));
 
@@ -35,7 +35,7 @@ export class DeleteComponent {
     if (this._idForm().invalid()) return;
     this._error.set(null);
     this._deletedId.set(null);
-    // 1. Check the role in the component first: not admin → don't even call the controller
+    // 1. not admin → skip the controller
     if (!this._isAdmin()) {
       this._error.set('forbidden: only an admin can delete a user');
       return;
@@ -46,16 +46,16 @@ export class DeleteComponent {
   async onConfirm() {
     const id = this._idForm.id().value();
     this._confirming.set(false);
-    // check again: the role may have changed between the two clicks (toggle)
+    // check again: the toggle may have changed
     if (!this._isAdmin()) {
       this._error.set('forbidden: only an admin can delete a user');
       return;
     }
     try {
-      await this._userController.delete(id); // Promise<void>: nothing to read, just wait
+      await this._userController.delete(id); // Promise<void>
       this._deletedId.set(id);
     } catch (err) {
-      // 'unauthorized', 'forbidden' (not admin), 'user not found' or an HTTP error
+      // 'unauthorized', 'forbidden', 'user not found' or HTTP error
       this._error.set(errorMessage(err));
     }
   }

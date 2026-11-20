@@ -13,12 +13,11 @@ import { tokenInterceptor } from '@core/interceptors/token.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    // withComponentInputBinding: route params (:id) and query params go into the component's input()
+    // route + query params → input()
     provideRouter(routes, withComponentInputBinding()),
-    // HttpClient for the services (withFetch: uses the browser's fetch() API)
-    // withInterceptors: runs tokenInterceptor on every request (adds the JWT, see core/interceptors/)
+    // withFetch + tokenInterceptor on every request
     provideHttpClient(withFetch(), withInterceptors([tokenInterceptor])),
-    // Before the first page opens: log in again if the auth toggle is 'on' (see shared/auth-toggle/)
+    // log in again on start if the toggle is on
     provideAppInitializer(() => inject(AuthToggleService).init()),
   ],
 };

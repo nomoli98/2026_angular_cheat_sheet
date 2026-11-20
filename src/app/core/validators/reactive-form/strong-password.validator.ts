@@ -12,27 +12,27 @@ export function strongPasswordValidator(): ValidatorFn {
   return (control) => {
     const value: string = control.value;
     const result: StrongPasswordErrors = {};
-    //   Min??
+    // lowercase
     const lowerCaseRegex = /.*[a-z]/;
     if (!lowerCaseRegex.test(value)) {
       result.lowercase = true;
     }
-    //   Maj??
+    // uppercase
     const upperCaseRegex = /.*[A-Z]/;
     if (!upperCaseRegex.test(value)) {
       result.uppercase = true;
     }
-    //   Chiffre??
+    // digit
     const numberCaseRegex = /.*[0-9]/;
     if (!numberCaseRegex.test(value)) {
       result.number = true;
     }
-    //   Char Spé??
+    // special char
     const specialCharRegex = /.*[\W_]/;
     if (!specialCharRegex.test(value)) {
       result.specialChar = true;
     }
-    //   Min len
+    // min length
     if (value.length < 8) {
       result.minlength = true;
     }
